@@ -455,8 +455,8 @@ DATA.E.forEach(e => {
     tur: parts.filter(x=>x.cty==='TUR').length, ranking: RKL, rounds};
 });
 const COMPLIST = Object.values(COMPS).sort((a,b)=>ABS(a.day,a.s)-ABS(b.day,b.s));
-const catKey = c => (c.name + ' ' + c.name.replace('Modern & Contemporary','MC Modern Contemporary').replace('Show Dance Stage','SD Show Stage') + ' ' + (CATN_().WC && c.cat==='WC' ? 'WC World Championship Dünya Şampiyonası' : 'Open')).toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');
-const catMatch = (c, q) => { const k = catKey(c); return q.split(/\s+/).filter(Boolean).every(w => k.includes(w)); };
+const catKey = c => (c.name + ' ' + c.name.replace('Modern & Contemporary','MC Modern Contemporary').replace('Show Dance Stage','SD Show Stage') + ' ' + c.name.replace(/\b(Juvenile|Junior) II\b/g,'$1 2 $12').replace(/\b(Juvenile|Junior) I\b/g,'$1 1 $11').replace(/\bJunior\b/g,'Junior Jr') + ' ' + (CATN_().WC && c.cat==='WC' ? 'WC World Championship Dünya Şampiyonası' : 'Open')).toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');
+const catMatch = (c, q) => { const k = catKey(c); q = q.replace(/\b(juv\w*|jun\w*|jr)\s*-?\s*(ii|2)\b/g, '$1 2').replace(/\b(juv\w*|jun\w*|jr)\s*-?\s*(i|1)\b/g, '$1 1'); return q.split(/\s+/).filter(Boolean).every(w => k.includes(w)); };
 
 function shortName(t){ const p = parseTitle(t.replace(/^\d+\.\s*/,'')); return (p.cat==='WC'?'':CATN[p.cat]+' ')+p.name.replace(/ F\+M$/,' (K+E)'); }
 const ITEMS = [];
