@@ -240,6 +240,10 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 .strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .strip a{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-decoration:none;font-size:13px;line-height:1.3;min-height:44px}
 .strip b{font-family:var(--display);font-size:24px;line-height:.9;color:var(--velvet)}
+.hallseg{margin:6px 0 4px;position:sticky;top:64px;z-index:9}
+.hallseg a{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+.hallseg b{font-family:var(--display);font-size:22px;line-height:1;color:var(--velvet)}
+.hallseg .hstar{color:var(--gilt);font-weight:800;font-size:13px}
 .remind{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gilt);border-radius:12px;padding:12px;margin:10px 0}
 .remind .bd{flex:1;font-size:13.5px;color:var(--muted);line-height:1.4}
 .remind .bd b{display:block;color:var(--ink);font-size:15px}
@@ -285,6 +289,7 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
   <!-- PROGRAM -->
   <section id="v-program">
     <div class="days" id="pDays"></div>
+    <div id="pHallSeg"></div>
     <div class="fl" id="pHall"></div>
     <details class="more" id="pMore"><summary><span class="tr">▾ Filtreler: branş, yaş, statü</span><span class="en">▾ Filters: discipline, age, status</span></summary>
       <div class="fl" id="pDisc"></div><div class="fl" id="pAge"></div><div class="fl" id="pCat"></div>
@@ -462,7 +467,7 @@ let pins = new Set(store.get('wdsfist-pins', []));      // "compId|name"
 let simAbs = null;
 try { const v = sessionStorage.getItem('wdsfist-sim'); if(v) simAbs = +v; } catch(e){}
 const nowAbs = () => simAbs != null ? simAbs : (Date.now()-EPOCH)/60000;
-const st = { pDay:null, pHall:'all', pOnly:false, pDisc:new Set(), pAge:new Set(), pCat:new Set(), pFav:false, pTur:false,
+const st = { pDay:null, pHall:null, pOnly:false, pDisc:new Set(), pAge:new Set(), pCat:new Set(), pFav:false, pTur:false,
              cQ:'', cDisc:new Set(), cAge:new Set(), aQ:'', aCty:'' };
 
 function myNames(cid){ const out=[]; pins.forEach(k => { const i=k.indexOf('|'); if(+k.slice(0,i)===cid) out.push(k.slice(i+1)); }); return out; }
@@ -677,10 +682,19 @@ function renderProgram(){
     return `<button class="day ${st.pDay===x?'on':''}" data-d="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${n} ${L('tur','rounds')}</small></button>`;
   }).join('');
   $('pDays').querySelectorAll('.day').forEach(b => b.onclick = () => { st.pDay=+b.dataset.d; renderProgram(); scrollToNow(); });
-  const hallOpts = [['all',L('İki salon','Both halls')],['A','A · Grand Ballroom'],['B','B · Auditorium']];
-  $('pHall').innerHTML = hallOpts.map(([v,l]) => `<button class="chip ${st.pHall===v?'on':''}" data-h="${v}">${l}</button>`).join('')
-    + `<button class="chip ${st.pOnly?'on':''}" id="pOnlyB">${L('Sadece turlar','Rounds only')}</button><button class="chip ${st.pFav?'on':''}" id="pFavB">${L('★ Takibim','★ Following')}</button><button class="chip ${st.pTur?'on':''}" id="pTurB">${L('TUR sporcu olan','With TUR athletes')}</button>`;
-  $('pHall').querySelectorAll('[data-h]').forEach(b => b.onclick = () => { st.pHall=b.dataset.h; renderProgram(); });
+  // one hall at a time: mixing both halls in one list was confusing
+  const hallsToday = ['A','B'].filter(h => ITEMS.some(i => i.d===st.pDay && i.h===h));
+  const mineIds = myCompIds(), aNow = nowAbs();
+  const myCount = h => ITEMS.filter(i => i.kind==='round' && i.d===st.pDay && i.h===h && mineIds.has(i.comp.id)).length;
+  if(!hallsToday.includes(st.pHall)){
+    const nextMine = ITEMS.find(i => i.kind==='round' && i.d===st.pDay && mineIds.has(i.comp.id) && ABS(i.d,i.e) > aNow) || ITEMS.find(i => i.kind==='round' && i.d===st.pDay && mineIds.has(i.comp.id));
+    st.pHall = nextMine && hallsToday.includes(nextMine.h) ? nextMine.h : (hallsToday[0] || 'A');
+  }
+  $('pHallSeg').innerHTML = hallsToday.length > 1
+    ? `<div class="seg hallseg">${hallsToday.map(h => `<a href="#program" data-h="${h}" class="${st.pHall===h?'on':''}"><b>${h}</b> ${HALL[h].split(' · ')[1]}${myCount(h) ? ` <span class="hstar">★${myCount(h)}</span>` : ''}</a>`).join('')}</div>`
+    : (hallsToday.length ? `<div class="note" style="padding:8px 0 2px">${L(`Bu gün tüm program <b>${HALL[hallsToday[0]]}</b> salonunda.`,`All events this day are in <b>${HALL[hallsToday[0]]}</b>.`)}</div>` : '');
+  $('pHallSeg').querySelectorAll('[data-h]').forEach(b => b.onclick = e => { e.preventDefault(); st.pHall = b.dataset.h; renderProgram(); });
+  $('pHall').innerHTML = `<button class="chip ${st.pOnly?'on':''}" id="pOnlyB">${L('Sadece turlar','Rounds only')}</button><button class="chip ${st.pFav?'on':''}" id="pFavB">${L('★ Takibim','★ Following')}</button><button class="chip ${st.pTur?'on':''}" id="pTurB">${L('TUR sporcu olan','With TUR athletes')}</button>`;
   $('pOnlyB').onclick = () => { st.pOnly=!st.pOnly; renderProgram(); };
   $('pFavB').onclick = () => { st.pFav=!st.pFav; renderProgram(); };
   $('pTurB').onclick = () => { st.pTur=!st.pTur; renderProgram(); };
@@ -690,15 +704,15 @@ function renderProgram(){
   chipRow($('pCat'), Object.entries(CATN_()), st.pCat, tog(st.pCat));
   const compFilter = st.pDisc.size || st.pAge.size || st.pCat.size || st.pFav || st.pTur;
   const mine = myCompIds();
-  const list = ITEMS.filter(i => i.d===st.pDay && (st.pHall==='all' || i.h===st.pHall)
+  const list = ITEMS.filter(i => i.d===st.pDay && i.h===st.pHall
     && (i.kind==='round' || (!st.pOnly && !compFilter))
     && (i.kind!=='round' || ((!st.pDisc.size || st.pDisc.has(i.comp.disc.k)) && (!st.pAge.size || st.pAge.has(i.comp.age)) && (!st.pCat.size || st.pCat.has(i.comp.cat)) && (!st.pFav || mine.has(i.comp.id)) && (!st.pTur || i.comp.tur))));
   const nR = list.filter(i=>i.kind==='round').length;
-  $('pCnt').textContent = `${nR} ${L('tur','rounds')}${compFilter?`${L(' (filtreli)',' (filtered)')}`:''}${L(` · saatler İstanbul saati`,` · Istanbul time`)}`;
+  $('pCnt').textContent = `${L('Salon','Hall')} ${st.pHall} · ${nR} ${L('tur','rounds')}${compFilter?`${L(' (filtreli)',' (filtered)')}`:''}${L(` · saatler İstanbul saati`,` · Istanbul time`)}`;
   const a = nowAbs(); let html=''; let placed=false;
   list.forEach(i => {
     if(!placed && ABS(i.d,i.s) > a && ABS(i.d,0) <= a && a < ABS(i.d,1440)){ html += `<div class="nowline" id="nowLine">${L(`ŞİMDİ `,`NOW `)}${fmt(Math.floor(((a%1440)+1440)%1440))}</div>`; placed=true; }
-    html += itemRow(i, {hall: st.pHall==='all'});
+    html += itemRow(i, {hall: false});
   });
   $('pList').innerHTML = html || `<div class="empty">${L('Bu filtrelerle program yok.','Nothing matches these filters.')}</div>`;
 }
