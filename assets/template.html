@@ -95,6 +95,7 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .cwarn .dtag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:0 6px;border-radius:5px;border:2px solid var(--dc);color:var(--ink);background:var(--surface);vertical-align:2px;line-height:17px}
 .srcs{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0 8px;font-size:14px}.srcs summary{cursor:pointer;font-weight:700;min-height:32px;line-height:1.5;padding:4px 0}.srcs li{margin:6px 0;line-height:1.45}
 .plan{font-size:12px;color:var(--muted)}
+.anom{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px;margin-left:4px}
 .wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
@@ -553,8 +554,9 @@ function applyLive(){
   const a = nowAbs(), fresh = liveFresh();
   if(LIVE !== liveOffFor){ liveOffFor = LIVE; liveOff = liveOffset(); }
   COMPLIST.forEach(c => { let prev = null; c.rounds.forEach((r, ix) => {
-    r.s = r.ps; r.e = r.pe; r.shift = 0; r.lst = null; r.base = r.ps;
+    r.s = r.ps; r.e = r.pe; r.shift = 0; r.lst = null; r.base = r.ps; r.anom = false;
     const m = LIVE && LIVE.r && LIVE.r[c.id + '.' + (ix + 1)];
+    r.nomx = !!(LIVE && LIVE.r && Object.keys(LIVE.r).length >= 50) && !(Array.isArray(m) && m[0] === c.day && typeof m[2] === 'number');
     if(!m || m[0] !== c.day || typeof m[2] !== 'number') return;
     const dur = m[3] > 0 ? m[3] : r.pe - r.ps;
     // marX is the main source: its times are shown as they are. Its programme as a whole may sit
@@ -562,7 +564,9 @@ function applyLive(){
     // marX is the main source: its times are shown exactly as marX gives them (no correction).
     r.base = r.ps;
     let t = m[2]; if(t - r.ps - liveOff > 720) t -= 1440; if(t - r.ps - liveOff < -720) t += 1440;   // only to place after-midnight rounds on the right side of midnight
-    if(prev != null && t < prev - 60) t += 1440;          // after midnight: still later than the round before
+    r.anom = false;
+    if(prev != null && t < prev && t < 360) t += 1440;    // 00:00-06:00 after a late round: same night, after midnight
+    else if(prev != null && t < prev) r.anom = true;      // marX puts this round before the previous one: show as given, flag it
     prev = t;
     r.s = t; r.e = t + Math.max(1, dur); r.shift = Math.round(t - r.base);
     if(!fresh) return;
@@ -574,7 +578,7 @@ function applyLive(){
   // other programme items (rehearsals, results, breaks, ceremonies): marX's own time when marX
   // lists the same item; otherwise they move with the round before them in the same hall
   const mxx = {}, used = new Set();
-  ((LIVE && LIVE.x) || []).forEach((m, n) => { const k = m[0] + '|' + m[1] + '|' + m[4]; (mxx[k] = mxx[k] || []).push(n); });
+  ((LIVE && Array.isArray(LIVE.x)) ? LIVE.x : []).forEach((m, n) => { if(!Array.isArray(m) || m.length < 5 || typeof m[2] !== 'number') return; const k = m[0] + '|' + m[1] + '|' + m[4]; (mxx[k] = mxx[k] || []).push(n); });
   const keyOf = i => { const raw = String(i.raw || '').trim();
     const rm = raw.match(/^Results presentation:\s*(.*)$/i);
     return rm ? 'R:' + rm[1].split(/\s+·\s+/).map(t => t.replace(/^\d+\.\s*/, '').trim()).sort().join('|') : raw; };
@@ -592,6 +596,8 @@ function applyLive(){
 }
 // When marX and WDSF disagree, show WDSF's time next to marX's, without judging which is right.
 const dlyTag = r => !r || !r.shift || Math.abs(r.shift) < 1 ? '' : `<span class="wdsft" title="${L('WDSF sitesindeki saat','Time on the WDSF site')}">WDSF ${fmt(r.ps)}</span>`;
+const nomxTag = r => r && r.nomx ? `<span class="wdsft">${L('marX\'ta yok · WDSF saati','not on marX · WDSF time')}</span>` : '';
+const anomTag = (c, r) => r && r.anom ? `<span class="anom" title="${L('marX\'taki saat, bir önceki turdan daha erken','marX time is earlier than the previous round')}">⚠ ${L('Sıra hatası olabilir: ' + esc(r.label) + ' önceki turdan önce','Possible order error: ' + esc(r.label) + ' before the previous round')}</span>` : '';
 const nowLabel = r => r && r.lst === 'c' ? L('SALONDA ŞU AN','ON STAGE NOW') : L('PLANA GÖRE ŞU AN','SCHEDULED NOW');
 async function pullLive(){
   if(location.protocol === 'file:' || document.visibilityState === 'hidden') return;
@@ -599,7 +605,8 @@ async function pullLive(){
     const res = await fetch(LIVE_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
     if(!res.ok) return;
     const j = await res.json();
-    if(!j || !j.r || !j.fetched || (LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched))) return;
+    if(!j || !j.r || typeof j.r !== 'object' || !j.fetched || isNaN(Date.parse(j.fetched)) || (LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched))) return;
+    if(Object.values(j.r).filter(m => Array.isArray(m) && m.length >= 5 && typeof m[2] === 'number').length < 50) return;   // half-empty file: keep the last good one
     LIVE = j; try { localStorage.setItem('wdsfist-live', JSON.stringify(j)); } catch(e) {}
     if(typeof rerender === 'function') rerender();
   } catch(e) {}
@@ -726,7 +733,7 @@ function itemRow(it, opts={}){
     return `<div class="row ${st0} ${my?'fav':''}" style="--c:${c.disc.c}" data-comp="${c.id}">
       <div class="tm" style="padding-left:6px">${fmt(it.s)}<small>${fmt(it.e)}</small></div>
       <div class="bd"><div class="ti">${esc(c.name)}</div>
-        <div class="mt">${st0==='live'?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${dlyTag(it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
+        <div class="mt">${st0==='live'?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${dlyTag(it.round)}${anomTag(it.comp, it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
   }
   return `<div class="row minor ${st0}" style="--c:transparent">
     <div class="tm" style="padding-left:6px">${fmt(it.s)}</div>
@@ -1002,7 +1009,7 @@ function openComp(id){
     <div class="mt">${c.day} ${L('Kasım','November')} ${DAYN[c.day]} · ${L('Salon','Hall')} ${HALL[c.hall]}</div>${myNames(c.id).length?`<div class="mt" style="margin-top:6px">${L(`Takip ettiğin: `,`Following: `)}${myTags(c.id)}</div>`:''}
     <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Klasman takipte','★ Category followed')}`:`${L('☆ Klasmanın tamamını takip et','☆ Follow the whole category')}`}</button></div>
     <h2>${L('Turlar','Rounds')}</h2>
-    <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}${dlyTag(r)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('ŞU AN','NOW'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
+    <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}${dlyTag(r)}${anomTag(c, r)}${nomxTag(r)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('ŞU AN','NOW'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
     ${res?`<tr>${L(`<td>Ödül töreni</td>`,`<td>Awards</td>`)}<td class="t">${fmt(res.s)}</td><td></td></tr>`:''}</table>
     <div class="links">
       <a class="lk" href="${base}Schedule/${slug}-${id}" target="_blank" rel="noopener">${L(`WDSF programı ↗`,`WDSF schedule ↗`)}</a>
@@ -1075,7 +1082,7 @@ function clubRow(i, a){
     return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
       <div class="ti">${klas(c)}</div>
       <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
-      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':dlyTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
+      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
   }
   if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${L('Hoca notu','Coach note')}</span>${hallChip(i.h)}</div></div>${tick}</div>`;
   const ids = CLUB.rel[i.k] || [];
@@ -1091,9 +1098,11 @@ function clubRow(i, a){
 const TIGHT = 15;
 const isReh = i => i.kind !== 'round' && i.kind !== 'note' && /rehearsal/i.test(i.raw || '');
 const evComps = i => i.kind === 'round' ? [i.comp.id] : (CLUB.rel[i.k] || []).filter(id => CLUBIDS.has(id));
-function evDesc(i){
-  if(i.kind === 'round') return `${klas(i.comp)} · ${esc(i.round.label)}${isLater(i.comp, i.round) ? L(' (geçerse)',' (if qualified)') : ''}`;
-  return `${L('Sahne provası','Stage rehearsal')} · ${evComps(i).map(id => COMPS[id] ? klas(COMPS[id]) : '').join(', ')}`;
+// Which entry this is (team / duo / solo name), so two competitions with similar names can't be mixed up.
+const entryNames = (id, people) => clubEntries(id).filter(e => !people || e[2].some(p => people.includes(p))).map(e => e[1]);
+function evDesc(i, people){
+  if(i.kind === 'round') return `<b>${esc(entryNames(i.comp.id, people).join(' · '))}</b> — ${klas(i.comp)} · <b>${esc(i.round.label)}</b>${isLater(i.comp, i.round) ? L(' (geçerse)',' (if qualified)') : ''}`;
+  return `<b>${esc(evComps(i).flatMap(id => entryNames(id, people)).join(' · '))}</b> — ${L('Sahne provası','Stage rehearsal')} · ${evComps(i).map(id => COMPS[id] ? klas(COMPS[id]) : '').join(', ')}`;
 }
 function clubWarnings(day){
   const evs = ITEMS.filter(i => i.d === day && ((i.kind === 'round' && CLUBIDS.has(i.comp.id)) || (isReh(i) && evComps(i).length)));
@@ -1125,6 +1134,7 @@ function clubSources(){
   const fresh = liveFresh();
   return `<details class="srcs"><summary>ⓘ ${L('Bu bilgiler nereden geliyor?','Where does this come from?')} <span style="color:var(--muted);font-weight:500">· WDSF ${agoTxt(DATA.fetched)}${LIVE ? ' · marX ' + agoTxt(LIVE.fetched) : ''}</span></summary><ul>
     <li><b>${L('Saatler: organizasyonun canlı sayfası (marX) — ana kaynak','Times: organiser\'s live page (marX), main source')}</b>. ${LIVE ? `${L('Son kontrol','Last check')}: ${tTxt(LIVE.fetched)}; ${L('marX\'ın son güncellemesi','marX last updated')}: ${tTxt(LIVE.at)}.` : L('Henüz alınamadı; saatler şimdilik WDSF\'den.','Not received yet; times come from WDSF for now.')} ${L('Her dakika kontrol edilir; sitedeki saatler marX\'takiyle aynıdır.','Checked every minute; times here are the same as on marX.')} ${fresh ? (shifted ? L(`${shifted} kulüp turunda marX ile WDSF saati farklı; bu turlarda yanında küçük "WDSF" saati yazıyor.`,`${shifted} club rounds have a different time on WDSF; those show the WDSF time in small print.`) : L('Şu an marX ile WDSF saatleri aynı.','marX and WDSF times currently match.')) : L('Canlı akış 20 dakikadır güncellenmediği için "sahnede" bilgisi saate göre tahmin ediliyor.','The live timetable has not updated for 20 minutes, so "on stage" is estimated from the clock.')}</li>
+    ${(() => { const an = COMPLIST.filter(c => CLUBIDS.has(c.id) && c.rounds.some(r => r.anom)); return an.length ? `<li><b style="color:var(--live)">⚠ ${L('Sıra hatası','Order problem')}:</b> ${L(`marX'ta ${an.length} kulüp yarışmasında bir tur, önceki turdan daha erken görünüyor: ${an.map(c => esc(c.name)).join(', ')}. Site marX'ı olduğu gibi gösteriyor; organizasyona sorulmalı.`,`In ${an.length} club competitions marX lists a round earlier than the one before: ${an.map(c => esc(c.name)).join(', ')}. Shown as given; check with the organiser.`)}</li>` : ''; })()}
     ${liveOff ? `<li><b>${L('WDSF ile fark','Difference from WDSF')}:</b> ${L(`WDSF sitesindeki saatler, marX'takilerden bütün programda ${Math.abs(liveOff)} dk ${liveOff > 0 ? 'erken' : 'geç'}. Site marX'ı olduğu gibi gösteriyor, hiçbir düzeltme yapmıyor; hangisinin doğru olduğunu organizasyon belirler.`,`Times on the WDSF site are ${Math.abs(liveOff)} min ${liveOff > 0 ? 'earlier' : 'later'} than marX across the programme. This page follows marX; the WDSF site shows different times.`)}</li>` : ''}
     <li><b>${L('Yarışmalar, turlar ve kayıtlar: WDSF','Competitions, rounds and entries: WDSF')}</b> (worlddancesport.org). ${L('Son kontrol','Last check')}: ${tTxt(DATA.fetched)}. ${L('Gündüz her 3 dakikada kontrol edilir; değişiklik olursa site kendini yeniler.','Checked every 3 minutes by day; the page reloads itself when something changes.')}</li>
     <li><b>${L('Kulüp kayıtları','Club entries')}</b>: ${L(`${comps} yarışmada ${ents} kayıt, ${CLUB.members.length} sporcu.`,`${ents} entries in ${comps} competitions, ${CLUB.members.length} athletes.`)} ${L('Adında "Tarz" geçen takımlar, ayrıca Secret ve Marvellous; bu takımların üyeleri; üyelerin solo ve düetleri. Elle eklenen: Necla Nehir Demirkurnali, Koray Ege Ozdemir. Her WDSF güncellemesinde yeniden hesaplanır.','Teams named "Tarz", plus Secret and Marvellous; their members; the members\' solos and duos. Added by hand: Necla Nehir Demirkurnali, Koray Ege Ozdemir. Recalculated on every WDSF update.')}</li>
@@ -1155,7 +1165,7 @@ function renderClub(soft){
   html += `<div class="cday">${DAYS.map((x, k) => `<button class="day ${x===day?'on':''}" data-cd="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${roundsAll[k]} ${L('tur','rounds')}</small></button>`).join('')}</div>`;
   const warns = clubWarnings(day).filter(w => (!person || w.people.includes(person)) && ABS(w.B.d, w.B.s) > a && !clubDone.has(doneKey(w.B)));
   const wline = w => { const ov = w.gap < 0;
-    return `<li><b>${esc((person ? [person] : w.people).join(', '))}</b><br>${fmt(w.A.s)}–${fmt(w.A.e)} ${hallChip(w.A.h)} ${evDesc(w.A)}<br>→ ${fmt(w.B.s)} ${hallChip(w.B.h)} ${evDesc(w.B)}<br><b style="color:var(--live)">${ov ? L(`Çakışma: ikincisi ilki bitmeden ${-w.gap} dk önce başlıyor`,`Overlap: the second starts ${-w.gap} min before the first ends`) : w.gap === 0 ? L('Arada hiç süre yok','No time in between') : L(`Arada ${w.gap} dk`,`${w.gap} min in between`)}</b></li>`; };
+    return `<li><b>${esc((person ? [person] : w.people).join(', '))}</b><br>${fmt(w.A.s)}–${fmt(w.A.e)} ${hallChip(w.A.h)} ${evDesc(w.A, w.people)}<br>→ ${fmt(w.B.s)} ${hallChip(w.B.h)} ${evDesc(w.B, w.people)}<br><small style="color:var(--muted)">${L('İki ayrı yarışma','Two different competitions')}</small><br><b style="color:var(--live)">${ov ? L(`Çakışma: ikincisi ilki bitmeden ${-w.gap} dk önce başlıyor`,`Overlap: the second starts ${-w.gap} min before the first ends`) : w.gap === 0 ? L('Arada hiç süre yok','No time in between') : L(`Arada ${w.gap} dk`,`${w.gap} min in between`)}</b></li>`; };
   if(warns.length) html += `<details class="cwarn" ${person || warns.length <= 3 ? 'open' : ''}><summary>⚠ ${L(`${warns.length} sıkışık geçiş (15 dk altı)`,`${warns.length} tight changeovers (under 15 min)`)}</summary><ul>${warns.map(wline).join('')}</ul><div class="plannote" style="padding:4px 0 0">${L('Turlar ve sahne provaları karşılaştırılır. Saatler değişince otomatik yeniden hesaplanır. Uzun turlarda (ör. 1/8 final) sporcu turun herhangi bir anında çıkabilir.','Rounds and stage rehearsals are compared. Recalculated automatically when times change. In long rounds (e.g. 1/8 final) the athlete may dance at any point.')}</div></details>`;
   else if(clubItems(day).some(i => i.kind === 'round')) html += `<div class="plannote" style="padding:2px 0 6px">✓ ${L('Bu gün 15 dakikanın altında geçiş yok.','No changeovers under 15 minutes this day.')}</div>`;
   const hideDone = store.get('wdsfist-hidedone', false);
