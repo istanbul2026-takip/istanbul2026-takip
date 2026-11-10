@@ -11,7 +11,7 @@ const SALT = createHash('sha256').update('istanbul2026-takip|v1').digest().subar
 
 export async function buildPage(data, password, outDir = A('dist')) {
   if (!password) throw new Error('SITE_PASSWORD is not set');
-  const { S, ...payload } = data;
+  const { S, _hash, _lastDeployAt, ...payload } = data;
   const b64 = p => fs.readFileSync(A(p)).toString('base64');
   let app = fs.readFileSync(A('assets/template.html'), 'utf8');
   app = app.replace('/*DATA*/null', () => JSON.stringify(payload).replace(/<\//g, '<\\/'))

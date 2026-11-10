@@ -837,7 +837,7 @@ setInterval(() => maybeReload(false), 60000);
 function renderStale(){
   const age = Math.round((Date.now() - Date.parse(DATA.fetched)) / 60000);
   const a = (Date.now() - EPOCH) / 60000;
-  const during = a > firstAbs - 120 && a < lastAbs + 60;
+  const during = ITEMS.some(i => a >= ABS(i.d,i.s) - 60 && a <= ABS(i.d,i.e) + 30);
   const el = $('stale');
   if(during && age > 40){ el.hidden = false; el.textContent = L(`Veriler ${age} dk önce güncellendi. Saatler kaymış olabilir; salondaki anonsları takip et.`, `Data last updated ${age} min ago. Times may have shifted; follow the announcements in the hall.`); }
   else el.hidden = true;

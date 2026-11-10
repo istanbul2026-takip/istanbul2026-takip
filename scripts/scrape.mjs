@@ -47,13 +47,19 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
   const todayIst = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
 
   const R = {}, P = {}, T = {}, RK = {};
+  const todayDay = todayIst.startsWith('2026-11-') ? +todayIst.slice(8) : (todayIst < '2026-11-01' ? 0 : 99);
   await pool(ids, 6, async id => {
     const slug = S[id] + '-' + id;
-    const sd = parse(await get('/Competitions/Schedule/' + slug));
-    R[id] = [...sd.querySelectorAll('table tbody tr')].map(tr => [...tr.children].map(text))
-      .filter(x => x.length >= 4).map(x => [x[0].replace(/ \(\d+\)/, ''), +x[1] || 0, x[2], x[3].replace(' - ', '-')]);
     const day = E.find(e => e[5] === +id)[0];
-    if (`2026-11-${day}` <= todayIst) {
+    // past days no longer change: reuse earlier round times
+    if (prev && prev.R && prev.R[id] && prev.R[id].length && day < todayDay) R[id] = prev.R[id];
+    else {
+      const sd = parse(await get('/Competitions/Schedule/' + slug));
+      R[id] = [...sd.querySelectorAll('table tbody tr')].map(tr => [...tr.children].map(text))
+        .filter(x => x.length >= 4).map(x => [x[0].replace(/ \(\d+\)/, ''), +x[1] || 0, x[2], x[3].replace(' - ', '-')]);
+    }
+    if (prev && prev.RK && prev.RK[id] && day < todayDay) { RK[id] = prev.RK[id]; return; }
+    if (day <= todayDay) {
       const rd = parse(await get('/Competitions/Ranking/' + slug));
       const rr = [...rd.querySelectorAll('table.ranking tbody tr')].filter(tr => tr.querySelector('.ranking__rank'))
         .map(tr => [text(tr.querySelector('.ranking__rank')).replace('.', ''), text(tr.querySelector('.ranking__couple')), text(tr.querySelector('.ranking__country')), text(tr.querySelector('.ranking__number'))]);
