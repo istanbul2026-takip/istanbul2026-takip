@@ -45,7 +45,7 @@ a{color:inherit}
 :root[data-theme=dark] .brand .mark{color:var(--live)}
 .brand .city{font-family:var(--display);font-weight:600;font-size:30px;line-height:1}
 .tbtns{display:flex;gap:8px;flex:none}
-.lng{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;min-width:44px;height:36px;padding:0 12px;font-size:13px;font-weight:700;cursor:pointer}
+.lng{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;min-width:44px;height:44px;padding:0 12px;font-size:13px;font-weight:700;cursor:pointer}
 .status{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);padding-bottom:6px}
 .status .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:6px;vertical-align:1px}
 .sim{color:var(--gilt);font-weight:600}
@@ -57,7 +57,7 @@ a{color:inherit}
 /* tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs .in{display:flex;max-width:720px;margin:0 auto}
-nav.tabs a{flex:1;text-align:center;text-decoration:none;padding:8px 2px 9px;font-size:11.5px;color:var(--muted);font-weight:600;position:relative;min-height:56px}
+nav.tabs a{flex:1;text-align:center;text-decoration:none;padding:8px 2px 9px;font-size:12.5px;color:var(--muted);font-weight:600;position:relative;min-height:56px}
 nav.tabs a .ic{display:block;font-size:18px;line-height:24px}
 nav.tabs a.on{color:var(--ink)}
 nav.tabs a.on::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--velvet)}
@@ -112,7 +112,7 @@ h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01e
 .day.on small{color:inherit;opacity:.75}
 .day .td{font-family:var(--body);font-size:10px;font-weight:800;color:var(--live);vertical-align:4px}
 .fl{display:flex;gap:6px;overflow-x:auto;flex-wrap:nowrap;margin:8px -16px;padding:0 16px;scrollbar-width:none}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 13px;height:36px;font-size:14px;cursor:pointer;white-space:nowrap;flex:none}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:40px;font-size:14px;cursor:pointer;white-space:nowrap;flex:none}
 .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .chip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--c)}
 .search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);font-size:16px}
@@ -133,7 +133,7 @@ details.more summary::-webkit-details-marker{display:none}
 .row.minor{cursor:default;padding:8px 2px}
 .row.minor .ti{font-weight:500;color:var(--muted);font-size:14px}
 .row.minor .tm{font-size:17px;color:var(--faint)}
-.row.past{opacity:.42}
+.row.past{opacity:.55}
 .row.live .tm{color:var(--live)}
 .row.fav .ti::after{content:" ★";color:var(--gilt)}
 .hb{font-size:12px;font-weight:700;color:var(--muted)}
@@ -141,12 +141,12 @@ details.more summary::-webkit-details-marker{display:none}
 .rb.final{color:var(--gilt);font-weight:800}
 .wc{font-size:11px;font-weight:800;border-radius:5px;padding:1px 6px;background:var(--ink);color:var(--paper)}
 .tur{font-size:12px;font-weight:700;color:var(--muted)}
-.livetag{font-size:11px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px}
+.livetag{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px}
 .nowline{display:flex;align-items:center;gap:8px;color:var(--live);font-size:13px;font-weight:700;margin:6px 0 2px}
 .nowline::after{content:"";flex:1;height:2px;background:var(--live);border-radius:2px}
 .empty{color:var(--muted);text-align:center;padding:36px 12px;font-size:15px;line-height:1.5}
 .cnt{font-size:13px;color:var(--muted);margin:6px 0}
-.mytag{font-size:12.5px;font-weight:700;color:var(--gilt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.mytag{margin-right:6px;font-size:12.5px;font-weight:700;color:var(--gilt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
 /* competition rows */
 .cc{display:flex;gap:10px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);cursor:pointer;position:relative}
@@ -169,7 +169,8 @@ details.more summary::-webkit-details-marker{display:none}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .cty[style*='--h']{background:hsl(var(--h) 35% 24%);color:hsl(var(--h) 70% 85%)}}
 :root[data-theme=dark] .cty[style*='--h']{background:hsl(var(--h) 35% 24%);color:hsl(var(--h) 70% 85%)}
 .cty .fg{font-size:15px;line-height:1}
-.pin{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:38px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
+.pin{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:44px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
+.pr .pin{min-width:104px}
 .pin.on{background:var(--gilt);color:#fff;border-color:var(--gilt)}
 
 /* sheet */
@@ -178,7 +179,7 @@ details.more summary::-webkit-details-marker{display:none}
 .sheet{background:var(--paper);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:0 16px calc(24px + env(safe-area-inset-bottom));overscroll-behavior:contain}
 .sheet::before{content:"";display:block;width:40px;height:5px;border-radius:5px;background:var(--line);margin:8px auto 4px}
 @media (min-width:760px){.ov{align-items:center}.sheet{border-radius:20px;max-height:86vh}}
-.sheet .x{position:sticky;top:6px;float:right;background:var(--surface);border:1px solid var(--line);border-radius:999px;width:40px;height:40px;cursor:pointer;font-size:16px;z-index:2}
+.sheet .x{box-shadow:0 2px 8px rgba(0,0,0,.18);position:sticky;top:6px;float:right;background:var(--surface);border:1px solid var(--line);border-radius:999px;width:40px;height:40px;cursor:pointer;font-size:16px;z-index:2}
 .sheet h3{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;margin:8px 48px 6px 0}
 .sheet .mt{font-size:14px;color:var(--muted);display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center}
 .rtab{width:100%;border-collapse:collapse;margin-top:4px;font-size:15px}
@@ -202,7 +203,7 @@ details.more summary::-webkit-details-marker{display:none}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0 16px;min-height:44px;font-size:15px;cursor:pointer;font-weight:600}
 .btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
-.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 .alert{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom));width:min(560px,calc(100% - 16px));z-index:45;background:var(--gilt);color:#1d1305;border-radius:14px;padding:10px 10px 10px 14px;box-shadow:0 8px 24px rgba(40,20,0,.25);display:none;gap:10px;align-items:center}
 .alert.on{display:flex}
@@ -234,6 +235,14 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 .find p{margin:0 0 12px;color:var(--muted);font-size:14.5px;line-height:1.45}
 .find .steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--muted)}
 .find .steps span{background:var(--sunk);border-radius:999px;padding:3px 10px}
+.qual{font-size:12px;color:var(--muted);font-style:italic}
+.live-now{color:var(--live);font-weight:800}
+.strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.strip a{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-decoration:none;font-size:13px;line-height:1.3;min-height:44px}
+.strip b{font-family:var(--display);font-size:24px;line-height:.9;color:var(--velvet)}
+.remind{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gilt);border-radius:12px;padding:12px;margin:10px 0}
+.remind .bd{flex:1;font-size:13.5px;color:var(--muted);line-height:1.4}
+.remind .bd b{display:block;color:var(--ink);font-size:15px}
 .stalebar{background:color-mix(in srgb,var(--gilt) 22%,var(--surface));border-left:4px solid var(--gilt);border-radius:10px;padding:9px 12px;font-size:14px;margin:4px 0 6px}
 .stalebar[hidden]{display:none}
 .simbox{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;font-size:13px}
@@ -360,6 +369,7 @@ const DAYS3_ = {tr:{11:'Çar',12:'Per',13:'Cum',14:'Cmt',15:'Paz'}, en:{11:'Wed'
 const DAYN = new Proxy({}, {get:(_,k)=>DAYN_[lang][k]});
 const DAYS3 = new Proxy({}, {get:(_,k)=>DAYS3_[lang][k]});
 const HALL = {A:'A · Grand Ballroom', B:'B · Auditorium'};
+const HALL_HINT = h => h === 'A' ? L('ana arena','main arena') : h === 'B' ? L("Grand Ballroom'un bir kat altı","one floor below the Grand Ballroom") : '';
 const DISC = [
   {k:'Modern & Contemporary', tr:'Modern & Contemporary', c:'var(--mc)'},
   {k:'Jazz', tr:'Jazz', c:'var(--jz)'},
@@ -421,6 +431,8 @@ DATA.E.forEach(e => {
     tur: parts.filter(x=>x.cty==='TUR').length, ranking: RKL, rounds};
 });
 const COMPLIST = Object.values(COMPS).sort((a,b)=>ABS(a.day,a.s)-ABS(b.day,b.s));
+const catKey = c => (c.name + ' ' + c.name.replace('Modern & Contemporary','MC Modern Contemporary').replace('Show Dance Stage','SD Show Stage') + ' ' + (CATN_().WC && c.cat==='WC' ? 'WC World Championship Dünya Şampiyonası' : 'Open')).toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');
+const catMatch = (c, q) => { const k = catKey(c); return q.split(/\s+/).filter(Boolean).every(w => k.includes(w)); };
 
 function shortName(t){ const p = parseTitle(t.replace(/^\d+\.\s*/,'')); return (p.cat==='WC'?'':CATN[p.cat]+' ')+p.name.replace(/ F\+M$/,' (K+E)'); }
 const ITEMS = [];
@@ -458,7 +470,7 @@ function placeOf(cid, name){ const c = COMPS[cid]; const p = c && c.parts.find(x
 function myTags(cid){ return myNames(cid).map(n => { const pl = placeOf(cid,n); return `<span class="mytag">★ ${esc(n)}${pl?` · 🏅 ${esc(pl)}.`:''}</span>`; }).join(''); }
 function saveFavs(){ store.set('wdsfist-favs',[...favs]); store.set('wdsfist-pins',[...pins]); updateBadge(); }
 function myCompIds(){ const s = new Set(favs); pins.forEach(p => s.add(+p.split('|')[0])); return s; }
-function updateBadge(){ const n = myCompIds().size; const b=$('favBadge'); b.hidden=!n; b.textContent=n; }
+function updateBadge(){ const n = pins.size + favs.size; const b=$('favBadge'); b.hidden=!n; b.textContent=n; }
 function toggleFav(id){ id=+id; favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Takibine eklendi ★','Added to Following ★'):L('Takipten çıkarıldı','Removed from Following')); rerender(); }
 function togglePin(key){ pins.has(key)?pins.delete(key):pins.add(key); saveFavs(); toast(pins.has(key)?L('Takibe alındı','Now following'):L('Takipten çıkarıldı','Unfollowed')); rerender(); }
 
@@ -466,6 +478,30 @@ function togglePin(key){ pins.has(key)?pins.delete(key):pins.add(key); saveFavs(
 const HALLIMG = {A:'data:image/jpeg;base64,/*IMGA*/', B:'data:image/jpeg;base64,/*IMGB*/'};
 let prefs = Object.assign({alert:true, sound:false}, store.get('wdsfist-prefs', {}));
 const utcStamp = (d,m) => { const t = new Date(EPOCH + ABS(d,m)*60000); return t.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,''); };
+function icsFor(items){
+  const st = (d,m) => utcStamp(d,m);
+  const escI = t => String(t).replace(/[\\;,]/g, m => '\\' + m).replace(/\n/g, ' ');
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//istanbul2026-takip//TR','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:İstanbul 2026'];
+  items.forEach(i => { const mn = myNames(i.comp.id);
+    lines.push('BEGIN:VEVENT', `UID:ist2026-${i.comp.id}-${String(i.round.r).replace(/[^\w]/g,'')}@istanbul2026-takip`, 'DTSTAMP:' + st(11, 0),
+      'DTSTART:' + st(i.d, i.s), 'DTEND:' + st(i.d, i.e),
+      'SUMMARY:' + escI(`${mn.length ? mn.join(', ') + ' · ' : ''}${i.comp.name} · ${i.round.label}${isLater(i.comp, i.round) ? ' ' + L('(geçerse)','(if qualified)') : ''}`),
+      'LOCATION:' + escI(`The Green Park Pendik · ${L('Salon','Hall')} ${HALL[i.h]}`),
+      'DESCRIPTION:' + escI(L('Planlanan saat; salondaki anonsları takip edin.','Planned time; follow the announcements in the hall.')),
+      'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + escI(L('30 dk sonra','In 30 min') + ': ' + i.comp.name),'TRIGGER:-PT30M','END:VALARM','END:VEVENT'); });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n') + '\r\n';
+}
+function downloadICS(items){
+  try {
+    const blob = new Blob([icsFor(items)], {type: 'text/calendar;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'istanbul2026-hatirlatici.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 20000);
+    toast(L('Takvim dosyası indirildi; açıp "Ekle"ye bas','Calendar file downloaded; open it and tap "Add"'));
+  } catch(e) { toast(L('İndirilemedi','Could not download')); }
+}
 function calLink(it){ return `<a class="cal" href="${calHref(it)}" target="_blank" rel="noopener" title="Google Calendar" onclick="event.stopPropagation()">📅 ${L('Takvime ekle','Add to calendar')}</a>`; }
 function calHref(it){
   const c = it.comp, mn = myNames(c.id);
@@ -536,6 +572,8 @@ $('simLive').onclick = () => { simAbs=null; try{sessionStorage.removeItem('wdsfi
 const catTag = c => c.cat==='WC' ? '<span class="wc">WC</span>' : `<span class="hb">${c.cat==='IGO'?'IGO':'Open'}</span>`;
 const turTag = c => c.tur ? `<span class="tur">${FLAGS_OK?flagEmoji('TUR')+' ':'TUR '}${c.tur}</span>` : '';
 const roundTag = r => `<span class="rb ${r.final?'final':''}">${esc(r.label)}</span>`;
+const isLater = (c, r) => c.rounds.length > 1 && r !== c.rounds[0];
+const qualTag = (c, r) => isLater(c, r) ? `<span class="qual">${L('(geçerse)','(if qualified)')}</span>` : '';
 function status(d,s,e){ const a=nowAbs(); const S=ABS(d,s), E=ABS(d,e); return a>=E?'past':a>=S?'live':'up'; }
 
 function itemRow(it, opts={}){
@@ -545,7 +583,7 @@ function itemRow(it, opts={}){
     return `<div class="row ${st0} ${my?'fav':''}" style="--c:${c.disc.c}" data-comp="${c.id}">
       <div class="tm" style="padding-left:6px">${fmt(it.s)}<small>${fmt(it.e)}</small></div>
       <div class="bd"><div class="ti">${esc(c.name)}</div>
-        <div class="mt">${st0==='live'?`<span class="livetag">${L('CANLI','LIVE')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
+        <div class="mt">${st0==='live'?`<span class="livetag">${L('CANLI','LIVE')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
   }
   return `<div class="row minor ${st0}" style="--c:transparent">
     <div class="tm" style="padding-left:6px">${fmt(it.s)}</div>
@@ -584,12 +622,20 @@ function renderNow(){
   const myNext = ITEMS.filter(i => i.kind==='round' && mine.has(i.comp.id) && ABS(i.d,i.e) > a).slice(0,3);
   $('mineBox').innerHTML = mine.size ? `<div class="mine"><div class="k" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span>${L(`★ Takip ettiklerinde sırada`,`★ Up next for you`)}</span><a href="#sporcu" style="font-weight:600;font-size:13.5px;color:var(--mc);text-decoration:none;white-space:nowrap">${L('+ Kişi ekle','+ Add')}</a></div><div class="nexts">${
     myNext.length ? myNext.map(i => { const S=ABS(i.d,i.s); const live=a>=S;
-      return `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx"><b>${esc(i.comp.name)}</b> ${roundTag(i.round)} ${myTags(i.comp.id)}<div class="in">${i.d!==d?DAYS3[i.d]+' '+i.d+' Kas · ':''}${L('Salon','Hall')} ${i.h}</div></div><div class="cd">${live?`<span class="livetag">${L('CANLI','LIVE')}</span>`:relTxt(S-a)}</div></div>`; }).join('')
+      return `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx"><b>${esc(i.comp.name)}</b> ${roundTag(i.round)} ${qualTag(i.comp, i.round)} ${myTags(i.comp.id)}<div class="in">${i.d!==d?DAYS3[i.d]+' '+i.d+' Kas · ':''}${L('Salon','Hall')} ${i.h}</div></div><div class="cd">${live?`<span class="livetag">${L('CANLI','LIVE')}</span>`:relTxt(S-a)}</div></div>`; }).join('')
     : `<div class="nx minor">${L('Takip ettiğin yarışmaların hepsi tamamlandı.','All competitions you follow are finished.')}</div>`}</div></div>` : '';
 
   const myRes = [...mine].map(id=>COMPS[id]).filter(c => c && c.ranking.length && myNames(c.id).length);
   if(myRes.length) $('mineBox').innerHTML += `<div class="mine"><div class="k">${L(`🏅 Takip ettiklerinin sonuçları`,`🏅 Your results`)}</div><div class="nexts">${myRes.map(c => myNames(c.id).map(n => { const pl = placeOf(c.id,n);
     return `<div class="nx" data-comp="${c.id}"><div class="tm">${pl?esc(pl)+'.':'–'}</div><div class="tx"><b>${esc(n)}</b><div class="in">${esc(c.name)} · ${c.parts.length} ${L('kayıt','entries')}</div></div></div>`; }).join('')).join('')}</div></div>`;
+  // compact strip: both halls at a glance
+  const stripHalls = ['A','B'].filter(h => ITEMS.some(i => i.h===h && i.d===d));
+  const stripTxt = h => { const cur = ITEMS.find(i => i.h===h && i.kind==='round' && ABS(i.d,i.s)<=a && a<ABS(i.d,i.e)) || ITEMS.find(i => i.h===h && ABS(i.d,i.s)<=a && a<ABS(i.d,i.e));
+    if(cur) return cur.kind==='round' ? `<span class="live-now">●</span> ${esc(cur.comp.short)} · ${esc(cur.round.label)}` : esc(cur.text);
+    const nx = ITEMS.find(i => i.h===h && i.kind==='round' && ABS(i.d,i.s) > a && i.d===d);
+    return nx ? `${fmt(nx.s)} · ${esc(nx.comp.short)}` : L('Bugün program yok','Nothing today'); };
+  const during = ITEMS.some(i => i.d===d && ABS(i.d,i.s) - 60 <= a && a <= ABS(i.d,i.e) + 30);
+  $('mineBox').insertAdjacentHTML('afterbegin', during && stripHalls.length > 1 ? `<div class="strip">${stripHalls.map(h => `<a href="#hall-${h}" onclick="event.preventDefault();document.getElementById('hall-${h}').scrollIntoView({behavior:'smooth'})"><b>${h}</b><span>${stripTxt(h)}</span></a>`).join('')}</div>` : '');
   // halls
   const dayItems = ITEMS.filter(i => i.d===d);
   const useHalls = dayItems.length ? ['A','B'].filter(h => dayItems.some(i=>i.h===h)) : ['A','B'];
@@ -609,7 +655,7 @@ function renderNow(){
     } else {
       live = `<div class="livebox"><div class="lab idle">${L(`ŞU AN`,`NOW`)}</div><div class="t" style="color:var(--muted);font-weight:600">${L(`Salonda program yok`,`Nothing in this hall now`)}</div></div>`;
     }
-    return `<div class="hall"><div class="hallimg" style="background-image:url(${HALLIMG[h]})"><div class="hl"><b>${h}</b><span>${HALL[h].split(' · ')[1]}</span></div></div><div class="hn"><span>${L('Salon','Hall')}</span><b>${HALL[h]}</b></div>${live}
+    return `<div class="hall" id="hall-${h}"><div class="hallimg" style="background-image:url(${HALLIMG[h]})"><div class="hl"><b>${h}</b><span>${HALL[h].split(' · ')[1]}<small style="display:block;font-weight:500;opacity:.85;font-size:12.5px">${HALL_HINT(h)}</small></span></div></div><div class="hn"><span>${L('Salon','Hall')}</span><b>${HALL[h]}</b></div>${live}
       <div class="nexts">${nexts.length? nexts.map(i => i.kind==='round'
         ? `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.comp.name)} ${roundTag(i.round)}${i.d!==d?`<div class="in">${DAYS3[i.d]} ${i.d} ${L('Kas','Nov')}</div>`:''}</div><div class="cd">${relTxt(ABS(i.d,i.s)-a)}</div></div>`
         : `<div class="nx minor"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.text)}</div></div>`).join('')
@@ -664,7 +710,7 @@ function renderComps(){
   chipRow($('cDisc'), DISC.map(x=>[x.k,x.tr,x.c]), st.cDisc, tog(st.cDisc));
   chipRow($('cAge'), AGES.map(x=>[x,x]), st.cAge, tog(st.cAge));
   const q = st.cQ.toLowerCase();
-  const list = COMPLIST.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!st.cDisc.size || st.cDisc.has(c.disc.k)) && (!st.cAge.size || st.cAge.has(c.age)));
+  const list = COMPLIST.filter(c => (!q || catMatch(c, norm(q))) && (!st.cDisc.size || st.cDisc.has(c.disc.k)) && (!st.cAge.size || st.cAge.has(c.age)));
   $('cCnt').textContent = `${list.length} ${L('yarışma','competitions')}`;
   let html='', last=0;
   list.forEach(c => {
@@ -698,17 +744,29 @@ function renderAth(){
   }
   const list = ALLP.filter(p => (!st.aCty || p.cty===st.aCty) && (!q || p.q.includes(q)));
   if(q) ALLM.forEach(m => { if((!st.aCty || m.cty===st.aCty) && m.q.includes(q)) list.push(m); });
-  $('aCnt').textContent = `${list.length} ${L('kayıt','entries')}` + (list.length>150?L(' · ilk 150 gösteriliyor, aramayı daralt',' · showing first 150, refine your search'):'');
-  $('aList').innerHTML = list.slice(0,150).map(athRow).join('') || `<div class="empty">${L('Sonuç yok. Türkçe karakterler olmadan da deneyebilirsin.','No results. Try without special characters.')}</div>`;
+  const nowA = nowAbs();
+  const nextStart = p => { const r = p.comp.rounds.find(r => ABS(p.comp.day, r.e) > nowA); return r ? ABS(p.comp.day, r.s) : Infinity; };
+  list.sort((x, y) => (nextStart(x) === Infinity) - (nextStart(y) === Infinity) || (!!x.team) - (!!y.team) || nextStart(x) - nextStart(y));
+  const cats = q && q.length >= 3 ? COMPLIST.filter(c => catMatch(c, q)).slice(0, 5) : [];
+  $('aCnt').textContent = (!list.length && cats.length) ? '' : `${list.length} ${L('kayıt','entries')}` + (list.length>150?L(' · ilk 150 gösteriliyor, aramayı daralt',' · showing first 150, refine your search'):'');
+  $('aList').innerHTML = (cats.length ? `<h2 style="margin:10px 0 4px;font-size:19px">${L('Klasmanlar','Categories')}</h2>` + cats.map(c => `<div class="cc" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div><div class="mt"><span>${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall} · ${fmt(c.s)}</span><span>· ${c.parts.length} ${L('kayıt','entries')}</span></div></div></div>`).join('') + (list.length ? `<h2 style="margin:14px 0 4px;font-size:19px">${L('Kişiler ve takımlar','People and teams')}</h2>` : '') : '') + list.slice(0,150).map(athRow).join('') || `<div class="empty">${L('Sonuç yok. Türkçe karakterler olmadan da deneyebilirsin.','No results. Try without special characters.')}</div>`;
+}
+function athStatus(p){
+  const c = p.comp, a = nowAbs();
+  const pp = c.parts.find(x => x.key === p.key);
+  if(pp && pp.place) return `🏅 <b>${esc(pp.place)}${L('. sıra','. place')}</b> (${c.parts.length} ${L('kayıt','entries')})`;
+  const live = c.rounds.find(r => ABS(c.day,r.s) <= a && a < ABS(c.day,r.e));
+  if(live) return `<span class="live-now">● ${L('ŞU AN SAHNEDE','ON STAGE NOW')}</span> · ${roundTag(live)} · ${L('Salon','Hall')} ${c.hall}`;
+  const nxt = c.rounds.find(r => ABS(c.day,r.s) > a);
+  if(nxt) return `${L('Sıradaki','Next')}: ${roundTag(nxt)} ${qualTag(c, nxt)} <b>${fmt(nxt.s)}</b> · ${relTxt(ABS(c.day,nxt.s) - a)}`;
+  return L('Bitti · sonuç henüz açıklanmadı, açıklanınca burada görünür','Finished · result not published yet; it will appear here');
 }
 function athRow(p){
-  const c = p.comp; const a = nowAbs();
-  const nxt = c.rounds.find(r => ABS(c.day,r.e) > a);
-  const nxtTxt = nxt ? `${roundTag(nxt)} <b>${fmt(nxt.s)}</b>` : `<span>${L('tamamlandı','finished')}</span>`;
+  const c = p.comp;
   return `<div class="ath"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="bd" data-comp="${c.id}" style="cursor:pointer">
-    <div class="nm">${esc(p.name)}</div>${p.team?`<div class="cp">${L(`Takım: <b>`,`Team: <b>`)}${esc(p.team)}</b></div>`:''}${p.chor?`<div class="ch">“${esc(p.chor)}”</div>`:''}${p.members&&p.members.length?`<div class="cp">${p.members.length}${L(` kişilik takım</div>`,`-member team</div>`)}`:''}
-    <div class="cp"><b>${esc(c.name)}</b> · ${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall}${L(` · İlk tur `,` · First round `)}${fmt(c.rounds[0].s)}</div>
-    <div class="cp">${(()=>{ const pp = c.parts.find(x=>x.key===p.key); return pp && pp.place ? `🏅 <b>${esc(pp.place)}${L(`. sıra</b>`,`. place</b>`)} (${c.parts.length} ${L('kayıt','entries')})` : `${L(`Sıradaki: `,`Next: `)}${nxtTxt}`; })()}</div></div>
+    <div class="nm">${esc(p.name)}</div>${p.team?`<div class="cp">${L('Takım','Team')}: <b>${esc(p.team)}</b></div>`:''}${p.chor?`<div class="ch">“${esc(p.chor)}”</div>`:''}${p.members&&p.members.length?`<div class="cp">${p.members.length} ${L('kişilik takım','members')}</div>`:''}
+    <div class="cp"><b>${esc(c.name)}</b> · ${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall}</div>
+    <div class="cp">${athStatus(p)}</div></div>
     <button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?L('✓ Takipte','✓ Following'):(p.team?L('Takımı takip et','Follow team'):L('Takip et','Follow'))}</button></div>`;
 }
 $('aQ').oninput = e => { st.aQ = e.target.value; renderAth(); };
@@ -727,35 +785,40 @@ function renderMine(){
     const A=items[x], B=items[y];
     if(A.comp.id!==B.comp.id && A.d===B.d && A.s < B.e && B.s < A.e) conf.push([A,B]);
   }
+  const tight = [];
+  const sorted = items.slice().sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
+  for(let k=1;k<sorted.length;k++){ const A = sorted[k-1], B = sorted[k];
+    const gap = ABS(B.d,B.s) - ABS(A.d,A.e);
+    if(A.comp.id !== B.comp.id && A.d === B.d && gap >= 0 && gap < 10) tight.push([A,B,gap]); }
+  const upcoming = items.filter(i => ABS(i.d,i.e) > nowAbs());
+  const calBox = upcoming.length ? `<div class="remind"><div class="bd"><b>${L('🔔 Telefonuma hatırlatıcı kur','🔔 Set phone reminders')}</b>${L(`Takip ettiğin ${upcoming.length} turun hepsi, 30 dk önce alarmla takvimine eklenir. Telefon kilitliyken de çalışır.`,`All ${upcoming.length} upcoming rounds go into your calendar with an alarm 30 min before. Works with the phone locked.`)}</div><button class="btn pri" id="icsBtn">${L('Ekle','Add')}</button></div>` : '';
   const pinned = ALLP.filter(p => pins.has(p.key));
   let html = '';
-  if(pinned.length) html += `<div class="note">${L(`<b>Takip edilen sporcular:</b>`,`<b>Following:</b>`)} ${pinned.map(p=>`${esc(p.name)} <span class="cty" ${ctyStyle(p.cty)}>${ctyLabel(p.cty)}</span>`).join(', ')}</div>`;
+  if(pinned.length) html += `<div class="note">${L(`<b>Takip edilen sporcular:</b>`,`<b>Following:</b>`)} ${[...new Map(pinned.map(p => [p.name + '|' + p.cty, p])).values()].map(p=>`${esc(p.name)} <span class="cty" ${ctyStyle(p.cty)}>${ctyLabel(p.cty)}</span>`).join(', ')}</div>`;
+  html += calBox;
+  if(items.some(i => isLater(i.comp, i.round))) html += `<div class="note" style="padding-top:0">${L('Not: Her turda sporcuların bir kısmı elenir (1/8 Final → Çeyrek → Yarı → Final). "(geçerse)" yazan turlar, önceki turu geçenler içindir.','Note: some dancers are eliminated each round (1/8 → quarter → semi → final). Rounds marked "(if qualified)" are for those who go through.')}</div>`;
+  const upc = x => ABS(x.d,x.e) > nowAbs();
+  const tightUp = tight.filter(([A,B]) => upc(B));
+  if(tightUp.length) html += `<div class="warn" style="border-left-color:var(--gilt);background:color-mix(in srgb,var(--gilt) 12%,var(--surface))"><b>⏱ ${L('Sıkı geçişler','Tight transitions')}</b><br>${tightUp.slice(0,6).map(([A,B,g]) => `${DAYS3[A.d]} ${fmt(A.e)} → ${fmt(B.s)} (${g} ${L('dk','min')}): ${esc(myNames(A.comp.id)[0] || A.comp.short)} → ${esc(myNames(B.comp.id)[0] || B.comp.short)}${A.h!==B.h ? ' · ' + L('salon değişiyor','hall change') : ''}`).join('<br>')}</div>`;
+  if(!conf.length && items.length > 1) html += `<div class="note" style="padding:2px 0 8px;color:var(--ok);font-weight:600">✓ ${L('Saat çakışması yok','No time clashes')}</div>`;
   if(conf.length) html += `<div class="warn"><b>⚠ ${conf.length}${L(` saat çakışması</b>`,` time clash(es)</b>`)}<br>${conf.slice(0,6).map(([A,B])=>`${DAYS3[A.d]} ${fmt(Math.max(A.s,B.s))}: ${esc(A.comp.short)} (${esc(A.round.label)}, ${A.h}) ↔ ${esc(B.comp.short)} (${esc(B.round.label)}, ${B.h})`).join('<br>')}</div>`;
   let tools = `<details class="tools"><summary>${L('Uyarı ayarları','Alert settings')}</summary><div class="set"><label><input type="checkbox" id="optAlert" ${prefs.alert?'checked':''}>${L(` Turdan 30 dk önce ekranda uyar</label>`,` Alert me on screen 30 min before a round</label>`)}
     <label><input type="checkbox" id="optSound" ${prefs.sound?'checked':''}>${L(` Uyarıda ses çal</label>`,` Play a sound with the alert</label>`)}
-    <div style="color:var(--muted);font-size:12px;margin-top:4px">${L(`Uyarılar yalnızca bu sayfa telefonda açıkken çalışır. Telefon kilitliyken de hatırlatma istersen aşağıdaki takvim butonunu kullan.`,`Alerts only work while this page is open. For reminders when your phone is locked, use the calendar button below.`)}</div></div></details>`;
-  const calAdded = new Set(store.get('wdsfist-cal', []));
-  const upcoming = items.filter(i => ABS(i.d,i.e) > nowAbs());
-  const calKey = i => i.comp.id+'@'+i.round.r;
-  const nextCal = upcoming.find(i => !calAdded.has(calKey(i)));
-  const doneN = upcoming.filter(i => calAdded.has(calKey(i))).length;
-  const calBox = `<div class="set" style="margin-top:14px"><b>${L(`📅 Programını takvimine ekle`,`📅 Add your schedule to your calendar`)}</b>
-    <div style="color:var(--muted);font-size:12.5px;margin:4px 0 8px">${L(`Butona her dokunuşta sıradaki tur Google Takvim'de açılır; "Kaydet"e basıp buraya dön ve devam et. Takvim telefon kilitliyken de hatırlatır (hatırlatmayı 30 dk yap).`,`Each tap opens the next round in Google Calendar; save it, come back and continue. Your calendar reminds you even when the phone is locked (set the reminder to 30 min).`)}</div>
-    ${upcoming.length ? (nextCal ? `<a class="btn pri" style="white-space:normal;padding:10px 16px;line-height:1.3" id="calNext" data-k="${esc(calKey(nextCal))}" href="${calHref(nextCal)}" target="_blank" rel="noopener"${L(`>Ekle: `,`>Add: `)}${esc(nextCal.comp.name)} · ${esc(nextCal.round.label)} (${doneN+1}/${upcoming.length})</a>`
-      : `<span style="color:var(--ok);font-weight:700">${L(`✓ Tüm turlar takvimine eklendi (`,`✓ All rounds added to your calendar (`)}${upcoming.length})</span>`) + (doneN?` <button class="linkbtn" id="calReset">${L(`baştan başla`,`start over`)}</button>`:'') : `<span style="color:var(--muted)">${L('Eklenecek yaklaşan tur yok.','No upcoming rounds to add.')}</span>`}</div>`;
+    <div style="color:var(--muted);font-size:12px;margin-top:4px">${L(`Uyarılar yalnızca bu sayfa telefonda açıkken çalışır. <b>Telefon kilitliyken de hatırlatma için yukarıdaki "Telefonuma hatırlatıcı kur" düğmesini kullan.</b>`,`Alerts only work while this page is open. <b>For reminders with the phone locked, use "Set phone reminders" above.</b>`)}</div></div></details>`;
   const actBox = `<div class="fl" style="margin-top:14px"><button class="btn pri" id="copyPlan">${L(`Programı kopyala`,`Copy schedule`)}</button><button class="btn" id="clearPlan">${L(`Temizle`,`Clear`)}</button></div>`;
   let last=0; const a = nowAbs(); let placed=false;
-  items.forEach(i => {
+  const pastItems = items.filter(i => ABS(i.d,i.e) <= a), restItems = items.filter(i => ABS(i.d,i.e) > a);
+  if(pastItems.length) html += `<details class="tools" style="margin-top:6px"><summary>${L(`Bitmiş turlar (${pastItems.length})`,`Finished rounds (${pastItems.length})`)}</summary>${pastItems.map(i => itemRow(i, {hall:true, mine:true, day:true})).join('')}</details>`;
+  restItems.forEach(i => {
     if(i.d!==last){ last=i.d; html += `<h2 style="margin:16px 0 4px">${i.d} ${L('Kasım','November')} · ${DAYN[i.d]}</h2>`; }
     if(!placed && ABS(i.d,i.s) > a && a > firstAbs){ html += `<div class="nowline">${L(`ŞİMDİ`,`NOW`)}</div>`; placed=true; }
-    html += itemRow(i, {hall:true, cal:true});
+    html += itemRow(i, {hall:true, mine:true});
   });
-  html += calBox + actBox + tools;
+  html += actBox + tools;
   html += `${L(`<h2>Takip edilen yarışmalar</h2>`,`<h2>Followed competitions</h2>`)}` + [...ids].map(id=>COMPS[id]).filter(Boolean).sort((x,y)=>ABS(x.day,x.s)-ABS(y.day,y.s)).map(c =>
     `<div class="cc" style="--c:${c.disc.c};margin-bottom:5px" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div><div class="mt">${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall} · ${fmt(c.s)}–${fmt(c.e)}</div></div>${favs.has(c.id)?`<button class="star on" data-star="${c.id}">★</button>`:`<span class="hb">${L('sporcu','athlete')}</span>`}</div>`).join('');
   $('myBox').innerHTML = html;
-  if($('calNext')) $('calNext').addEventListener('click', e => { e.stopPropagation(); calAdded.add($('calNext').dataset.k); store.set('wdsfist-cal',[...calAdded]); setTimeout(renderMine, 400); });
-  if($('calReset')) $('calReset').onclick = () => { store.set('wdsfist-cal',[]); renderMine(); };
+  if($('icsBtn')) $('icsBtn').onclick = () => downloadICS(upcoming);
   $('optAlert').onchange = e => { prefs.alert = e.target.checked; store.set('wdsfist-prefs', prefs); };
   $('optSound').onchange = e => { prefs.sound = e.target.checked; store.set('wdsfist-prefs', prefs); if(prefs.sound) beep(); };
   $('copyPlan').onclick = async () => {
@@ -781,8 +844,8 @@ function openComp(id){
     <div class="mt">${catTag(c)}<span style="color:${c.disc.c};font-weight:700">${c.disc.tr}</span></div>
     <h3>${esc(c.name)}</h3>
     <div class="mt">${c.day} ${L('Kasım','November')} ${DAYN[c.day]} · ${L('Salon','Hall')} ${HALL[c.hall]}</div>${myNames(c.id).length?`<div class="mt" style="margin-top:6px">${L(`Takip ettiğin: `,`Following: `)}${myTags(c.id)}</div>`:''}
-    <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Takipte','★ Following')}`:`${L('☆ Takip et','☆ Follow')}`}</button></div>
-    <h2>Turlar</h2>
+    <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Klasman takipte','★ Category followed')}`:`${L('☆ Klasmanın tamamını takip et','☆ Follow the whole category')}`}</button></div>
+    <h2>${L('Turlar','Rounds')}</h2>
     <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('CANLI','LIVE'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
     ${res?`<tr>${L(`<td>Ödül töreni</td>`,`<td>Awards</td>`)}<td class="t">${fmt(res.s)}</td><td></td></tr>`:''}</table>
     <div class="links">
@@ -797,7 +860,7 @@ function openComp(id){
     <input class="search" id="sq" type="search" placeholder="${isTeam?L('Takım veya üye ara…','Search team or member…'):L('Bu yarışmada ara…','Search this competition…')}" style="margin-top:10px">
     <div class="plist" id="spl"></div>`;
   const drawP = () => { const q = norm($('sq').value); $('spl').innerHTML = c.parts.filter(p => (!sheetCty || p.cty===sheetCty)) .filter(p => !q || norm(p.name+' '+p.chor+' '+p.cty+' '+(p.members||[]).join(' ')).includes(q)).map(p =>
-    `<div><div class="pr"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="n">${esc(p.name)}${p.chor?` <i>“${esc(p.chor)}”</i>`:''}${p.members?` <button class="tbtn" data-mem>${p.members.length}${L(` kişi ▾`,` ▾`)}</button>`:''}</div><button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?'✓':L('Takip','Follow')}</button></div>`
+    `<div><div class="pr"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="n">${esc(p.name)}${p.chor?` <i>“${esc(p.chor)}”</i>`:''}${p.members?` <button class="tbtn" data-mem>${p.members.length}${L(` kişi ▾`,` ▾`)}</button>`:''}</div><button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?L('✓ Takipte','✓ Following'):L('Takip et','Follow')}</button></div>`
     + (p.members ? `<div class="mem" ${q && p.members.some(m=>norm(m).includes(q)) ? '' : 'hidden'}>${p.members.map(m => q && norm(m).includes(q) ? `<b>${esc(m)}</b>` : esc(m)).join(' · ')}</div>` : '') + `</div>`).join('');
     $('spl').querySelectorAll('[data-mem]').forEach(b => b.onclick = e => { e.stopPropagation(); const mm = b.closest('.pr').nextElementSibling; mm.hidden = !mm.hidden; }); };
   drawP(); $('sq').oninput = drawP;
