@@ -15,18 +15,18 @@
 <style>
 html[lang=en] .tr,html[lang=tr] .en{display:none!important}
 :root{
-  --paper:#F4F2F6; --surface:#FFFFFF; --sunk:#EAE6EE; --ink:#211A25; --muted:#6E6574; --faint:#7A7180; --line:#DFD9E4;
+  --paper:#F4F2F6; --surface:#FFFFFF; --sunk:#EAE6EE; --ink:#211A25; --muted:#6E6574; --faint:#6B6271; --line:#DFD9E4;
   --velvet:#7C1528; --velvet-ink:#FFF3F4; --gilt:#8C6414; --gilt-soft:#F6E7C3; --live:#D21F3C;
   --mc:#3E63DD; --jz:#D9622B; --sd:#9B3FC0; --im:#158A6E; --tur:#C8102E;
   --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif; --body:"Flags","Figtree",system-ui,sans-serif;
-  --r:14px; --ok:#1E8F5A;
+  --r:14px; --ok:#17784A; --on-gilt:#fff; --on-live:#fff;
 }
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme=light]){--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#8A8190;--line:#352C3A;
-  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6;color-scheme:dark}
+  :root:not([data-theme=light]){--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#968D9C;--line:#352C3A;
+  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6;--ok:#4FD08F;--on-gilt:#211A25;--on-live:#211A25;color-scheme:dark}
 }
-:root[data-theme=dark]{--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#8A8190;--line:#352C3A;
-  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6;color-scheme:dark}
+:root[data-theme=dark]{--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#968D9C;--line:#352C3A;
+  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6;--ok:#4FD08F;--on-gilt:#211A25;--on-live:#211A25;color-scheme:dark}
 :root[data-theme=light]{color-scheme:light}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -62,8 +62,10 @@ nav.tabs a .ic{display:block;font-size:18px;line-height:24px}
 nav.tabs a.on{color:var(--ink)}
 nav.tabs a.on::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--velvet)}
 .badge[hidden]{display:none}
-.badge{display:inline-block;min-width:17px;padding:0 5px;border-radius:999px;background:var(--gilt);color:#fff;font-size:10.5px;font-weight:800;margin-left:3px;vertical-align:1px}
+.badge{display:inline-block;min-width:17px;padding:0 5px;border-radius:999px;background:var(--gilt);color:var(--on-gilt);font-size:10.5px;font-weight:800;margin-left:3px;vertical-align:1px}
 
+h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 section{display:none}
 section.on{display:block}
 h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;margin:26px 0 10px;line-height:1.1}
@@ -73,7 +75,7 @@ h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01e
 @media (min-width:700px){.halls{grid-template-columns:1fr 1fr}}
 .hall{background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
 .hallimg{height:92px;background-size:cover;background-position:center 60%;position:relative;display:flex;align-items:flex-end;padding:10px 14px}
-.hallimg::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,8,12,.05),rgba(20,8,12,.72))}
+.hallimg::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,rgba(20,8,12,.05),rgba(20,8,12,.72))}
 .hallimg .hl{position:relative;color:#fff;display:flex;align-items:baseline;gap:10px}
 .hallimg .hl b{font-family:var(--display);font-size:44px;font-weight:800;line-height:.8}
 .hallimg .hl span{font-weight:600;font-size:15px}
@@ -110,7 +112,7 @@ h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01e
 .day small{display:block;font-family:var(--body);color:var(--muted);font-size:11.5px;font-weight:500;margin-top:3px}
 .day.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .day.on small{color:inherit;opacity:.75}
-.day .td{font-family:var(--body);font-size:10px;font-weight:800;color:var(--live);vertical-align:4px}
+.day .td{font-family:var(--body);font-size:11px;font-weight:800;color:inherit;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:var(--live);vertical-align:4px}
 .fl{display:flex;gap:6px;overflow-x:auto;flex-wrap:nowrap;margin:8px -16px;padding:0 16px;scrollbar-width:none}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:40px;font-size:14px;cursor:pointer;white-space:nowrap;flex:none}
 .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -133,7 +135,7 @@ details.more summary::-webkit-details-marker{display:none}
 .row.minor{cursor:default;padding:8px 2px}
 .row.minor .ti{font-weight:500;color:var(--muted);font-size:14px}
 .row.minor .tm{font-size:17px;color:var(--faint)}
-.row.past{opacity:.62}
+.row.past{opacity:1}.row.past .tm,.row.past .ti,.row.past .mt{color:var(--muted)}.row.past{--c:var(--line)!important}
 .row.live .tm{color:var(--live)}
 .row.fav .ti::after{content:" ★";color:var(--gilt)}
 .hb{font-size:12px;font-weight:700;color:var(--muted)}
@@ -141,7 +143,7 @@ details.more summary::-webkit-details-marker{display:none}
 .rb.final{color:var(--gilt);font-weight:800}
 .wc{font-size:11px;font-weight:800;border-radius:5px;padding:1px 6px;background:var(--ink);color:var(--paper)}
 .tur{font-size:12px;font-weight:700;color:var(--muted)}
-.livetag{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px}
+.livetag{font-size:12px;font-weight:800;color:var(--on-live);background:var(--live);border-radius:5px;padding:1px 6px}
 .nowline{display:flex;align-items:center;gap:8px;color:var(--live);font-size:13px;font-weight:700;margin:6px 0 2px}
 .nowline::after{content:"";flex:1;height:2px;background:var(--live);border-radius:2px}
 .empty{color:var(--muted);text-align:center;padding:36px 12px;font-size:15px;line-height:1.5}
@@ -171,21 +173,24 @@ details.more summary::-webkit-details-marker{display:none}
 .cty .fg{font-size:15px;line-height:1}
 .pin{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:44px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
 .pr .pin{min-width:104px}
-.pin.on{background:var(--gilt);color:#fff;border-color:var(--gilt)}
+.pin.on{background:var(--gilt);color:var(--on-gilt);border-color:var(--gilt)}
 
 /* sheet */
-.ov{position:fixed;inset:0;background:rgba(15,8,14,.5);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.ov{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(15,8,14,.5);z-index:50;display:none;align-items:flex-end;justify-content:center}
 .ov.on{display:flex}
 .sheet{background:var(--paper);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:0 16px calc(24px + env(safe-area-inset-bottom));overscroll-behavior:contain}
 .sheet::before{content:"";display:block;width:40px;height:5px;border-radius:5px;background:var(--line);margin:8px auto 4px}
+:root[data-theme=dark] .sheet{background:var(--sunk);box-shadow:0 -1px 0 var(--line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .sheet{background:var(--sunk);box-shadow:0 -1px 0 var(--line)}}
+.sheet .sbar{position:sticky;top:0;z-index:3;display:flex;justify-content:flex-end;margin:0 -16px;padding:8px 10px 4px;background:inherit}
 @media (min-width:760px){.ov{align-items:center}.sheet{border-radius:20px;max-height:86vh}}
-.sheet .x{box-shadow:0 2px 8px rgba(0,0,0,.18);position:sticky;top:6px;float:right;background:var(--surface);border:1px solid var(--line);border-radius:999px;width:40px;height:40px;cursor:pointer;font-size:16px;z-index:2}
+.sheet .x{box-shadow:0 2px 8px rgba(0,0,0,.18);position:static;background:var(--surface);border:1px solid var(--line);border-radius:999px;width:40px;height:40px;cursor:pointer;font-size:16px;z-index:2}
 .sheet h3{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;margin:8px 48px 6px 0}
 .sheet .mt{font-size:14px;color:var(--muted);display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center}
 .rtab{width:100%;border-collapse:collapse;margin-top:4px;font-size:15px}
 .rtab td{padding:11px 4px;border-top:1px solid var(--line)}
 .rtab td.t{font-family:var(--display);font-size:20px;font-weight:700;white-space:nowrap}
-.rtab tr.past td{opacity:.45}
+.rtab tr.past td{color:var(--muted)}
 .rtab tr.live td{color:var(--live);font-weight:700}
 .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .lk{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;font-size:14px;text-decoration:none}
@@ -198,12 +203,12 @@ details.more summary::-webkit-details-marker{display:none}
 .tbtn{background:var(--sunk);border:none;border-radius:6px;font-size:12.5px;padding:3px 8px;cursor:pointer;color:var(--ink);margin-left:4px}
 
 /* misc */
-.warn{background:color-mix(in srgb,var(--live) 10%,var(--surface));border-left:4px solid var(--live);border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+.warn{background:var(--surface);background:color-mix(in srgb,var(--live) 10%,var(--surface));border-left:4px solid var(--live);border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
 .note{font-size:14px;color:var(--muted);padding:6px 0 10px;line-height:1.5}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0 16px;min-height:44px;font-size:15px;cursor:pointer;font-weight:600}
 .btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
-.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top));max-width:calc(100% - 32px);transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 .alert{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom));width:min(560px,calc(100% - 16px));z-index:45;background:var(--gilt);color:#1d1305;border-radius:14px;padding:10px 10px 10px 14px;box-shadow:0 8px 24px rgba(40,20,0,.25);display:none;gap:10px;align-items:center}
 .alert.on{display:flex}
@@ -251,8 +256,9 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 .fchip{display:inline-flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 4px 0 12px;min-height:40px;font-size:14px;font-weight:600;text-decoration:none}
 .fchip button{border:none;background:none;color:var(--muted);width:32px;height:32px;cursor:pointer;font-size:13px}
 .fchip.add{padding:0 14px;color:var(--mc);border-style:dashed}
+button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--mc)}
 .plannote{font-size:12.5px;color:var(--muted);padding:6px 14px 0;line-height:1.35}
-.stalebar{background:color-mix(in srgb,var(--gilt) 22%,var(--surface));border-left:4px solid var(--gilt);border-radius:10px;padding:9px 12px;font-size:14px;margin:4px 0 6px}
+.stalebar{background:var(--surface);background:color-mix(in srgb,var(--gilt) 22%,var(--surface));border-left:4px solid var(--gilt);border-radius:10px;padding:9px 12px;font-size:14px;margin:4px 0 6px}
 .stalebar[hidden]{display:none}
 .simbox{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;font-size:13px}
 .simbox.on{display:flex}
@@ -262,9 +268,10 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><span class="mark">WDSF</span><span class="city">İstanbul 2026</span></div>
-    <div class="tbtns"><button class="lng" id="themeBtn" aria-label="Tema / Theme"></button><button class="lng" id="lngBtn" aria-label="Language"></button></div>
+    <h1 class="brand"><span class="mark">WDSF</span> <span class="city">İstanbul 2026</span></h1>
+    <div class="tbtns"><button class="lng" id="themeBtn"></button><button class="lng" id="lngBtn"></button></div>
   </header>
+  <main id="main">
   <div class="status"><span id="clockTxt">–</span><span id="updTxt"></span></div>
   <div class="stalebar" id="stale" hidden></div>
   <div class="stalebar" id="upd" hidden></div>
@@ -328,24 +335,25 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
     <div id="myBox"></div>
   </section>
 
+  </main>
   <footer>
     <span class="tr">Takım için hazırlanmış bağımsız takip sayfasıdır; WDSF'nin resmi sitesi değildir.</span><span class="en">An independent tracking page made for the team; not an official WDSF site.</span><br>
-    <button class="linkbtn" id="simToggle" hidden><span class="tr">Saati test et</span><span class="en">Test a time</span></button>
+    <button class="linkbtn" id="forgetMe"><span class="tr">Bu cihazda çıkış yap</span><span class="en">Sign out on this device</span></button><br><button class="linkbtn" id="simToggle" hidden><span class="tr">Saati test et</span><span class="en">Test a time</span></button>
     <span class="tr">Kaynak</span><span class="en">Source</span>: <a href="https://www.worlddancesport.org/Events/Istanbul-T%C3%BCrkiye-11112026-15112026-8773#tab=schedule" target="_blank" rel="noopener">WDSF</a> · <span class="tr">Son güncelleme</span><span class="en">Last update</span>: <span id="fetched"></span>.
     <span class="tr">Saatler WDSF'nin planlanan programıdır; yarışma sırasında kayma olabilir, salondaki duyuruları takip edin.</span><span class="en">Times are WDSF's planned schedule and may shift during the event; follow the announcements in the hall.</span>
   </footer>
 </div>
 
-<nav class="tabs"><div class="in">
-  <a href="#simdi" data-v="simdi"><span class="ic">◉</span><span class="tr">Şimdi</span><span class="en">Now</span></a>
-  <a href="#program" data-v="program"><span class="ic">☰</span>Program</a>
-  <a href="#sporcu" data-v="sporcu"><span class="ic">⌕</span><span class="tr">Ara</span><span class="en">Search</span></a>
-  <a href="#programim" data-v="programim"><span class="ic">★</span><span class="tr">Takibim</span><span class="en">Following</span><span class="badge" id="favBadge" hidden></span></a>
+<nav class="tabs" aria-label="Menü / Menu"><div class="in">
+  <a href="#simdi" data-v="simdi"><span class="ic" aria-hidden="true">◉</span><span class="tr">Şimdi</span><span class="en">Now</span></a>
+  <a href="#program" data-v="program"><span class="ic" aria-hidden="true">☰</span>Program</a>
+  <a href="#sporcu" data-v="sporcu"><span class="ic" aria-hidden="true">⌕</span><span class="tr">Ara</span><span class="en">Search</span></a>
+  <a href="#programim" data-v="programim"><span class="ic" aria-hidden="true">★</span><span class="tr">Takibim</span><span class="en">Following</span><span class="badge" id="favBadge" hidden></span></a>
 </div></nav>
 
-<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
-<div class="toast" id="toast"></div>
-<div class="alert" id="alert"><div class="b" id="alertB"></div><button id="alertX">OK</button></div>
+<div class="ov" id="ov"><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="alert" id="alert" role="alert"><div class="b" id="alertB"></div><button id="alertX">OK</button></div>
 
 <script>
 const DATA = /*DATA*/null;
@@ -362,7 +370,7 @@ const sysDark = () => !!(window.matchMedia && matchMedia('(prefers-color-scheme:
 const isDark = () => theme ? theme === 'dark' : sysDark();
 function applyTheme(){
   if(theme) document.documentElement.setAttribute('data-theme', theme); else document.documentElement.removeAttribute('data-theme');
-  const b = document.getElementById('themeBtn'); if(b){ b.textContent = isDark() ? '☀' : '☾'; b.title = isDark() ? L('Açık mod','Light mode') : L('Karanlık mod','Dark mode'); }
+  const b = document.getElementById('themeBtn'); if(b){ b.textContent = isDark() ? '☀' : '☾'; b.title = isDark() ? L('Açık moda geç','Switch to light mode') : L('Karanlık moda geç','Switch to dark mode'); b.setAttribute('aria-label', b.title); }
   let m = document.querySelector('meta[name=theme-color]'); if(!m){ m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
   m.content = isDark() ? '#17121A' : '#7C1528';
 }
@@ -394,7 +402,7 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),3500); }
 
 /* ---------- countries ---------- */
 const ISO2 = {TUR:'TR',GER:'DE',CRO:'HR',ROU:'RO',POL:'PL',HUN:'HU',BEL:'BE',SRB:'RS',ITA:'IT',SWE:'SE',UKR:'UA',GEO:'GE',BIH:'BA',MNE:'ME',SVK:'SK',RUS:'RU',MKD:'MK',CYP:'CY',NED:'NL',ALB:'AL',
@@ -607,7 +615,7 @@ function renderNow(){
   if(a < firstAbs){
     const mins = firstAbs - a;
     const dd = Math.floor(mins/1440), hh = Math.floor((mins%1440)/60), mm = Math.floor(mins%60);
-    hero = `<div class="hero"><div class="k">${L(`İlk tura kalan`,`Until first round`)}</div><div class="big">${dd? dd+L('g ','d '):''}${hh}${L('s','h')} ${mm}${L('d','m')}</div><div class="s">${L(`11 Kasım Çarşamba, 08:30 · B salonunda MC Solo Male Junior I finali, A salonunda takım provaları`,`Wednesday 11 November, 08:30 · MC Solo Male Junior I final in Hall B, team rehearsals in Hall A`)}</div></div>`;
+    hero = `<div class="hero"><div class="k">${L(`İlk tura kalan`,`Until first round`)}</div><div class="big">${dd? dd+L(' gün ','d '):''}${hh}${L(' sa',' h')} ${mm}${L(' dk',' min')}</div><div class="s">${L(`11 Kasım Çarşamba, 08:30 · B salonunda MC Solo Male Junior I finali, A salonunda takım provaları`,`Wednesday 11 November, 08:30 · MC Solo Male Junior I final in Hall B, team rehearsals in Hall A`)}</div></div>`;
   } else if(a > lastAbs){
     hero = `<div class="hero"><div class="k">${L(`Etkinlik tamamlandı`,`Event finished`)}</div><div class="big">${L(`Teşekkürler!`,`Thank you!`)}</div><div class="s">${L(`Sonuçlar için yarışma detaylarındaki "Sonuçlar" bağlantısını kullan.`,`Open any competition to see its results.`)}</div></div>`;
   } else {
@@ -681,7 +689,7 @@ function chipRow(el, items, set, cb, single){
 }
 function renderProgram(){
   const {d} = nowParts();
-  if(st.pDay==null) st.pDay = DAYS.includes(d) ? d : 11;
+  if(st.pDay==null) st.pDay = DAYS.includes(d) ? d : (nowAbs() > ABS(DAYS[DAYS.length-1], 0) ? DAYS[DAYS.length-1] : DAYS[0]);
   $('pDays').innerHTML = DAYS.map(x => {
     const n = ITEMS.filter(i=>i.d===x && i.kind==='round').length;
     return `<button class="day ${st.pDay===x?'on':''}" data-d="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${n} ${L('tur','rounds')}</small></button>`;
@@ -736,7 +744,7 @@ function renderComps(){
     const fin = c.rounds.find(r=>r.final);
     html += `<div class="cc" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div>
       <div class="mt"><span>${L('Salon','Hall')} ${c.hall} · ${fmt(c.s)}${fin && fin.s !== c.rounds[0].s ? ` · ${L('Final','Final')} ${fmt(fin.s)}` : ''}</span><span>· ${c.parts.length} ${L('kayıt','entries')}</span>${turTag(c)}${c.ranking.length?`<span class="rb final">${L('Sonuçlar ✓','Results ✓')}</span>`:''}</div></div>
-      <button class="star ${favs.has(c.id)?'on':''}" data-star="${c.id}" aria-label="Follow">★</button></div>`;
+      <button class="star ${favs.has(c.id)?'on':''}" data-star="${c.id}" aria-label="${L('Takip et','Follow')}: ${esc(c.name)}" aria-pressed="${favs.has(c.id)}">★</button></div>`;
   });
   $('cList').innerHTML = html || `<div class="empty">${L('Yarışma bulunamadı.','No competitions found.')}</div>`;
 }
@@ -745,7 +753,7 @@ $('cQ').oninput = e => { st.cQ = e.target.value; renderComps(); };
 /* ---------- ATHLETES view ---------- */
 const ALLP = []; COMPLIST.forEach(c => c.parts.forEach(p => ALLP.push({...p, comp:c})));
 const ALLM = []; COMPLIST.forEach(c => c.parts.forEach(p => (p.members||[]).forEach(mn => ALLM.push({name:mn, team:p.name, chor:p.chor, cty:p.cty, comp:c, key:p.key}))));
-const norm = s => s.toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i');
+const norm = s => String(s).trim().replace(/\s+/g,' ').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i');
 ALLP.forEach(p => p.q = norm(p.name+' '+p.chor)); ALLM.forEach(p => p.q = norm(p.name));
 function renderAth(){
   const cnt = {}; ALLP.forEach(p => cnt[p.cty]=(cnt[p.cty]||0)+1);
@@ -812,12 +820,16 @@ function renderMine(){
   const calBox = upcoming.length ? `<div class="remind"><div class="bd"><b>${L('🔔 Telefonuma hatırlatıcı kur','🔔 Set phone reminders')}</b>${L(`Takip ettiğin ${upcoming.length} turun hepsi, 30 dk önce alarmla takvimine eklenir. Telefon kilitliyken de çalışır.`,`All ${upcoming.length} upcoming rounds go into your calendar with an alarm 30 min before. Works with the phone locked.`)}</div><button class="btn pri" id="icsBtn">${L('Ekle','Add')}</button></div>` : '';
   const pinned = ALLP.filter(p => pins.has(p.key));
   let html = '';
-  if(pins.size) html += `<div class="fchips">${[...pins].map(k => `<span class="fchip">${esc(k.slice(k.indexOf('|') + 1))}<button data-pin="${esc(k)}" aria-label="${L('Takipten çıkar','Unfollow')}">✕</button></span>`).join('')}<a class="fchip add" href="#sporcu">${L('+ Kişi ekle','+ Add')}</a></div>`;
+  const pinNames = [...pins].map(k => k.slice(k.indexOf('|') + 1));
+  const dupName = n => pinNames.filter(x => x === n).length > 1;
+  const pinList = [...pins].sort((a, b) => a.slice(a.indexOf('|')+1).localeCompare(b.slice(b.indexOf('|')+1), 'tr'));
+  const showPins = st.allPins || pinList.length <= 10 ? pinList : pinList.slice(0, 8);
+  if(pins.size) html += `<div class="fchips">${showPins.map(k => `<span class="fchip">${esc(k.slice(k.indexOf('|') + 1))}${dupName(k.slice(k.indexOf('|') + 1)) && COMPS[+k.slice(0, k.indexOf('|'))] ? ` <small style="color:var(--muted)">${esc(COMPS[+k.slice(0, k.indexOf('|'))].name)}</small>` : ''}<button data-pin="${esc(k)}" aria-label="${L('Takipten çıkar','Unfollow')}: ${esc(k.slice(k.indexOf('|') + 1))}">✕</button></span>`).join('')}${showPins.length < pinList.length ? `<button class="fchip add" id="morePins">${L(`+${pinList.length - showPins.length} kişi daha`,`+${pinList.length - showPins.length} more`)}</button>` : ''}<a class="fchip add" href="#sporcu">${L('+ Kişi ekle','+ Add')}</a></div>`;
   html += calBox;
   if(items.some(i => isLater(i.comp, i.round))) html += `<div class="note" style="padding-top:0">${L('Not: Her turda sporcuların bir kısmı elenir (1/8 Final → Çeyrek → Yarı → Final). "(geçerse)" yazan turlar, önceki turu geçenler içindir.','Note: some dancers are eliminated each round (1/8 → quarter → semi → final). Rounds marked "(if qualified)" are for those who go through.')}</div>`;
   const upc = x => ABS(x.d,x.e) > nowAbs();
   const tightUp = tight.filter(([A,B]) => upc(B));
-  if(tightUp.length) html += `<div class="warn" style="border-left-color:var(--gilt);background:color-mix(in srgb,var(--gilt) 12%,var(--surface))"><b>⏱ ${L('Sıkı geçişler','Tight transitions')}</b><br>${tightUp.slice(0,6).map(([A,B,g]) => `${DAYS3[A.d]} ${fmt(A.e)} → ${fmt(B.s)} (${g} ${L('dk','min')}): ${esc(myNames(A.comp.id)[0] || A.comp.short)} → ${esc(myNames(B.comp.id)[0] || B.comp.short)}${A.h!==B.h ? ' · ' + L('salon değişiyor','hall change') : ''}`).join('<br>')}</div>`;
+  if(tightUp.length) html += `<div class="warn" style="border-left-color:var(--gilt);background:var(--surface);background:color-mix(in srgb,var(--gilt) 12%,var(--surface))"><b>⏱ ${L('Sıkı geçişler','Tight transitions')}</b><br>${tightUp.slice(0,6).map(([A,B,g]) => `${DAYS3[A.d]} ${fmt(A.e)} → ${fmt(B.s)} (${g} ${L('dk','min')}): ${esc(myNames(A.comp.id)[0] || A.comp.short)} → ${esc(myNames(B.comp.id)[0] || B.comp.short)}${A.h!==B.h ? ' · ' + L('salon değişiyor','hall change') : ''}`).join('<br>')}</div>`;
   if(!conf.length && items.length > 1) html += `<div class="note" style="padding:2px 0 8px;color:var(--ok);font-weight:600">✓ ${L('Saat çakışması yok','No time clashes')}</div>`;
   if(conf.length) html += `<div class="warn"><b>⚠ ${conf.length}${L(` saat çakışması</b>`,` time clash(es)</b>`)}<br>${conf.slice(0,6).map(([A,B])=>`${DAYS3[A.d]} ${fmt(Math.max(A.s,B.s))}: ${esc(A.comp.short)} (${esc(A.round.label)}, ${A.h}) ↔ ${esc(B.comp.short)} (${esc(B.round.label)}, ${B.h})`).join('<br>')}</div>`;
   let tools = `<details class="tools"><summary>${L('Uyarı ayarları','Alert settings')}</summary><div class="set"><label><input type="checkbox" id="optAlert" ${prefs.alert?'checked':''}>${L(` Turdan 30 dk önce ekranda uyar</label>`,` Alert me on screen 30 min before a round</label>`)}
@@ -836,6 +848,7 @@ function renderMine(){
   html += `${L(`<h2>Takip edilen yarışmalar</h2>`,`<h2>Followed competitions</h2>`)}` + [...ids].map(id=>COMPS[id]).filter(Boolean).sort((x,y)=>ABS(x.day,x.s)-ABS(y.day,y.s)).map(c =>
     `<div class="cc" style="--c:${c.disc.c};margin-bottom:5px" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div><div class="mt">${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall} · ${fmt(c.s)}–${fmt(c.e)}</div></div>${favs.has(c.id)?`<button class="star on" data-star="${c.id}">★</button>`:`<span class="hb">${L('sporcu','athlete')}</span>`}</div>`).join('');
   $('myBox').innerHTML = html;
+  if($('morePins')) $('morePins').onclick = () => { st.allPins = true; renderMine(); };
   if($('icsBtn')) $('icsBtn').onclick = () => downloadICS(upcoming);
   $('optAlert').onchange = e => { prefs.alert = e.target.checked; store.set('wdsfist-prefs', prefs); };
   $('optSound').onchange = e => { prefs.sound = e.target.checked; store.set('wdsfist-prefs', prefs); if(prefs.sound) beep(); };
@@ -858,9 +871,9 @@ function openComp(id){
   const key = n => n.replace(/ (Female|Male)| F\+M| \(K\+E\)/g,'').replace('Mega Team Adult','Mega Team');
   const cands = ITEMS.filter(i => i.kind==='result' && i.d===c.day && i.s>=lastR.s);
   const res = cands.find(i => i.names.includes(c.name)) || cands.find(i => i.names.map(key).includes(key(c.name)));
-  $('sheet').innerHTML = `<button class="x" id="sx" aria-label="Kapat">✕</button>
-    <div class="mt">${catTag(c)}<span style="color:${c.disc.c};font-weight:700">${c.disc.tr}</span></div>
-    <h3>${esc(c.name)}</h3>
+  $('sheet').innerHTML = `<div class="sbar"><button class="x" id="sx" aria-label="${L('Kapat','Close')}">✕</button></div>
+    <div class="mt">${catTag(c)}<span style="font-weight:700;border-bottom:3px solid ${c.disc.c}">${c.disc.tr}</span></div>
+    <h3 id="sheetTitle">${esc(c.name)}</h3>
     <div class="mt">${c.day} ${L('Kasım','November')} ${DAYN[c.day]} · ${L('Salon','Hall')} ${HALL[c.hall]}</div>${myNames(c.id).length?`<div class="mt" style="margin-top:6px">${L(`Takip ettiğin: `,`Following: `)}${myTags(c.id)}</div>`:''}
     <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Klasman takipte','★ Category followed')}`:`${L('☆ Klasmanın tamamını takip et','☆ Follow the whole category')}`}</button></div>
     <h2>${L('Turlar','Rounds')}</h2>
@@ -872,7 +885,7 @@ function openComp(id){
       <a class="lk" href="${base}Ranking/${slug}-${id}" target="_blank" rel="noopener">${L(`Sonuçlar ↗`,`Results ↗`)}</a>
     </div>
     ${c.ranking.length ? `${L(`<h2>🏅 Sonuçlar</h2>`,`<h2>🏅 Results</h2>`)}<div class="plist">${c.ranking.slice(0,60).map(([r,n,ct]) => { const nm = n.replace(/\s*\(.*\)\s*$/,''); const mine = pins.has(c.id+'|'+nm);
-      return `<div class="pr" ${mine?'style="background:color-mix(in srgb,var(--gilt) 18%,transparent);border-radius:8px"':''}><b style="width:30px;font-variant-numeric:tabular-nums">${esc(r)}.</b><button class="cty" ${ctyStyle(ct)} data-cty="${esc(ct)}">${ctyLabel(ct)}</button><div class="n">${esc(nm)}${mine?' ★':''}</div></div>`; }).join('')}</div>` : ''}
+      return `<div class="pr" ${mine?'style="background:rgba(140,100,20,.16);background:color-mix(in srgb,var(--gilt) 18%,transparent);border-radius:8px"':''}><b style="width:30px;font-variant-numeric:tabular-nums">${esc(r)}.</b><button class="cty" ${ctyStyle(ct)} data-cty="${esc(ct)}">${ctyLabel(ct)}</button><div class="n">${esc(nm)}${mine?' ★':''}</div></div>`; }).join('')}</div>` : ''}
     <h2>${isTeam?L('Takımlar','Teams'):L('Kayıtlar','Entries')} · ${c.parts.length}${isTeam?` · ${c.parts.reduce((n,p)=>n+(p.members||[]).length,0)} ${L('sporcu','athletes')}`:''}</h2>
     <div class="fl" id="sCty">${Object.entries(byC).sort((x,y)=>y[1]-x[1]).map(([k,n])=>`<button class="chip ${sheetCty===k?'on':''}" data-sc="${esc(k)}">${FLAGS_OK&&flagEmoji(k)?flagEmoji(k)+' ':''}${esc(k)} ${n}</button>`).join('')}</div>
     <input class="search" id="sq" type="search" placeholder="${isTeam?L('Takım veya üye ara…','Search team or member…'):L('Bu yarışmada ara…','Search this competition…')}" style="margin-top:10px">
@@ -880,19 +893,101 @@ function openComp(id){
   const drawP = () => { const q = norm($('sq').value); $('spl').innerHTML = c.parts.filter(p => (!sheetCty || p.cty===sheetCty)) .filter(p => !q || norm(p.name+' '+p.chor+' '+p.cty+' '+(p.members||[]).join(' ')).includes(q)).map(p =>
     `<div><div class="pr"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="n">${esc(p.name)}${p.chor?` <i>“${esc(p.chor)}”</i>`:''}${p.members?` <button class="tbtn" data-mem>${p.members.length}${L(` kişi ▾`,` ▾`)}</button>`:''}</div><button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?L('✓ Takipte','✓ Following'):L('Takip et','Follow')}</button></div>`
     + (p.members ? `<div class="mem" ${q && p.members.some(m=>norm(m).includes(q)) ? '' : 'hidden'}>${p.members.map(m => q && norm(m).includes(q) ? `<b>${esc(m)}</b>` : esc(m)).join(' · ')}</div>` : '') + `</div>`).join('');
-    $('spl').querySelectorAll('[data-mem]').forEach(b => b.onclick = e => { e.stopPropagation(); const mm = b.closest('.pr').nextElementSibling; mm.hidden = !mm.hidden; }); };
+    $('spl').querySelectorAll('[data-mem]').forEach(b => b.onclick = e => { e.stopPropagation(); const mm = b.closest('.pr').nextElementSibling; mm.hidden = !mm.hidden; const k = b.dataset.mem || b.closest('.pr').textContent; mm.hidden ? openMembers.delete(k) : openMembers.add(k); }); $('spl').querySelectorAll('[data-mem]').forEach(b => { const k = b.dataset.mem || b.closest('.pr').textContent; if(openMembers.has(k)){ const mm=b.closest('.pr').nextElementSibling; if(mm) mm.hidden=false; } }); };
   drawP(); $('sq').oninput = drawP;
   $('sCty').querySelectorAll('[data-sc]').forEach(b => b.onclick = e => { e.stopPropagation(); sheetCty = sheetCty===b.dataset.sc ? '' : b.dataset.sc; $('sCty').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.dataset.sc===sheetCty)); drawP(); });
+  const wasOpen = $('ov').classList.contains('on');
   $('ov').classList.add('on'); $('ov').dataset.comp = id;
-  $('sx').onclick = closeSheet;
+  $("sx").onclick = () => closeSheet();
+  if(!wasOpen){
+    try { if(!(history.state && history.state.sheet)) history.pushState({sheet:1}, '', location.href); } catch(e) {}
+    sheetOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+    setBgInert(true);
+    setTimeout(() => { try { $('sx').focus({preventScroll:true}); } catch(e) {} }, 30);
+  }
 }
-function closeSheet(){ sheetFor = null; $('ov').classList.remove('on'); delete $('ov').dataset.comp; }
+let sheetOpener = null; const openMembers = new Set();
+function setBgInert(on){ document.querySelectorAll('.wrap, nav.tabs').forEach(el => { if(on){ el.setAttribute('inert',''); el.setAttribute('aria-hidden','true'); } else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); } }); }
+function closeSheet(fromHistory){
+  const id = $('ov').dataset.comp, wasOpen = $('ov').classList.contains('on');
+  if(wasOpen && !fromHistory && history.state && history.state.sheet){ try { history.back(); } catch(e) {} }
+  sheetFor = null; $('ov').classList.remove('on'); delete $('ov').dataset.comp;
+  if(!wasOpen) return;
+  setBgInert(false);
+  let back = sheetOpener && sheetOpener.isConnected ? sheetOpener : (id ? document.querySelector(`[data-comp="${id}"] [tabindex], [data-comp="${id}"][tabindex]`) : null);
+  sheetOpener = null;
+  if(back){ try { back.focus({preventScroll:true}); } catch(e) {} }
+}
+// keep keyboard focus inside the open sheet (for browsers without inert)
+document.addEventListener('focusin', e => { if($('ov').classList.contains('on') && !$('sheet').contains(e.target)){ try { $('sx').focus({preventScroll:true}); } catch(x) {} } });
+window.addEventListener('popstate', () => { if($('ov').classList.contains('on')) closeSheet(true); });
 $('ov').addEventListener('click', e => { if(e.target.id==='ov') closeSheet(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
 
 /* ---------- global delegation ---------- */
+// Switching tabs replaces the history entry, so the phone's back button leaves the page
+// (or closes an open sheet) instead of walking back through every tab visited.
+function goView(v){
+  const url = location.pathname + location.search + '#' + v;
+  if(location.hash === '#' + v){ route(); return; }
+  try { history.replaceState(null, '', url); route(); } catch(e) { location.hash = v; }
+}
 document.addEventListener('click', e => {
-  const ct = e.target.closest('[data-cty]'); if(ct){ e.stopPropagation(); st.aCty = ct.dataset.cty; st.aQ=''; const q=$('aQ'); if(q) q.value=''; closeSheet(); if(location.hash!=='#sporcu') location.hash='sporcu'; else renderAth(); toast(L(`${ct.dataset.cty} sporcuları`,`${ct.dataset.cty} athletes`)); return; }
+  const a = e.target.closest && e.target.closest('a[href^="#"]'); if(!a) return;
+  const v = a.getAttribute('href').slice(1);
+  if(!VIEWS.includes(v) || a.dataset.h) return;
+  e.preventDefault(); if($('ov').classList.contains('on')) closeSheet(true); goView(v);
+}, true);
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target; if(!t || !t.matches || !t.matches('[data-a11y]')) return;
+  const c = t.closest('[data-comp]'); if(!c) return;
+  e.preventDefault(); openComp(+c.dataset.comp);
+});
+/* Accessibility pass after every render: focusable schedule items with a spoken summary,
+   pressed states for toggles, names for search fields. */
+function a11yPass(){
+  document.querySelectorAll('[data-comp]').forEach(el => {
+    if(el.closest('.sheet') || el.matches('button, a')) return;
+    const nested = el.querySelector('button, a, input');
+    const target = nested ? (el.querySelector('.ti, .tx b, b') || null) : el;
+    if(!target || target.dataset.a11y === '1') return;
+    const copy = el.cloneNode(true); copy.querySelectorAll('button, a, input, .cty').forEach(x => x.remove());
+    const parts = []; const tw = document.createTreeWalker(copy, NodeFilter.SHOW_TEXT); while(tw.nextNode()){ const t = tw.currentNode.nodeValue.trim(); if(t) parts.push(t); }
+    let label = parts.join(' ').replace(/\s+/g, ' ');
+    if(el.classList.contains('past')) label += ' · ' + L('bitti','finished');
+    target.dataset.a11y = '1'; target.setAttribute('tabindex', '0'); target.setAttribute('role', 'button');
+    target.setAttribute('aria-label', label);
+  });
+  document.querySelectorAll('button.chip, button.pin, button.day, button.star').forEach(b => {
+    const on = b.classList.contains('on') ? 'true' : 'false';
+    if(b.getAttribute('aria-pressed') !== on) b.setAttribute('aria-pressed', on);
+  });
+  document.querySelectorAll('input.search, input[type=search]').forEach(i => { if(!i.getAttribute('aria-label') && i.placeholder) i.setAttribute('aria-label', i.placeholder); });
+  document.querySelectorAll('nav.tabs a, [data-seg], .hallseg a').forEach(a => { if(a.classList.contains('on')) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+}
+let a11yQueued = false;
+new MutationObserver(() => { if(a11yQueued) return; a11yQueued = true; Promise.resolve().then(() => { a11yQueued = false; try { a11yPass(); } catch(e) {} }); })
+  .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+/* Re-rendering replaces the HTML; put keyboard focus back on the same control afterwards. */
+function keepFocus(fn){
+  const ae = document.activeElement; let sel = null;
+  if(ae && ae !== document.body){
+    if(ae.id) sel = '#' + CSS.escape(ae.id);
+    else {
+      const holder = ae.closest('[data-comp]');
+      for(const k of ['data-star','data-pin','data-v','data-d','data-h','data-c','data-cty','data-seg']) if(ae.hasAttribute(k)){ sel = `${ae.tagName.toLowerCase()}[${k}="${CSS.escape(ae.getAttribute(k))}"]`; break; }
+      if(!sel && holder && ae.dataset.a11y) sel = `[data-comp="${holder.dataset.comp}"] [data-a11y], [data-comp="${holder.dataset.comp}"][data-a11y]`;
+    }
+  }
+  fn();
+  if(sel && (!document.activeElement || document.activeElement === document.body)){
+    a11yPass();
+    const n = document.querySelector(sel); if(n){ try { n.focus({preventScroll:true}); } catch(e) {} }
+  }
+}
+document.addEventListener('click', e => {
+  const ct = e.target.closest('[data-cty]'); if(ct){ e.stopPropagation(); st.aCty = ct.dataset.cty; st.aQ=''; const q=$('aQ'); if(q) q.value=''; closeSheet(true); goView('sporcu'); toast(L(`${ct.dataset.cty} sporcuları`,`${ct.dataset.cty} athletes`)); return; }
   const s = e.target.closest('[data-star]'); if(s){ e.stopPropagation(); toggleFav(s.dataset.star); return; }
   const p = e.target.closest('[data-pin]'); if(p){ e.stopPropagation(); togglePin(p.dataset.pin); return; }
   const c = e.target.closest('[data-comp]'); if(c && !e.target.closest('.sheet')){ openComp(+c.dataset.comp); }
@@ -909,7 +1004,8 @@ function route(){
   rerender(); window.scrollTo(0,0);
   if(view==='program') setTimeout(scrollToNow, 30);
 }
-function rerender(){
+function rerender(){ keepFocus(rerender0); }
+function rerender0(){
   renderClock(); updateBadge();
   if(view==='simdi') renderNow();
   if(view==='program') renderProgram();
@@ -918,7 +1014,8 @@ function rerender(){
   if(view==='programim') renderMine();
   if($('ov').dataset.comp){ const y=$('sheet').scrollTop; const q=$('sq')?$('sq').value:''; openComp(+$('ov').dataset.comp); $('sq').value=q; $('sq').oninput(); $('sheet').scrollTop=y; }
 }
-function tick(force){
+function tick(force){ keepFocus(() => tick0(force)); }
+function tick0(force){
   renderClock(); checkAlerts();
   if($('ov').dataset.comp && !force) return;
   if(force) rerender();
@@ -933,12 +1030,13 @@ $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-G
 $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
 function applyLang(){
   document.documentElement.lang = lang;
-  $('lngBtn').textContent = lang==='en' ? 'TR' : 'EN';
+  $('lngBtn').textContent = lang==='en' ? 'TR' : 'EN'; $('lngBtn').setAttribute('aria-label', lang==='en' ? 'TR · Türkçe' : 'EN · English'); $('lngBtn').title = lang==='en' ? 'Türkçe' : 'English';
   document.querySelectorAll('[data-en]').forEach(el => { if(!el.dataset.tr) el.dataset.tr = el.placeholder; el.placeholder = lang==='en' ? el.dataset.en : el.dataset.tr; });
   $('updTxt').textContent = L('Güncellendi ','Updated ') + new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
   $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
 }
+$('forgetMe').onclick = () => { try { localStorage.removeItem('wdsfist-k'); } catch(e) {} location.reload(); };
 $('themeBtn').onclick = () => { theme = isDark() ? 'light' : 'dark'; try{ localStorage.setItem('wdsfist-theme', theme); }catch(e){} applyTheme(); };
 if(window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch(e) {}
 $('lngBtn').onclick = () => { lang = lang==='en' ? 'tr' : 'en'; try{ localStorage.setItem('wdsfist-lang', lang); }catch(e){} applyLang(); rerender(); };

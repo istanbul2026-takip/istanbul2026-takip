@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:,">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#7C1528">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="İstanbul 2026">
@@ -20,11 +21,11 @@ button:disabled{opacity:.6}
 label{display:flex;gap:8px;align-items:center;font-size:14px;color:#6E6574;margin-top:14px}
 .err{color:#D21F3C;font-size:14px;min-height:20px;margin-top:10px}
 </style></head><body>
-<form class="box" id="f"><div class="k">İstanbul 2026</div><h1>Yarışma programı<br><span style="font-weight:500;color:#6E6574;font-size:18px">Competition schedule</span></h1><p>Devam etmek için şifreyi gir.<br>Enter the password to continue.</p>
-<input type="password" id="pw" placeholder="Şifre / Password" autocomplete="current-password" autofocus>
+<main><form class="box" id="f" aria-labelledby="ttl"><div class="k">İstanbul 2026</div><h1 id="ttl">Yarışma programı<br><span lang="en" style="font-weight:500;color:#6E6574;font-size:18px">Competition schedule</span></h1><p>Devam etmek için şifreyi gir.<br>Enter the password to continue.</p>
+<label for="pw" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Şifre / Password</label><input type="password" id="pw" placeholder="Şifre / Password" aria-describedby="err" autocomplete="current-password" autofocus>
 <label><input type="checkbox" id="rem" checked> Bu cihazda hatırla · Remember me</label>
-<button type="submit" id="go">Giriş · Enter</button><div class="err" id="err"></div>
-<p style="font-size:12.5px;margin:14px 0 0">Bağımsız takip sayfası, resmi WDSF sitesi değildir.<br>Independent page, not an official WDSF site.</p></form>
+<button type="submit" id="go">Giriş · Enter</button><div class="err" id="err" role="alert"></div>
+<p style="font-size:12.5px;margin:14px 0 0">Bağımsız takip sayfası, resmi WDSF sitesi değildir.<br>Independent page, not an official WDSF site.</p></form></main>
 <script>
 (()=>{
 const S="__S__",I="__I__",C="__C__",N=__N__;
@@ -75,12 +76,12 @@ if(saved){ go.disabled=true; go.textContent='…';
     .catch(()=>{ try{localStorage.removeItem(KEY)}catch(e){} go.disabled=false; go.textContent='Giriş · Enter'; }); }
 let busy=false;
 document.getElementById('f').onsubmit=async e=>{
-  e.preventDefault(); if(busy) return; const pw=document.getElementById('pw').value.trim(); if(!pw) return;
-  busy=true; go.disabled=true; go.textContent='…'; err.textContent='';
+  e.preventDefault(); if(busy) return; const pw=document.getElementById('pw').value.trim(); if(!pw){ err.textContent='Şifreyi yaz. · Type the password.'; document.getElementById('pw').focus(); return; }
+  busy=true; go.disabled=true; go.textContent='Açılıyor… · Opening…'; err.textContent='';
   try{ const key=await fromPw(pw); const h=await dec(key);
     if(document.getElementById('rem').checked){ try{ localStorage.setItem(KEY,b(await crypto.subtle.exportKey('raw',key))); }catch(e){} }
     show(h); }
-  catch(x){ await new Promise(r=>setTimeout(r,900)); err.textContent='Şifre yanlış. · Wrong password.'; go.disabled=false; go.textContent='Giriş · Enter'; busy=false; }
+  catch(x){ await new Promise(r=>setTimeout(r,900)); err.textContent='Şifre yanlış. · Wrong password.'; go.disabled=false; go.textContent='Giriş · Enter'; busy=false; const pi=document.getElementById('pw'); pi.setAttribute('aria-invalid','true'); pi.select(); pi.focus(); }
 };
 })();
 </script></body></html>
