@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>WDSF İstanbul 2026 · Yarışma Programı</title>
+<style>
+@font-face{font-family:"Big Shoulders Display";font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,/*F_BSD_LATIN*/) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Big Shoulders Display";font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,/*F_BSD_EXT*/) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Flags";font-display:swap;src:url(data:font/woff2;base64,/*F_FLAGS*/) format("woff2");unicode-range:U+1F1E6-1F1FF,U+1F3F4,U+E0062-E007F}
+@font-face{font-family:"Figtree";font-weight:300 900;font-display:swap;src:url(data:font/woff2;base64,/*F_FIG_LATIN*/) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Figtree";font-weight:300 900;font-display:swap;src:url(data:font/woff2;base64,/*F_FIG_EXT*/) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+</style>
+<style>
+html[lang=en] .tr,html[lang=tr] .en{display:none!important}
+:root{
+  --paper:#F4F2F6; --surface:#FFFFFF; --sunk:#EAE6EE; --ink:#211A25; --muted:#6E6574; --faint:#A79FAD; --line:#DFD9E4;
+  --velvet:#7C1528; --velvet-ink:#FFF3F4; --gilt:#B8862A; --gilt-soft:#F6E7C3; --live:#D21F3C;
+  --mc:#3E63DD; --jz:#D9622B; --sd:#9B3FC0; --im:#158A6E; --tur:#C8102E;
+  --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif; --body:"Flags","Figtree",system-ui,sans-serif;
+  --r:14px; --ok:#1E8F5A;
+}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#6D6373;--line:#352C3A;
+  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--body);background:var(--paper);color:var(--ink);font-size:16px;line-height:1.45;padding-bottom:calc(76px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--mc);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+
+/* header */
+.top{display:flex;align-items:flex-end;justify-content:space-between;padding:18px 0 4px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand .mark{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;letter-spacing:.01em;color:var(--velvet)}
+@media (prefers-color-scheme:dark){.brand .mark{color:var(--live)}}
+.brand .city{font-family:var(--display);font-weight:600;font-size:30px;line-height:1}
+.lng{border:1px solid var(--line);background:var(--surface);border-radius:999px;min-width:44px;height:36px;padding:0 12px;font-size:13px;font-weight:700;cursor:pointer}
+.status{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);padding-bottom:6px}
+.status .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:6px;vertical-align:1px}
+.sim{color:var(--gilt);font-weight:600}
+.linkbtn{background:none;border:none;text-decoration:underline;cursor:pointer;color:var(--muted);font-size:13px;padding:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--live);display:inline-block;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+
+/* tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .in{display:flex;max-width:720px;margin:0 auto}
+nav.tabs a{flex:1;text-align:center;text-decoration:none;padding:8px 2px 9px;font-size:11.5px;color:var(--muted);font-weight:600;position:relative;min-height:56px}
+nav.tabs a .ic{display:block;font-size:18px;line-height:24px}
+nav.tabs a.on{color:var(--ink)}
+nav.tabs a.on::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--velvet)}
+.badge[hidden]{display:none}
+.badge{display:inline-block;min-width:17px;padding:0 5px;border-radius:999px;background:var(--gilt);color:#fff;font-size:10.5px;font-weight:800;margin-left:3px;vertical-align:1px}
+
+section{display:none}
+section.on{display:block}
+h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;margin:26px 0 10px;line-height:1.1}
+
+/* NOW: stage cards */
+.halls{display:grid;grid-template-columns:1fr;gap:14px;margin-top:10px}
+@media (min-width:700px){.halls{grid-template-columns:1fr 1fr}}
+.hall{background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.hallimg{height:92px;background-size:cover;background-position:center 60%;position:relative;display:flex;align-items:flex-end;padding:10px 14px}
+.hallimg::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,8,12,.05),rgba(20,8,12,.72))}
+.hallimg .hl{position:relative;color:#fff;display:flex;align-items:baseline;gap:10px}
+.hallimg .hl b{font-family:var(--display);font-size:44px;font-weight:800;line-height:.8}
+.hallimg .hl span{font-weight:600;font-size:15px}
+.hn{display:none}
+.livebox{padding:14px 14px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.livebox .lab{font-size:13px;font-weight:700;color:var(--live);display:flex;align-items:center;gap:7px}
+.livebox .lab.idle{color:var(--muted);font-weight:600}
+.livebox .t{font-size:19px;font-weight:700;margin-top:4px;line-height:1.25}
+.livebox .r{font-size:14px;color:var(--muted);margin-top:2px}
+.prog{height:4px;border-radius:4px;background:var(--sunk);margin-top:10px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--live)}
+.nexts{padding:2px 14px 6px}
+.nx{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:15px;cursor:pointer;align-items:baseline}
+.nx:first-child{border-top:none}
+.nx .tm{font-family:var(--display);font-weight:800;font-size:20px;width:52px;flex:none;font-variant-numeric:tabular-nums;line-height:1}
+.nx .tx{flex:1;min-width:0;line-height:1.3}
+.nx .in{font-size:13px;color:var(--muted);margin-top:2px}
+.nx.minor{color:var(--muted);font-size:14px;cursor:default}
+.nx.minor .tm{font-size:17px;color:var(--faint)}
+.nx .cd{font-size:13px;color:var(--muted);white-space:nowrap}
+.hero{background:var(--velvet);color:var(--velvet-ink);border-radius:var(--r);padding:18px 18px 16px;margin-top:10px}
+.hero .k{font-size:14px;opacity:.85}
+.hero .big{font-family:var(--display);font-size:56px;font-weight:800;line-height:.95;margin-top:4px;font-variant-numeric:tabular-nums}
+.hero .s{font-size:14px;opacity:.85;margin-top:6px;line-height:1.4}
+.mine{background:var(--surface);border-radius:var(--r);border:1px solid var(--line);border-left:4px solid var(--gilt);padding:12px 14px 4px;margin-top:12px}
+.mine .k{font-size:14px;font-weight:700}
+.mine .nexts{padding:0}
+
+/* filters */
+.days{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;margin:0 -16px;position:sticky;top:0;z-index:10;background:var(--paper);scrollbar-width:none}
+.days::-webkit-scrollbar,.fl::-webkit-scrollbar{display:none}
+.day{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 12px 7px;cursor:pointer;text-align:left;min-width:68px}
+.day{font-family:var(--display);font-size:22px;font-weight:700;line-height:1}
+.day small{display:block;font-family:var(--body);color:var(--muted);font-size:11.5px;font-weight:500;margin-top:3px}
+.day.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.day.on small{color:inherit;opacity:.75}
+.day .td{font-family:var(--body);font-size:10px;font-weight:800;color:var(--live);vertical-align:4px}
+.fl{display:flex;gap:6px;overflow-x:auto;flex-wrap:nowrap;margin:8px -16px;padding:0 16px;scrollbar-width:none}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 13px;height:36px;font-size:14px;cursor:pointer;white-space:nowrap;flex:none}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--c)}
+.search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);font-size:16px}
+.search:focus{outline:2px solid var(--mc);outline-offset:-1px}
+details.more{margin:2px 0}
+details.more summary{cursor:pointer;font-size:14px;color:var(--muted);list-style:none;padding:6px 0}
+details.more summary::-webkit-details-marker{display:none}
+
+/* timeline rows */
+.tl{display:flex;flex-direction:column;margin-top:4px}
+.row{display:flex;gap:12px;align-items:flex-start;padding:12px 2px;border-bottom:1px solid var(--line);cursor:pointer;position:relative}
+.row::before{content:"";position:absolute;left:-10px;top:14px;width:4px;height:22px;border-radius:2px;background:var(--c,transparent)}
+.row .tm{width:54px;flex:none;font-family:var(--display);font-weight:800;font-size:22px;line-height:1;font-variant-numeric:tabular-nums;padding-left:0!important}
+.row .tm small{display:block;font-family:var(--body);font-weight:500;color:var(--muted);font-size:12px;margin-top:3px}
+.row .bd{flex:1;min-width:0}
+.row .ti{font-weight:650;font-size:15.5px;line-height:1.3}
+.row .mt{font-size:13px;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.row.minor{cursor:default;padding:8px 2px}
+.row.minor .ti{font-weight:500;color:var(--muted);font-size:14px}
+.row.minor .tm{font-size:17px;color:var(--faint)}
+.row.past{opacity:.42}
+.row.live .tm{color:var(--live)}
+.row.fav .ti::after{content:" ★";color:var(--gilt)}
+.hb{font-size:12px;font-weight:700;color:var(--muted)}
+.rb{font-size:13px;font-weight:600;color:var(--ink)}
+.rb.final{color:var(--gilt);font-weight:800}
+.wc{font-size:11px;font-weight:800;border-radius:5px;padding:1px 6px;background:var(--ink);color:var(--paper)}
+.tur{font-size:12px;font-weight:700;color:var(--muted)}
+.livetag{font-size:11px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px}
+.nowline{display:flex;align-items:center;gap:8px;color:var(--live);font-size:13px;font-weight:700;margin:6px 0 2px}
+.nowline::after{content:"";flex:1;height:2px;background:var(--live);border-radius:2px}
+.empty{color:var(--muted);text-align:center;padding:36px 12px;font-size:15px;line-height:1.5}
+.cnt{font-size:13px;color:var(--muted);margin:6px 0}
+.mytag{font-size:12.5px;font-weight:700;color:var(--gilt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* competition rows */
+.cc{display:flex;gap:10px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);cursor:pointer;position:relative}
+.cc::before{content:"";position:absolute;left:-10px;top:15px;width:4px;height:20px;border-radius:2px;background:var(--c)}
+.cc .bd{flex:1;min-width:0}
+.cc .ti{font-weight:650;font-size:15.5px}
+.cc .mt{font-size:13px;color:var(--muted);margin-top:3px;display:flex;gap:4px 8px;flex-wrap:wrap;align-items:center}
+.star{background:none;border:none;font-size:24px;cursor:pointer;color:var(--faint);width:44px;height:44px;line-height:1;flex:none}
+.star.on{color:var(--gilt)}
+
+/* athletes */
+.ath{display:flex;align-items:flex-start;gap:12px;padding:14px 2px;border-bottom:1px solid var(--line)}
+.ath .bd{flex:1;min-width:0}
+.ath .nm{font-weight:700;font-size:16px}
+.ath .ch{font-size:13.5px;color:var(--muted);font-style:italic}
+.ath .cp{font-size:13.5px;color:var(--muted);margin-top:3px}
+.ath .cp b{color:var(--ink);font-weight:600}
+.cty{border:none;cursor:pointer;font-family:inherit;line-height:1.4;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--sunk);color:var(--ink);flex:none;margin-top:1px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.cty[style*='--h']{background:hsl(var(--h) 55% 90%);color:hsl(var(--h) 60% 25%)}
+@media (prefers-color-scheme:dark){.cty[style*='--h']{background:hsl(var(--h) 35% 24%);color:hsl(var(--h) 70% 85%)}}
+.cty .fg{font-size:15px;line-height:1}
+.pin{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:38px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
+.pin.on{background:var(--gilt);color:#fff;border-color:var(--gilt)}
+
+/* sheet */
+.ov{position:fixed;inset:0;background:rgba(15,8,14,.5);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.ov.on{display:flex}
+.sheet{background:var(--paper);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:0 16px calc(24px + env(safe-area-inset-bottom));overscroll-behavior:contain}
+.sheet::before{content:"";display:block;width:40px;height:5px;border-radius:5px;background:var(--line);margin:8px auto 4px}
+@media (min-width:760px){.ov{align-items:center}.sheet{border-radius:20px;max-height:86vh}}
+.sheet .x{position:sticky;top:6px;float:right;background:var(--surface);border:1px solid var(--line);border-radius:999px;width:40px;height:40px;cursor:pointer;font-size:16px;z-index:2}
+.sheet h3{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;margin:8px 48px 6px 0}
+.sheet .mt{font-size:14px;color:var(--muted);display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center}
+.rtab{width:100%;border-collapse:collapse;margin-top:4px;font-size:15px}
+.rtab td{padding:11px 4px;border-top:1px solid var(--line)}
+.rtab td.t{font-family:var(--display);font-size:20px;font-weight:700;white-space:nowrap}
+.rtab tr.past td{opacity:.45}
+.rtab tr.live td{color:var(--live);font-weight:700}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.lk{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;font-size:14px;text-decoration:none}
+.plist{display:flex;flex-direction:column}
+.pr{display:flex;align-items:center;gap:10px;padding:9px 2px;border-top:1px solid var(--line);font-size:15px}
+.pr .n{flex:1;min-width:0}
+.pr .n i{color:var(--muted);font-size:13.5px}
+.mem{font-size:13.5px;color:var(--muted);padding:2px 0 10px 46px;line-height:1.6}
+.mem b{color:var(--ink);font-weight:700}
+.tbtn{background:var(--sunk);border:none;border-radius:6px;font-size:12.5px;padding:3px 8px;cursor:pointer;color:var(--ink);margin-left:4px}
+
+/* misc */
+.warn{background:color-mix(in srgb,var(--live) 10%,var(--surface));border-left:4px solid var(--live);border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+.note{font-size:14px;color:var(--muted);padding:6px 0 10px;line-height:1.5}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0 16px;min-height:44px;font-size:15px;cursor:pointer;font-weight:600}
+.btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+a.btn{display:inline-flex;align-items:center;text-decoration:none}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.alert{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom));width:min(560px,calc(100% - 16px));z-index:45;background:var(--gilt);color:#1d1305;border-radius:14px;padding:10px 10px 10px 14px;box-shadow:0 8px 24px rgba(40,20,0,.25);display:none;gap:10px;align-items:center}
+.alert.on{display:flex}
+.alert .b{flex:1;font-size:14px;line-height:1.35;max-height:90px;overflow:auto}
+.alert .b b{display:block;font-size:13px}
+.alert hr{border:none;border-top:1px solid rgba(0,0,0,.2);margin:6px 0}
+.alert button{background:rgba(0,0,0,.85);color:#fff;border:none;border-radius:10px;min-width:44px;height:40px;cursor:pointer;font-weight:700;font-size:14px}
+.cal{font-size:13px;text-decoration:none;color:var(--mc);font-weight:600;white-space:nowrap}
+.set{padding:4px 0}
+.set label{display:flex;gap:10px;align-items:center;padding:8px 0;cursor:pointer;font-size:15px}
+.set input[type=checkbox]{width:20px;height:20px;accent-color:var(--velvet)}
+details.tools{border-top:1px solid var(--line);margin-top:18px}
+details.tools summary{font-family:var(--display);font-size:20px;font-weight:700;padding:14px 0;cursor:pointer;list-style:none}
+details.tools summary::-webkit-details-marker{display:none}
+details.tools summary::after{content:" +";color:var(--muted)}
+details.tools[open] summary::after{content:" –"}
+.info{display:grid;grid-template-columns:1fr;gap:0}
+.info .bx{padding:12px 0;border-top:1px solid var(--line);font-size:14.5px;line-height:1.5}
+.info .bx b{display:block;font-weight:700;margin-bottom:2px}
+.stats{display:none}
+footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
+.simbox{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;font-size:13px}
+.simbox.on{display:flex}
+.simbox input{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px;font:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="mark">WDSF</span><span class="city">İstanbul 2026</span></div>
+    <button class="lng" id="lngBtn" aria-label="Language"></button>
+  </header>
+  <div class="status"><span id="clockTxt">–</span><span id="updTxt"></span></div>
+  <div class="simbox" id="simBox">
+    <span><span class="tr">Test saati (İstanbul):</span><span class="en">Test time (Istanbul):</span></span>
+    <input type="datetime-local" id="simInput" min="2026-11-11T07:00" max="2026-11-15T23:59" step="60">
+    <button class="btn" id="simLive"><span class="tr">Canlıya dön</span><span class="en">Back to live</span></button>
+  </div>
+
+  <!-- NOW -->
+  <section id="v-simdi">
+    <div id="heroBox"></div>
+    <div id="mineBox"></div>
+    <div class="halls" id="hallsBox"></div>
+    <details class="tools"><summary><span class="tr">Mekân ve bilgiler</span><span class="en">Venue and info</span></summary>
+    <div class="info">
+      <div class="bx"><b><span class="tr">Mekân</span><span class="en">Venue</span></b>The Green Park Pendik Hotel &amp; Convention Center<br><span style="color:var(--muted)">Kaynarca, Erol Kaya Cd. No:204, Pendik</span><br><a href="https://www.google.com/maps/search/?api=1&query=The+Green+Park+Pendik+Hotel+Convention+Center" target="_blank" rel="noopener"><span class="tr">Haritada aç ↗</span><span class="en">Open in Maps ↗</span></a></div>
+      <div class="bx"><b><span class="tr">Salonlar</span><span class="en">Halls</span></b><span class="tr">A · Grand Ballroom: ana arena, iki yanda ~800 kişilik tribün<br>B · Auditorium: tiyatro düzeni, Grand Ballroom'un bir kat altında<br><span style="color:var(--muted)">14–15 Kasım tüm yarışmalar A salonunda. Fuayedeki LED ekrandan A salonu canlı izlenebiliyor.</span></span><span class="en">A · Grand Ballroom: main arena, ~800-seat stands on both sides<br>B · Auditorium: theatre seating, one floor below the Grand Ballroom<br><span style="color:var(--muted)">On 14–15 November all events are in Hall A. Hall A is streamed live on the LED screen in the foyer.</span></span></div>
+      <div class="bx"><b><span class="tr">Soyunma odaları</span><span class="en">Changing rooms</span></b><span class="tr">Ülke/kulübe atanmış ~30 toplantı odası; oda adı girişteki ekranda. Sadece kostüm hazırlığı, yiyecek-içecek yok.</span><span class="en">~30 meeting rooms assigned to countries/clubs; the name is shown on the screen at the door. Costume preparation only, no food or drink.</span></div>
+      <div class="bx"><b><span class="tr">Açılış töreni</span><span class="en">Opening ceremony</span></b><span class="tr">13 Kasım Cuma, 12:30</span><span class="en">Friday 13 November, 12:30</span><br>A · Grand Ballroom</div>
+      <div class="bx"><b><span class="tr">Organizatör</span><span class="en">Organiser</span></b>Bodrum Dance Club<br><a href="http://www.worlddanceturkiye.com" target="_blank" rel="noopener">worlddanceturkiye.com ↗</a></div>
+    </div>
+    <div class="stats" id="statsBox"></div></details>
+  </section>
+
+  <!-- PROGRAM -->
+  <section id="v-program">
+    <div class="days" id="pDays"></div>
+    <div class="fl" id="pHall"></div>
+    <details class="more" id="pMore"><summary><span class="tr">▾ Filtreler: branş, yaş, statü</span><span class="en">▾ Filters: discipline, age, status</span></summary>
+      <div class="fl" id="pDisc"></div><div class="fl" id="pAge"></div><div class="fl" id="pCat"></div>
+    </details>
+    <div class="cnt" id="pCnt"></div>
+    <div class="tl" id="pList"></div>
+  </section>
+
+  <!-- COMPETITIONS -->
+  <section id="v-yarismalar">
+    <h2><span class="tr">Yarışmalar</span><span class="en">Competitions</span></h2>
+    <input class="search" id="cQ" type="search" placeholder="Yarışma ara: örn. Jazz Duo Adult" data-en="Search competitions, e.g. Jazz Duo Adult">
+    <div class="fl" id="cDisc" style="margin-top:8px"></div>
+    <div class="fl" id="cAge"></div>
+    <div class="cnt" id="cCnt"></div>
+    <div class="tl" id="cList"></div>
+  </section>
+
+  <!-- ATHLETES -->
+  <section id="v-sporcu">
+    <h2><span class="tr">Sporcu / takım ara</span><span class="en">Find athlete / team</span></h2>
+    <input class="search" id="aQ" type="search" placeholder="Ad, takım, takım üyesi veya koreografi adı…" data-en="Name, team, team member or choreography title…" autocomplete="off">
+    <div class="fl" id="aCty" style="margin-top:8px"></div>
+    <div class="cnt" id="aCnt"></div>
+    <div class="tl" id="aList"></div>
+  </section>
+
+  <!-- MY PROGRAM -->
+  <section id="v-programim">
+    <h2><span class="tr">Programım</span><span class="en">My schedule</span></h2>
+    <div id="myBox"></div>
+  </section>
+
+  <footer>
+    <span class="tr">Takım için hazırlanmış bağımsız takip sayfasıdır; WDSF'nin resmi sitesi değildir.</span><span class="en">An independent tracking page made for the team; not an official WDSF site.</span><br>
+    <button class="linkbtn" id="simToggle"><span class="tr">Saati test et</span><span class="en">Test a time</span></button><br>
+    <span class="tr">Kaynak</span><span class="en">Source</span>: <a href="https://www.worlddancesport.org/Events/Istanbul-T%C3%BCrkiye-11112026-15112026-8773#tab=schedule" target="_blank" rel="noopener">WDSF</a> · <span class="tr">Son güncelleme</span><span class="en">Last update</span>: <span id="fetched"></span>.
+    <span class="tr">Saatler WDSF'nin planlanan programıdır; yarışma sırasında kayma olabilir, salondaki duyuruları takip edin.</span><span class="en">Times are WDSF's planned schedule and may shift during the event; follow the announcements in the hall.</span>
+  </footer>
+</div>
+
+<nav class="tabs"><div class="in">
+  <a href="#simdi" data-v="simdi"><span class="ic">◉</span><span class="tr">Şimdi</span><span class="en">Now</span></a>
+  <a href="#program" data-v="program"><span class="ic">☰</span>Program</a>
+  <a href="#yarismalar" data-v="yarismalar"><span class="ic">◆</span><span class="tr">Yarışmalar</span><span class="en">Events</span></a>
+  <a href="#sporcu" data-v="sporcu"><span class="ic">⌕</span><span class="tr">Sporcu</span><span class="en">Athletes</span></a>
+  <a href="#programim" data-v="programim"><span class="ic">★</span><span class="tr">Programım</span><span class="en">Mine</span><span class="badge" id="favBadge" hidden></span></a>
+</div></nav>
+
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<div class="alert" id="alert"><div class="b" id="alertB"></div><button id="alertX">OK</button></div>
+
+<script>
+const DATA = /*DATA*/null;
+const SLUG = /*SLUGS*/null;
+
+/* ---------- language ---------- */
+let lang = 'tr';
+try { lang = localStorage.getItem('wdsfist-lang') || ((navigator.language||'').toLowerCase().startsWith('tr') ? 'tr' : 'en'); } catch(e) {}
+const L = (tr, en) => lang==='en' ? en : tr;
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+const fmt = m => String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const ABS = (d,m) => (d-11)*1440 + m;               // minutes since 11 Nov 00:00 Istanbul
+const EPOCH = Date.UTC(2026,10,10,21,0);            // 11 Nov 2026 00:00 Istanbul (UTC+3)
+const DAYS = [11,12,13,14,15];
+const DAYN_ = {tr:{11:'Çarşamba',12:'Perşembe',13:'Cuma',14:'Cumartesi',15:'Pazar'}, en:{11:'Wednesday',12:'Thursday',13:'Friday',14:'Saturday',15:'Sunday'}};
+const DAYS3_ = {tr:{11:'Çar',12:'Per',13:'Cum',14:'Cmt',15:'Paz'}, en:{11:'Wed',12:'Thu',13:'Fri',14:'Sat',15:'Sun'}};
+const DAYN = new Proxy({}, {get:(_,k)=>DAYN_[lang][k]});
+const DAYS3 = new Proxy({}, {get:(_,k)=>DAYS3_[lang][k]});
+const HALL = {A:'A · Grand Ballroom', B:'B · Auditorium'};
+const DISC = [
+  {k:'Modern & Contemporary', tr:'Modern & Contemporary', c:'var(--mc)'},
+  {k:'Jazz', tr:'Jazz', c:'var(--jz)'},
+  {k:'Show Dance Stage', tr:'Show Dance', c:'var(--sd)'},
+  {k:'Improvisation', get tr(){ return L('Doğaçlama','Improvisation'); }, c:'var(--im)'}];
+const AGES = ['Juvenile','Junior','Youth','Adult'];
+const CATN_ = () => ({WC:L('Dünya Şamp.','World Ch.'), O:'WDSF Open', IGO:'Istanbul Global Open'});
+const CATN = new Proxy({}, {get:(_,k)=>CATN_()[k]});
+const ROUNDTR = r => (lang==='en' ? {'1st':'Round 1','1/16 F':'1/16 Final','1/8 F':'1/8 Final','1/4 F':'Quarter-final','1/2 F':'Semi-final','F':'Final'} : {'1st':'1. Tur','1/16 F':'1/16 Final','1/8 F':'1/8 Final','1/4 F':'Çeyrek Final','1/2 F':'Yarı Final','F':'Final'})[r] || r;
+const dur = m => m < 60 ? `${m} dk` : `${Math.floor(m/60)} sa ${m%60 ? (m%60)+' dk' : ''}`.trim();
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
+
+/* ---------- countries ---------- */
+const ISO2 = {TUR:'TR',GER:'DE',CRO:'HR',ROU:'RO',POL:'PL',HUN:'HU',BEL:'BE',SRB:'RS',ITA:'IT',SWE:'SE',UKR:'UA',GEO:'GE',BIH:'BA',MNE:'ME',SVK:'SK',RUS:'RU',MKD:'MK',CYP:'CY',NED:'NL',ALB:'AL',
+  AUT:'AT',FRA:'FR',ESP:'ES',CZE:'CZ',SLO:'SI',BUL:'BG',GRE:'GR',LAT:'LV',LTU:'LT',EST:'EE',FIN:'FI',NOR:'NO',DEN:'DK',SUI:'CH',POR:'PT',ISR:'IL',KAZ:'KZ',AZE:'AZ',ARM:'AM',MDA:'MD',USA:'US',GBR:'GB',IRL:'IE',LUX:'LU',CHN:'CN',JPN:'JP',KOR:'KR',ISL:'IS',BLR:'BY',KOS:'XK'};
+const flagEmoji = code => { const i = ISO2[code]; return i ? String.fromCodePoint(...[...i].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65)) : ''; };
+const FLAGS_OK = true || (() => { try {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 20; const x = cv.getContext('2d'); if(!x) return false;
+  x.font = '16px sans-serif'; x.textBaseline = 'top'; x.fillText('\u{1F1F9}\u{1F1F7}', 0, 0);
+  const d = x.getImageData(0,0,20,20).data; for(let k=0;k<d.length;k+=4){ if(d[k+3] && (Math.abs(d[k]-d[k+1])>40 || Math.abs(d[k]-d[k+2])>40)) return true; } return false;
+} catch(e) { return false; } })();
+const ctyHue = code => { let h = 0; for(const ch of code) h = (h*31 + ch.charCodeAt(0)) % 360; return h; };
+const ctyLabel = code => { const f = FLAGS_OK ? flagEmoji(code) : ''; return f ? `<span class="fg">${f}</span>${esc(code)}` : esc(code); };
+const ctyStyle = code => (FLAGS_OK && flagEmoji(code)) ? '' : `style="--h:${ctyHue(code)}"`;
+/* ---------- build model ---------- */
+function parseTitle(t){
+  let cat = /World Ch/.test(t) ? 'WC' : /Improvisation/.test(t) ? 'IGO' : 'O';
+  let name = t.replace(/^WDSF World Ch(\.|ampionship) /,'').replace(/^WDSF Open /,'').replace(/^Istanbul Global Open /,'')
+              .replace('Contemporary Dance','Contemporary').replace('Jazz Dance','Jazz');
+  const disc = DISC.find(d => name.startsWith(d.k)) || DISC[3];
+  const fmtT = ['Mega Team','Large Team','Small Team','Duo','Solo'].find(f => name.includes(f)) || '';
+  let age = AGES.find(a => name.includes(a)) || 'Adult';
+  const gender = /Female/.test(name) ? 'Kadın' : /Male/.test(name) ? 'Erkek' : '';
+  const short = name.replace(disc.k+' ','');
+  return {cat, name, disc, fmt:fmtT, age, gender, short};
+}
+const COMPS = {};
+DATA.E.forEach(e => {
+  const [d,h,s,en,title,id] = e;
+  if(!id) return;
+  const p = parseTitle(title);
+  const T = (DATA.T||{})[id];
+  const parts = (DATA.P[id]||[]).map(([n,c],ix) => {
+    const m = n.match(/^(.*?)\s*\((.*)\)\s*$/);
+    return {raw:n, name: m ? m[1] : n, chor: m ? m[2].trim() : '', cty:c, members: T && T[ix] && T[ix].length ? T[ix] : null, key: id+'|'+(m ? m[1] : n)};
+  });
+  const RKL = (DATA.RK||{})[id] || [];
+  const rkMap = {}; RKL.forEach(([r,n]) => rkMap[n.replace(/\s+/g,' ').trim()] = r);
+  parts.forEach(p => { p.place = rkMap[p.raw] || null; });
+  COMPS[id] = {id, day:d, hall:h, s:toMin(s), e:toMin(en), ...p, parts,
+    tur: parts.filter(x=>x.cty==='TUR').length, ranking: RKL,
+    rounds: (DATA.R[id]||[]).map(([r,n,dn,tm]) => { const [a,b]=tm.split('-'); return {r, get label(){ return ROUNDTR(r); }, s:toMin(a), e:toMin(b), final:r==='F'}; })};
+});
+const COMPLIST = Object.values(COMPS).sort((a,b)=>ABS(a.day,a.s)-ABS(b.day,b.s));
+
+function shortName(t){ const p = parseTitle(t.replace(/^\d+\.\s*/,'')); return (p.cat==='WC'?'':CATN[p.cat]+' ')+p.name.replace(/ F\+M$/,' (K+E)'); }
+const ITEMS = [];
+COMPLIST.forEach(c => c.rounds.forEach(r => ITEMS.push({kind:'round', d:c.day, h:c.hall, s:r.s, e:r.e, comp:c, round:r})));
+DATA.E.forEach(([d,h,s,en,t,id]) => {
+  if(id) return;
+  let kind='break', names=[];
+  let tx = () => t;
+  if(/^Results presentation/.test(t)){ kind='result'; const raw=t.replace(/^Results presentation:\s*/,'').split(' · ').map(x=>x.replace(/^\d+\.\s*/,'')); names=raw.map(x=>parseTitle(x).name); tx = () => L('Ödül töreni: ','Awards: ')+raw.map(shortName).join(', '); }
+  else if(/Team rehearsal/.test(t)){ kind='reh'; const nm=t.replace(/^Team rehearsal\s*–\s*/,''); tx = () => L('Takım provası: ','Team rehearsal: ')+shortName(nm); }
+  else if(/ceremony/i.test(t)){ kind='cer'; const inA=/in hall A/.test(t); tx = () => inA ? L('Açılış töreni (A salonunda)','Opening ceremony (in Hall A)') : L('Açılış töreni','Opening ceremony'); }
+  else if(/Lunch/i.test(t)) tx = () => L('Öğle arası','Lunch break');
+  else if(/Dinner/i.test(t)) tx = () => L('Akşam yemeği arası','Dinner break');
+  else if(/attire/i.test(t)) tx = () => L('Kostüm değişim arası','Costume change break');
+  else if(/Break/i.test(t)) tx = () => L('Ara','Break');
+  ITEMS.push({kind, d, h, s:toMin(s), e:toMin(en), get text(){ return tx(); }, names});
+});
+ITEMS.sort((a,b)=>ABS(a.d,a.s)-ABS(b.d,b.s) || (a.h<b.h?-1:1));
+const firstAbs = Math.min(...ITEMS.map(i=>ABS(i.d,i.s)));
+const lastAbs = Math.max(...ITEMS.map(i=>ABS(i.d,i.e)));
+
+/* ---------- state ---------- */
+let favs = new Set(store.get('wdsfist-favs', []));
+let pins = new Set(store.get('wdsfist-pins', []));      // "compId|name"
+let simAbs = null;
+try { const v = sessionStorage.getItem('wdsfist-sim'); if(v) simAbs = +v; } catch(e){}
+const nowAbs = () => simAbs != null ? simAbs : (Date.now()-EPOCH)/60000;
+const st = { pDay:null, pHall:'all', pOnly:false, pDisc:new Set(), pAge:new Set(), pCat:new Set(), pFav:false, pTur:false,
+             cQ:'', cDisc:new Set(), cAge:new Set(), aQ:'', aCty:'' };
+
+function myNames(cid){ const out=[]; pins.forEach(k => { const i=k.indexOf('|'); if(+k.slice(0,i)===cid) out.push(k.slice(i+1)); }); return out; }
+function placeOf(cid, name){ const c = COMPS[cid]; const p = c && c.parts.find(x => x.name===name); return p && p.place; }
+function myTags(cid){ return myNames(cid).map(n => { const pl = placeOf(cid,n); return `<span class="mytag">★ ${esc(n)}${pl?` · 🏅 ${esc(pl)}.`:''}</span>`; }).join(''); }
+function saveFavs(){ store.set('wdsfist-favs',[...favs]); store.set('wdsfist-pins',[...pins]); updateBadge(); }
+function myCompIds(){ const s = new Set(favs); pins.forEach(p => s.add(+p.split('|')[0])); return s; }
+function updateBadge(){ const n = myCompIds().size; const b=$('favBadge'); b.hidden=!n; b.textContent=n; }
+function toggleFav(id){ id=+id; favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Programına eklendi ★','Added to your schedule ★'):L('Programından çıkarıldı','Removed from your schedule')); rerender(); }
+function togglePin(key){ pins.has(key)?pins.delete(key):pins.add(key); saveFavs(); toast(pins.has(key)?L('Takibe alındı','Now following'):L('Takipten çıkarıldı','Unfollowed')); rerender(); }
+
+/* ---------- calendar & alerts ---------- */
+const HALLIMG = {A:'data:image/jpeg;base64,/*IMGA*/', B:'data:image/jpeg;base64,/*IMGB*/'};
+let prefs = Object.assign({alert:true, sound:false}, store.get('wdsfist-prefs', {}));
+const utcStamp = (d,m) => { const t = new Date(EPOCH + ABS(d,m)*60000); return t.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,''); };
+function calLink(it){ return `<a class="cal" href="${calHref(it)}" target="_blank" rel="noopener" title="Google Calendar" onclick="event.stopPropagation()">📅 ${L('Takvime ekle','Add to calendar')}</a>`; }
+function calHref(it){
+  const c = it.comp, mn = myNames(c.id);
+  const u = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent(`${c.name} · ${it.round.label}${mn.length?' · '+mn.join(', '):''}`)
+    + '&dates=' + utcStamp(it.d,it.s) + '/' + utcStamp(it.d,it.e)
+    + '&details=' + encodeURIComponent(`WDSF İstanbul 2026 · ${L('Salon','Hall')} ${HALL[it.h]}. ${L('Saatler planlanan programdır, salondaki anonsları takip edin.','Planned times; follow the announcements in the hall.')}`)
+    + '&location=' + encodeURIComponent('The Green Park Pendik Hotel & Convention Center, ' + HALL[it.h]);
+  return u.replace(/&/g,'&amp;');
+}
+let audioCtx = null;
+function beep(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    [0,0.25,0.5].forEach(t => { const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.frequency.value=880; g.gain.setValueAtTime(0.0001,audioCtx.currentTime+t); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+t+0.2); o.connect(g).connect(audioCtx.destination); o.start(audioCtx.currentTime+t); o.stop(audioCtx.currentTime+t+0.22); });
+  }catch(e){}
+}
+document.addEventListener('click', () => { if(prefs.sound && audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, {passive:true});
+let alerted = new Set(store.get('wdsfist-alerted', []));
+function checkAlerts(){
+  if(!prefs.alert) return;
+  const a = nowAbs(), ids = myCompIds(); const due = [];
+  ITEMS.forEach(i => { if(i.kind!=='round' || !ids.has(i.comp.id)) return; const k = i.comp.id+'@'+i.round.r+(simAbs!=null?'#sim':''); const left = ABS(i.d,i.s)-a;
+    if(left > 0 && left <= 30 && !alerted.has(k)){ alerted.add(k); due.push([i,left]); } });
+  if(!due.length) return;
+  if(simAbs==null) store.set('wdsfist-alerted',[...alerted]);
+  $('alertB').innerHTML = due.map(([i,left]) => { const mn = myNames(i.comp.id);
+    return `<b>⏰ ${relTxt(left)} · ${esc(i.comp.name)}</b>${esc(i.round.label)} · ${L('Salon','Hall')} ${i.h} · ${fmt(i.s)}${mn.length?' · ★ '+mn.map(esc).join(', '):''}`; }).join('<hr>');
+  $('alert').classList.add('on');
+  if(prefs.sound) beep();
+  try{ navigator.vibrate && navigator.vibrate([300,150,300]); }catch(e){}
+}
+$('alertX').onclick = () => $('alert').classList.remove('on');
+
+/* ---------- clock ---------- */
+function nowParts(){
+  const a = nowAbs(); const d = 11 + Math.floor(a/1440); const m = Math.floor(((a%1440)+1440)%1440);
+  return {a, d, m};
+}
+function relTxt(mins){
+  mins = Math.round(mins);
+  if(lang==='en'){ if(mins<1) return 'now'; if(mins<60) return `in ${mins} min`; const H=Math.floor(mins/60), M=mins%60; if(H<24) return `in ${H} h${M?' '+M+' min':''}`; return `in ${Math.floor(H/24)} d ${H%24} h`; }
+  if(mins < 1) return 'şimdi';
+  if(mins < 60) return `${mins} dk sonra`;
+  const h = Math.floor(mins/60), m = mins%60;
+  if(h < 24) return `${h} sa ${m? m+' dk ':''}sonra`;
+  return `${Math.floor(h/24)} gün ${h%24} sa sonra`;
+}
+function renderClock(){
+  const {a,d,m} = nowParts();
+  const real = new Intl.DateTimeFormat(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(EPOCH + a*60000));
+  $('clockTxt').innerHTML = simAbs!=null ? `<span class="sim">Test · ${esc(real)}</span>` : `<span class="live-dot"></span>${esc(real)}`;
+}
+$('simToggle').onclick = () => { $('simBox').classList.toggle('on'); window.scrollTo(0,0); if(!$('simInput').value) $('simInput').value='2026-11-12T18:00'; };
+$('simInput').onchange = e => {
+  const v = e.target.value; if(!v) return;
+  const [dt, tm] = v.split('T'); const day = +dt.slice(8); const mo = +dt.slice(5,7);
+  simAbs = (mo===11 ? (day-11) : -30)*1440 + toMin(tm);
+  try{ sessionStorage.setItem('wdsfist-sim', simAbs); }catch(err){}
+  [...alerted].filter(k=>k.endsWith('#sim')).forEach(k=>alerted.delete(k));
+  tick(true);
+};
+$('simLive').onclick = () => { simAbs=null; try{sessionStorage.removeItem('wdsfist-sim');}catch(e){} $('simBox').classList.remove('on'); tick(true); };
+
+/* ---------- small renderers ---------- */
+const catTag = c => c.cat==='WC' ? '<span class="wc">WC</span>' : `<span class="hb">${c.cat==='IGO'?'IGO':'Open'}</span>`;
+const turTag = c => c.tur ? `<span class="tur">${FLAGS_OK?flagEmoji('TUR')+' ':'TUR '}${c.tur}</span>` : '';
+const roundTag = r => `<span class="rb ${r.final?'final':''}">${esc(r.label)}</span>`;
+function status(d,s,e){ const a=nowAbs(); const S=ABS(d,s), E=ABS(d,e); return a>=E?'past':a>=S?'live':'up'; }
+
+function itemRow(it, opts={}){
+  const st0 = status(it.d,it.s,it.e);
+  if(it.kind==='round'){
+    const c = it.comp, my = myCompIds().has(c.id);
+    return `<div class="row ${st0} ${my?'fav':''}" style="--c:${c.disc.c}" data-comp="${c.id}">
+      <div class="tm" style="padding-left:6px">${fmt(it.s)}<small>${fmt(it.e)}</small></div>
+      <div class="bd"><div class="ti">${esc(c.name)}</div>
+        <div class="mt">${st0==='live'?`<span class="livetag">${L('CANLI','LIVE')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
+  }
+  return `<div class="row minor ${st0}" style="--c:transparent">
+    <div class="tm" style="padding-left:6px">${fmt(it.s)}</div>
+    <div class="bd"><div class="ti">${it.kind==='cer'?'🎉 ':''}${esc(it.text)}${opts.hall!==false?` <span class="hb">${it.h}</span>`:''}</div></div></div>`;
+}
+
+/* ---------- NOW view ---------- */
+function renderNow(){
+  const {a,d,m} = nowParts();
+  let hero = '';
+  if(a < firstAbs){
+    const mins = firstAbs - a;
+    const dd = Math.floor(mins/1440), hh = Math.floor((mins%1440)/60), mm = Math.floor(mins%60);
+    hero = `<div class="hero"><div class="k">${L(`İlk tura kalan`,`Until first round`)}</div><div class="big">${dd? dd+L('g ','d '):''}${hh}${L('s','h')} ${mm}${L('d','m')}</div><div class="s">${L(`11 Kasım Çarşamba, 08:30 · B salonunda MC Solo Male Junior I finali, A salonunda takım provaları`,`Wednesday 11 November, 08:30 · MC Solo Male Junior I final in Hall B, team rehearsals in Hall A`)}</div></div>`;
+  } else if(a > lastAbs){
+    hero = `<div class="hero"><div class="k">${L(`Etkinlik tamamlandı`,`Event finished`)}</div><div class="big">${L(`Teşekkürler!`,`Thank you!`)}</div><div class="s">${L(`Sonuçlar için yarışma detaylarındaki "Sonuçlar" bağlantısını kullan.`,`Open any competition to see its results.`)}</div></div>`;
+  } else {
+    const dayItems = ITEMS.filter(i=>i.d===d);
+    if(dayItems.length){
+      const S = Math.min(...dayItems.map(i=>i.s)), E = Math.max(...dayItems.map(i=>i.e));
+      if(m < S) hero = `<div class="hero"><div class="k">${L(`Bugün · `,`Today · `)}${DAYN[d]}</div><div class="big">${fmt(S)}</div><div class="s">${L(`İlk program `,`First item `)}${relTxt(S-m)}${L(` başlıyor · `,` · `)}${dayItems.filter(i=>i.kind==='round').length} ${L('tur','rounds')}</div></div>`;
+      else if(m >= E){ const nd = DAYS.find(x=>x>d); if(nd){ const ni = ITEMS.find(i=>i.d===nd); hero = `<div class="hero"><div class="k">${L(`Bugünkü program bitti`,`Today's programme is over`)}</div><div class="big">${L(`Yarın `,`Tomorrow `)}${fmt(ni.s)}</div><div class="s">${nd} ${L('Kasım','November')} ${DAYN[nd]} · ${ni.kind==='round'?esc(ni.comp.name):esc(ni.text)}</div></div>`; } }
+    }
+  }
+  $('heroBox').innerHTML = hero;
+
+  // my next
+  const mine = myCompIds();
+  const myNext = ITEMS.filter(i => i.kind==='round' && mine.has(i.comp.id) && ABS(i.d,i.e) > a).slice(0,3);
+  $('mineBox').innerHTML = mine.size ? `<div class="mine"><div class="k">${L(`★ Takip ettiklerinde sırada`,`★ Up next for you`)}</div><div class="nexts">${
+    myNext.length ? myNext.map(i => { const S=ABS(i.d,i.s); const live=a>=S;
+      return `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx"><b>${esc(i.comp.name)}</b> ${roundTag(i.round)} ${myTags(i.comp.id)}<div class="in">${i.d!==d?DAYS3[i.d]+' '+i.d+' Kas · ':''}${L('Salon','Hall')} ${i.h}</div></div><div class="cd">${live?`<span class="livetag">${L('CANLI','LIVE')}</span>`:relTxt(S-a)}</div></div>`; }).join('')
+    : `<div class="nx minor">${L('Takip ettiğin yarışmaların hepsi tamamlandı.','All competitions you follow are finished.')}</div>`}</div></div>` : '';
+
+  const myRes = [...mine].map(id=>COMPS[id]).filter(c => c && c.ranking.length && myNames(c.id).length);
+  if(myRes.length) $('mineBox').innerHTML += `<div class="mine"><div class="k">${L(`🏅 Takip ettiklerinin sonuçları`,`🏅 Your results`)}</div><div class="nexts">${myRes.map(c => myNames(c.id).map(n => { const pl = placeOf(c.id,n);
+    return `<div class="nx" data-comp="${c.id}"><div class="tm">${pl?esc(pl)+'.':'–'}</div><div class="tx"><b>${esc(n)}</b><div class="in">${esc(c.name)} · ${c.parts.length} ${L('kayıt','entries')}</div></div></div>`; }).join('')).join('')}</div></div>`;
+  // halls
+  const dayItems = ITEMS.filter(i => i.d===d);
+  const useHalls = dayItems.length ? ['A','B'].filter(h => dayItems.some(i=>i.h===h)) : ['A','B'];
+  $('hallsBox').innerHTML = useHalls.map(h => {
+    const hi = ITEMS.filter(i=>i.h===h);
+    const cur = hi.filter(i => ABS(i.d,i.s)<=a && a<ABS(i.d,i.e));
+    const curMain = cur.find(i=>i.kind==='round') || cur[0];
+    const nexts = hi.filter(i => ABS(i.d,i.s) > a).slice(0,5);
+    let live;
+    if(curMain && curMain.kind==='round'){
+      const c=curMain.comp, S=ABS(curMain.d,curMain.s), E=ABS(curMain.d,curMain.e), pct=Math.min(100,(a-S)/(E-S)*100);
+      live = `<div class="livebox" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="lab"><span class="dot"></span>${L(`ŞU AN SAHNEDE`,`ON STAGE NOW`)}</div>
+        <div class="t">${esc(c.name)}</div><div class="r">${roundTag(curMain.round)} · ${fmt(curMain.s)}–${fmt(curMain.e)} · ${Math.max(0,Math.round(E-a))}${L(` dk kaldı`,` min left`)}</div>
+        <div class="prog"><i style="width:${pct}%"></i></div></div>`;
+    } else if(curMain){
+      live = `<div class="livebox"><div class="lab idle">${L(`ŞU AN`,`NOW`)}</div><div class="t">${esc(curMain.text)}</div><div class="r">${fmt(curMain.s)}–${fmt(curMain.e)}</div></div>`;
+    } else {
+      live = `<div class="livebox"><div class="lab idle">${L(`ŞU AN`,`NOW`)}</div><div class="t" style="color:var(--muted);font-weight:600">${L(`Salonda program yok`,`Nothing in this hall now`)}</div></div>`;
+    }
+    return `<div class="hall"><div class="hallimg" style="background-image:url(${HALLIMG[h]})"><div class="hl"><b>${h}</b><span>${HALL[h].split(' · ')[1]}</span></div></div><div class="hn"><span>${L('Salon','Hall')}</span><b>${HALL[h]}</b></div>${live}
+      <div class="nexts">${nexts.length? nexts.map(i => i.kind==='round'
+        ? `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.comp.name)} ${roundTag(i.round)}${i.d!==d?`<div class="in">${DAYS3[i.d]} ${i.d} ${L('Kas','Nov')}</div>`:''}</div><div class="cd">${relTxt(ABS(i.d,i.s)-a)}</div></div>`
+        : `<div class="nx minor"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.text)}</div></div>`).join('')
+        : `<div class="nx minor">${L('Bu salonda başka program yok.','Nothing else in this hall.')}</div>`}</div></div>`;
+  }).join('');
+}
+
+/* ---------- PROGRAM view ---------- */
+function chipRow(el, items, set, cb, single){
+  el.innerHTML = items.map(([v,l,c]) => `<button class="chip ${set.has? (set.has(v)?'on':'') : (set===v?'on':'')}" data-v="${esc(v)}" ${c?`style="--c:${c}"`:''}>${c?'<span class="sw"></span>':''}${esc(l)}</button>`).join('');
+  el.querySelectorAll('.chip').forEach(b => b.onclick = () => cb(b.dataset.v));
+}
+function renderProgram(){
+  const {d} = nowParts();
+  if(st.pDay==null) st.pDay = DAYS.includes(d) ? d : 11;
+  $('pDays').innerHTML = DAYS.map(x => {
+    const n = ITEMS.filter(i=>i.d===x && i.kind==='round').length;
+    return `<button class="day ${st.pDay===x?'on':''}" data-d="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${n} ${L('tur','rounds')}</small></button>`;
+  }).join('');
+  $('pDays').querySelectorAll('.day').forEach(b => b.onclick = () => { st.pDay=+b.dataset.d; renderProgram(); scrollToNow(); });
+  const hallOpts = [['all',L('İki salon','Both halls')],['A','A · Grand Ballroom'],['B','B · Auditorium']];
+  $('pHall').innerHTML = hallOpts.map(([v,l]) => `<button class="chip ${st.pHall===v?'on':''}" data-h="${v}">${l}</button>`).join('')
+    + `<button class="chip ${st.pOnly?'on':''}" id="pOnlyB">${L('Sadece turlar','Rounds only')}</button><button class="chip ${st.pFav?'on':''}" id="pFavB">${L('★ Takibim','★ Following')}</button><button class="chip ${st.pTur?'on':''}" id="pTurB">${L('TUR sporcu olan','With TUR athletes')}</button>`;
+  $('pHall').querySelectorAll('[data-h]').forEach(b => b.onclick = () => { st.pHall=b.dataset.h; renderProgram(); });
+  $('pOnlyB').onclick = () => { st.pOnly=!st.pOnly; renderProgram(); };
+  $('pFavB').onclick = () => { st.pFav=!st.pFav; renderProgram(); };
+  $('pTurB').onclick = () => { st.pTur=!st.pTur; renderProgram(); };
+  const tog = (set) => v => { set.has(v)?set.delete(v):set.add(v); renderProgram(); };
+  chipRow($('pDisc'), DISC.map(x=>[x.k,x.tr,x.c]), st.pDisc, tog(st.pDisc));
+  chipRow($('pAge'), AGES.map(x=>[x,x]), st.pAge, tog(st.pAge));
+  chipRow($('pCat'), Object.entries(CATN_()), st.pCat, tog(st.pCat));
+  const compFilter = st.pDisc.size || st.pAge.size || st.pCat.size || st.pFav || st.pTur;
+  const mine = myCompIds();
+  const list = ITEMS.filter(i => i.d===st.pDay && (st.pHall==='all' || i.h===st.pHall)
+    && (i.kind==='round' || (!st.pOnly && !compFilter))
+    && (i.kind!=='round' || ((!st.pDisc.size || st.pDisc.has(i.comp.disc.k)) && (!st.pAge.size || st.pAge.has(i.comp.age)) && (!st.pCat.size || st.pCat.has(i.comp.cat)) && (!st.pFav || mine.has(i.comp.id)) && (!st.pTur || i.comp.tur))));
+  const nR = list.filter(i=>i.kind==='round').length;
+  $('pCnt').textContent = `${nR} ${L('tur','rounds')}${compFilter?`${L(' (filtreli)',' (filtered)')}`:''}${L(` · saatler İstanbul saati`,` · Istanbul time`)}`;
+  const a = nowAbs(); let html=''; let placed=false;
+  list.forEach(i => {
+    if(!placed && ABS(i.d,i.s) > a && ABS(i.d,0) <= a && a < ABS(i.d,1440)){ html += `<div class="nowline" id="nowLine">${L(`ŞİMDİ `,`NOW `)}${fmt(Math.floor(((a%1440)+1440)%1440))}</div>`; placed=true; }
+    html += itemRow(i, {hall: st.pHall==='all'});
+  });
+  $('pList').innerHTML = html || `<div class="empty">${L('Bu filtrelerle program yok.','Nothing matches these filters.')}</div>`;
+}
+function scrollToNow(){ const n=$('nowLine'); if(n) n.scrollIntoView({block:'center'}); }
+
+/* ---------- COMPETITIONS view ---------- */
+function renderComps(){
+  const tog = set => v => { set.has(v)?set.delete(v):set.add(v); renderComps(); };
+  chipRow($('cDisc'), DISC.map(x=>[x.k,x.tr,x.c]), st.cDisc, tog(st.cDisc));
+  chipRow($('cAge'), AGES.map(x=>[x,x]), st.cAge, tog(st.cAge));
+  const q = st.cQ.toLowerCase();
+  const list = COMPLIST.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!st.cDisc.size || st.cDisc.has(c.disc.k)) && (!st.cAge.size || st.cAge.has(c.age)));
+  $('cCnt').textContent = `${list.length} ${L('yarışma','competitions')}`;
+  let html='', last=0;
+  list.forEach(c => {
+    if(c.day!==last){ last=c.day; html += `<h2 style="margin:14px 0 4px">${c.day} ${L('Kasım','November')} · ${DAYN[c.day]}</h2>`; }
+    const fin = c.rounds.find(r=>r.final);
+    html += `<div class="cc" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div>
+      <div class="mt">${catTag(c)}<span class="hb">${c.hall}</span><span>${fmt(c.s)}–${fmt(c.e)}</span><span>· ${c.rounds.length} ${L('tur','rounds')}</span>${fin?`<span>${L(`· Final `,`· Final `)}${fmt(fin.s)}</span>`:''}<span>· ${c.parts.length} ${L('kayıt','entries')}</span>${turTag(c)}${c.ranking.length?`<span class="rb final">${L('Sonuçlar ✓','Results ✓')}</span>`:''}</div></div>
+      <button class="star ${favs.has(c.id)?'on':''}" data-star="${c.id}" aria-label="Follow">★</button></div>`;
+  });
+  $('cList').innerHTML = html || `<div class="empty">${L('Yarışma bulunamadı.','No competitions found.')}</div>`;
+}
+$('cQ').oninput = e => { st.cQ = e.target.value; renderComps(); };
+
+/* ---------- ATHLETES view ---------- */
+const ALLP = []; COMPLIST.forEach(c => c.parts.forEach(p => ALLP.push({...p, comp:c})));
+const ALLM = []; COMPLIST.forEach(c => c.parts.forEach(p => (p.members||[]).forEach(mn => ALLM.push({name:mn, team:p.name, chor:p.chor, cty:p.cty, comp:c, key:p.key}))));
+const norm = s => s.toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i');
+ALLP.forEach(p => p.q = norm(p.name+' '+p.chor)); ALLM.forEach(p => p.q = norm(p.name));
+function renderAth(){
+  const cnt = {}; ALLP.forEach(p => cnt[p.cty]=(cnt[p.cty]||0)+1);
+  const ctys = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  $('aCty').innerHTML = `<button class="chip ${!st.aCty?'on':''}" data-c="">${L(`Tüm ülkeler`,`All countries`)}</button>` + ctys.map(([c,n]) => `<button class="chip ${st.aCty===c?'on':''}" data-c="${esc(c)}">${FLAGS_OK&&flagEmoji(c)?flagEmoji(c)+' ':''}${esc(c)} ${n}</button>`).join('');
+  $('aCty').querySelectorAll('.chip').forEach(b => b.onclick = () => { st.aCty = st.aCty===b.dataset.c ? '' : b.dataset.c; renderAth(); });
+  const q = norm(st.aQ.trim());
+  if(!q && !st.aCty){
+    const pinned = ALLP.filter(p => pins.has(p.key));
+    $('aCnt').textContent = '';
+    $('aList').innerHTML = `<div class="note">${L(`Adını, takımının adını veya koreografi adını yaz (grup yarışmalarında takım üyelerinin adları da aranıyor); hangi yarışmada, hangi salonda ve hangi saatlerde dans ettiğini gör. "Takip et" ile sporcuyu Programım'a ekle. Ülke seçerek o ülkenin tüm kayıtlarını listeleyebilirsin.`,`Type a name, team or choreography title (team members are searchable too) to see the competition, hall and times. Tap "Follow" to add it to My schedule. Pick a country to list all its entries.`)}</div>`
+      + (pinned.length ? `<h2>${L('Takip ettiğin sporcular','Athletes you follow')}</h2>` + pinned.map(athRow).join('') : '');
+    return;
+  }
+  const list = ALLP.filter(p => (!st.aCty || p.cty===st.aCty) && (!q || p.q.includes(q)));
+  if(q) ALLM.forEach(m => { if((!st.aCty || m.cty===st.aCty) && m.q.includes(q)) list.push(m); });
+  $('aCnt').textContent = `${list.length} ${L('kayıt','entries')}` + (list.length>150?L(' · ilk 150 gösteriliyor, aramayı daralt',' · showing first 150, refine your search'):'');
+  $('aList').innerHTML = list.slice(0,150).map(athRow).join('') || `<div class="empty">${L('Sonuç yok. Türkçe karakterler olmadan da deneyebilirsin.','No results. Try without special characters.')}</div>`;
+}
+function athRow(p){
+  const c = p.comp; const a = nowAbs();
+  const nxt = c.rounds.find(r => ABS(c.day,r.e) > a);
+  const nxtTxt = nxt ? `${roundTag(nxt)} <b>${fmt(nxt.s)}</b>` : `<span>${L('tamamlandı','finished')}</span>`;
+  return `<div class="ath"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="bd" data-comp="${c.id}" style="cursor:pointer">
+    <div class="nm">${esc(p.name)}</div>${p.team?`<div class="cp">${L(`Takım: <b>`,`Team: <b>`)}${esc(p.team)}</b></div>`:''}${p.chor?`<div class="ch">“${esc(p.chor)}”</div>`:''}${p.members&&p.members.length?`<div class="cp">${p.members.length}${L(` kişilik takım</div>`,`-member team</div>`)}`:''}
+    <div class="cp"><b>${esc(c.name)}</b> · ${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall}${L(` · İlk tur `,` · First round `)}${fmt(c.rounds[0].s)}</div>
+    <div class="cp">${(()=>{ const pp = c.parts.find(x=>x.key===p.key); return pp && pp.place ? `🏅 <b>${esc(pp.place)}${L(`. sıra</b>`,`. place</b>`)} (${c.parts.length} ${L('kayıt','entries')})` : `${L(`Sıradaki: `,`Next: `)}${nxtTxt}`; })()}</div></div>
+    <button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?L('✓ Takipte','✓ Following'):(p.team?L('Takımı takip et','Follow team'):L('Takip et','Follow'))}</button></div>`;
+}
+$('aQ').oninput = e => { st.aQ = e.target.value; renderAth(); };
+
+/* ---------- MY PROGRAM view ---------- */
+function renderMine(){
+  const ids = myCompIds();
+  if(!ids.size){
+    $('myBox').innerHTML = `<div class="empty">${L(`Henüz bir şey eklemedin.<br><br>Yarışmalar sekmesinde ★ ile yarışma ekle ya da Sporcu sekmesinde kendini/takımını bulup "Takip et"e dokun. Takip ettiklerinin tüm turları burada tek akışta toplanır ve çakışmalar işaretlenir.`,`Nothing here yet.<br><br>Star a competition in Events, or find yourself/your team in Athletes and tap "Follow". All rounds you follow are collected here, with clashes flagged.`)}</div>`;
+    return;
+  }
+  const items = ITEMS.filter(i => i.kind==='round' && ids.has(i.comp.id));
+  // conflicts
+  const conf = [];
+  for(let x=0;x<items.length;x++) for(let y=x+1;y<items.length;y++){
+    const A=items[x], B=items[y];
+    if(A.comp.id!==B.comp.id && A.d===B.d && A.s < B.e && B.s < A.e) conf.push([A,B]);
+  }
+  const pinned = ALLP.filter(p => pins.has(p.key));
+  let html = '';
+  if(pinned.length) html += `<div class="note">${L(`<b>Takip edilen sporcular:</b>`,`<b>Following:</b>`)} ${pinned.map(p=>`${esc(p.name)} <span class="cty" ${ctyStyle(p.cty)}>${ctyLabel(p.cty)}</span>`).join(', ')}</div>`;
+  if(conf.length) html += `<div class="warn"><b>⚠ ${conf.length}${L(` saat çakışması</b>`,` time clash(es)</b>`)}<br>${conf.slice(0,6).map(([A,B])=>`${DAYS3[A.d]} ${fmt(Math.max(A.s,B.s))}: ${esc(A.comp.short)} (${esc(A.round.label)}, ${A.h}) ↔ ${esc(B.comp.short)} (${esc(B.round.label)}, ${B.h})`).join('<br>')}</div>`;
+  let tools = `<details class="tools"><summary>${L('Uyarı ayarları','Alert settings')}</summary><div class="set"><label><input type="checkbox" id="optAlert" ${prefs.alert?'checked':''}>${L(` Turdan 30 dk önce ekranda uyar</label>`,` Alert me on screen 30 min before a round</label>`)}
+    <label><input type="checkbox" id="optSound" ${prefs.sound?'checked':''}>${L(` Uyarıda ses çal</label>`,` Play a sound with the alert</label>`)}
+    <div style="color:var(--muted);font-size:12px;margin-top:4px">${L(`Uyarılar yalnızca bu sayfa telefonda açıkken çalışır. Telefon kilitliyken de hatırlatma istersen aşağıdaki takvim butonunu kullan.`,`Alerts only work while this page is open. For reminders when your phone is locked, use the calendar button below.`)}</div></div></details>`;
+  const calAdded = new Set(store.get('wdsfist-cal', []));
+  const upcoming = items.filter(i => ABS(i.d,i.e) > nowAbs());
+  const calKey = i => i.comp.id+'@'+i.round.r;
+  const nextCal = upcoming.find(i => !calAdded.has(calKey(i)));
+  const doneN = upcoming.filter(i => calAdded.has(calKey(i))).length;
+  const calBox = `<div class="set" style="margin-top:14px"><b>${L(`📅 Programını takvimine ekle`,`📅 Add your schedule to your calendar`)}</b>
+    <div style="color:var(--muted);font-size:12.5px;margin:4px 0 8px">${L(`Butona her dokunuşta sıradaki tur Google Takvim'de açılır; "Kaydet"e basıp buraya dön ve devam et. Takvim telefon kilitliyken de hatırlatır (hatırlatmayı 30 dk yap).`,`Each tap opens the next round in Google Calendar; save it, come back and continue. Your calendar reminds you even when the phone is locked (set the reminder to 30 min).`)}</div>
+    ${upcoming.length ? (nextCal ? `<a class="btn pri" style="white-space:normal;padding:10px 16px;line-height:1.3" id="calNext" data-k="${esc(calKey(nextCal))}" href="${calHref(nextCal)}" target="_blank" rel="noopener"${L(`>Ekle: `,`>Add: `)}${esc(nextCal.comp.name)} · ${esc(nextCal.round.label)} (${doneN+1}/${upcoming.length})</a>`
+      : `<span style="color:var(--ok);font-weight:700">${L(`✓ Tüm turlar takvimine eklendi (`,`✓ All rounds added to your calendar (`)}${upcoming.length})</span>`) + (doneN?` <button class="linkbtn" id="calReset">${L(`baştan başla`,`start over`)}</button>`:'') : `<span style="color:var(--muted)">${L('Eklenecek yaklaşan tur yok.','No upcoming rounds to add.')}</span>`}</div>`;
+  const actBox = `<div class="fl" style="margin-top:14px"><button class="btn pri" id="copyPlan">${L(`Programı kopyala`,`Copy schedule`)}</button><button class="btn" id="clearPlan">${L(`Temizle`,`Clear`)}</button></div>`;
+  let last=0; const a = nowAbs(); let placed=false;
+  items.forEach(i => {
+    if(i.d!==last){ last=i.d; html += `<h2 style="margin:16px 0 4px">${i.d} ${L('Kasım','November')} · ${DAYN[i.d]}</h2>`; }
+    if(!placed && ABS(i.d,i.s) > a && a > firstAbs){ html += `<div class="nowline">${L(`ŞİMDİ`,`NOW`)}</div>`; placed=true; }
+    html += itemRow(i, {hall:true, cal:true});
+  });
+  html += calBox + actBox + tools;
+  html += `${L(`<h2>Takip edilen yarışmalar</h2>`,`<h2>Followed competitions</h2>`)}` + [...ids].map(id=>COMPS[id]).filter(Boolean).sort((x,y)=>ABS(x.day,x.s)-ABS(y.day,y.s)).map(c =>
+    `<div class="cc" style="--c:${c.disc.c};margin-bottom:5px" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div><div class="mt">${DAYS3[c.day]} ${c.day} ${L('Kas','Nov')} · ${L('Salon','Hall')} ${c.hall} · ${fmt(c.s)}–${fmt(c.e)}</div></div>${favs.has(c.id)?`<button class="star on" data-star="${c.id}">★</button>`:`<span class="hb">${L('sporcu','athlete')}</span>`}</div>`).join('');
+  $('myBox').innerHTML = html;
+  if($('calNext')) $('calNext').addEventListener('click', e => { e.stopPropagation(); calAdded.add($('calNext').dataset.k); store.set('wdsfist-cal',[...calAdded]); setTimeout(renderMine, 400); });
+  if($('calReset')) $('calReset').onclick = () => { store.set('wdsfist-cal',[]); renderMine(); };
+  $('optAlert').onchange = e => { prefs.alert = e.target.checked; store.set('wdsfist-prefs', prefs); };
+  $('optSound').onchange = e => { prefs.sound = e.target.checked; store.set('wdsfist-prefs', prefs); if(prefs.sound) beep(); };
+  $('copyPlan').onclick = async () => {
+    let txt = L('WDSF İstanbul 2026 — Programım\n','WDSF Istanbul 2026 — My schedule\n'); let ld=0;
+    items.forEach(i => { if(i.d!==ld){ ld=i.d; txt += `\n${i.d} ${L('Kasım','November')} ${DAYN[i.d]}\n`; } const mn=myNames(i.comp.id); txt += `${fmt(i.s)}–${fmt(i.e)} · ${L('Salon','Hall')} ${i.h} · ${i.comp.name} · ${i.round.label}${mn.length?' · '+mn.join(', '):''}\n`; });
+    try{ await navigator.clipboard.writeText(txt); toast(L('Kopyalandı, WhatsApp\'a yapıştırabilirsin','Copied — paste it into WhatsApp')); }catch(e){ toast(L('Kopyalanamadı','Could not copy')); }
+  };
+  $('clearPlan').onclick = () => { if($('clearPlan').dataset.c){ favs.clear(); pins.clear(); saveFavs(); rerender(); } else { $('clearPlan').dataset.c=1; $('clearPlan').textContent=L('Emin misin? Tekrar dokun','Sure? Tap again'); } };
+}
+
+/* ---------- detail sheet ---------- */
+let sheetCty = '', sheetFor = null;
+function openComp(id){
+  if(sheetFor !== id){ sheetCty = ''; sheetFor = id; }
+  const c = COMPS[id]; if(!c) return; const a = nowAbs();
+  const slug = SLUG[id]; const base='https://www.worlddancesport.org/Competitions/'; const isTeam = c.parts.some(p => p.members);
+  const byC = {}; c.parts.forEach(p => byC[p.cty]=(byC[p.cty]||0)+1);
+  const lastR = c.rounds[c.rounds.length-1];
+  const key = n => n.replace(/ (Female|Male)| F\+M| \(K\+E\)/g,'').replace('Mega Team Adult','Mega Team');
+  const cands = ITEMS.filter(i => i.kind==='result' && i.d===c.day && i.s>=lastR.s);
+  const res = cands.find(i => i.names.includes(c.name)) || cands.find(i => i.names.map(key).includes(key(c.name)));
+  $('sheet').innerHTML = `<button class="x" id="sx" aria-label="Kapat">✕</button>
+    <div class="mt">${catTag(c)}<span style="color:${c.disc.c};font-weight:700">${c.disc.tr}</span></div>
+    <h3>${esc(c.name)}</h3>
+    <div class="mt">${c.day} ${L('Kasım','November')} ${DAYN[c.day]} · ${L('Salon','Hall')} ${HALL[c.hall]}</div>${myNames(c.id).length?`<div class="mt" style="margin-top:6px">${L(`Takip ettiğin: `,`Following: `)}${myTags(c.id)}</div>`:''}
+    <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Programımda','★ In my schedule')}`:`${L('☆ Programıma ekle','☆ Add to my schedule')}`}</button></div>
+    <h2>Turlar</h2>
+    <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('CANLI','LIVE'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
+    ${res?`<tr>${L(`<td>Ödül töreni</td>`,`<td>Awards</td>`)}<td class="t">${fmt(res.s)}</td><td></td></tr>`:''}</table>
+    <div class="links">
+      <a class="lk" href="${base}Schedule/${slug}-${id}" target="_blank" rel="noopener">${L(`WDSF programı ↗`,`WDSF schedule ↗`)}</a>
+      <a class="lk" href="${base}Participants/${slug}-${id}" target="_blank" rel="noopener">${L(`Katılımcılar ↗`,`Participants ↗`)}</a>
+      <a class="lk" href="${base}Ranking/${slug}-${id}" target="_blank" rel="noopener">${L(`Sonuçlar ↗`,`Results ↗`)}</a>
+    </div>
+    ${c.ranking.length ? `${L(`<h2>🏅 Sonuçlar</h2>`,`<h2>🏅 Results</h2>`)}<div class="plist">${c.ranking.slice(0,60).map(([r,n,ct]) => { const nm = n.replace(/\s*\(.*\)\s*$/,''); const mine = pins.has(c.id+'|'+nm);
+      return `<div class="pr" ${mine?'style="background:color-mix(in srgb,var(--gilt) 18%,transparent);border-radius:8px"':''}><b style="width:30px;font-variant-numeric:tabular-nums">${esc(r)}.</b><button class="cty" ${ctyStyle(ct)} data-cty="${esc(ct)}">${ctyLabel(ct)}</button><div class="n">${esc(nm)}${mine?' ★':''}</div></div>`; }).join('')}</div>` : ''}
+    <h2>${isTeam?L('Takımlar','Teams'):L('Kayıtlar','Entries')} · ${c.parts.length}${isTeam?` · ${c.parts.reduce((n,p)=>n+(p.members||[]).length,0)} ${L('sporcu','athletes')}`:''}</h2>
+    <div class="fl" id="sCty">${Object.entries(byC).sort((x,y)=>y[1]-x[1]).map(([k,n])=>`<button class="chip ${sheetCty===k?'on':''}" data-sc="${esc(k)}">${FLAGS_OK&&flagEmoji(k)?flagEmoji(k)+' ':''}${esc(k)} ${n}</button>`).join('')}</div>
+    <input class="search" id="sq" type="search" placeholder="${isTeam?L('Takım veya üye ara…','Search team or member…'):L('Bu yarışmada ara…','Search this competition…')}" style="margin-top:10px">
+    <div class="plist" id="spl"></div>`;
+  const drawP = () => { const q = norm($('sq').value); $('spl').innerHTML = c.parts.filter(p => (!sheetCty || p.cty===sheetCty)) .filter(p => !q || norm(p.name+' '+p.chor+' '+p.cty+' '+(p.members||[]).join(' ')).includes(q)).map(p =>
+    `<div><div class="pr"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="n">${esc(p.name)}${p.chor?` <i>“${esc(p.chor)}”</i>`:''}${p.members?` <button class="tbtn" data-mem>${p.members.length}${L(` kişi ▾`,` ▾`)}</button>`:''}</div><button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?'✓':L('Takip','Follow')}</button></div>`
+    + (p.members ? `<div class="mem" ${q && p.members.some(m=>norm(m).includes(q)) ? '' : 'hidden'}>${p.members.map(m => q && norm(m).includes(q) ? `<b>${esc(m)}</b>` : esc(m)).join(' · ')}</div>` : '') + `</div>`).join('');
+    $('spl').querySelectorAll('[data-mem]').forEach(b => b.onclick = e => { e.stopPropagation(); const mm = b.closest('.pr').nextElementSibling; mm.hidden = !mm.hidden; }); };
+  drawP(); $('sq').oninput = drawP;
+  $('sCty').querySelectorAll('[data-sc]').forEach(b => b.onclick = e => { e.stopPropagation(); sheetCty = sheetCty===b.dataset.sc ? '' : b.dataset.sc; $('sCty').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.dataset.sc===sheetCty)); drawP(); });
+  $('ov').classList.add('on'); $('ov').dataset.comp = id;
+  $('sx').onclick = closeSheet;
+}
+function closeSheet(){ sheetFor = null; $('ov').classList.remove('on'); delete $('ov').dataset.comp; }
+$('ov').addEventListener('click', e => { if(e.target.id==='ov') closeSheet(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
+
+/* ---------- global delegation ---------- */
+document.addEventListener('click', e => {
+  const ct = e.target.closest('[data-cty]'); if(ct){ e.stopPropagation(); st.aCty = ct.dataset.cty; st.aQ=''; const q=$('aQ'); if(q) q.value=''; closeSheet(); if(location.hash!=='#sporcu') location.hash='sporcu'; else renderAth(); toast(L(`${ct.dataset.cty} sporcuları`,`${ct.dataset.cty} athletes`)); return; }
+  const s = e.target.closest('[data-star]'); if(s){ e.stopPropagation(); toggleFav(s.dataset.star); return; }
+  const p = e.target.closest('[data-pin]'); if(p){ e.stopPropagation(); togglePin(p.dataset.pin); return; }
+  const c = e.target.closest('[data-comp]'); if(c && !e.target.closest('.sheet')){ openComp(+c.dataset.comp); }
+});
+
+/* ---------- routing ---------- */
+const VIEWS = ['simdi','program','yarismalar','sporcu','programim'];
+let view = 'simdi';
+function route(){
+  const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'simdi';
+  VIEWS.forEach(v => $('v-'+v).classList.toggle('on', v===view));
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.v===view));
+  rerender(); window.scrollTo(0,0);
+  if(view==='program') setTimeout(scrollToNow, 30);
+}
+function rerender(){
+  renderClock(); updateBadge();
+  if(view==='simdi') renderNow();
+  if(view==='program') renderProgram();
+  if(view==='yarismalar') renderComps();
+  if(view==='sporcu') renderAth();
+  if(view==='programim') renderMine();
+  if($('ov').dataset.comp){ const y=$('sheet').scrollTop; const q=$('sq')?$('sq').value:''; openComp(+$('ov').dataset.comp); $('sq').value=q; $('sq').oninput(); $('sheet').scrollTop=y; }
+}
+function tick(force){
+  renderClock(); checkAlerts();
+  if($('ov').dataset.comp && !force) return;
+  if(force) rerender();
+  else if(view==='simdi') renderNow();
+  else if(view==='programim') renderMine();
+  else if(view==='program'){ const y=window.scrollY; renderProgram(); window.scrollTo(0,y); }
+}
+window.addEventListener('hashchange', route);
+
+$('updTxt').textContent = L('Güncellendi ','Updated ') + new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+$('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+$('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
+function applyLang(){
+  document.documentElement.lang = lang;
+  $('lngBtn').textContent = lang==='en' ? 'TR' : 'EN';
+  document.querySelectorAll('[data-en]').forEach(el => { if(!el.dataset.tr) el.dataset.tr = el.placeholder; el.placeholder = lang==='en' ? el.dataset.en : el.dataset.tr; });
+  $('updTxt').textContent = L('Güncellendi ','Updated ') + new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
+}
+$('lngBtn').onclick = () => { lang = lang==='en' ? 'tr' : 'en'; try{ localStorage.setItem('wdsfist-lang', lang); }catch(e){} applyLang(); rerender(); };
+applyLang();
+route();
+setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
+</script>
+</body>
+</html>

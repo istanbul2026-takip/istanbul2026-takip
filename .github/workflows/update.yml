@@ -1,0 +1,52 @@
+name: Update site
+on:
+  schedule:
+    - cron: '*/15 * 9-16 11 *'   # every 15 min, 9–16 Nov (UTC)
+    - cron: '17 5 * * *'         # once a day otherwise
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Refresh entries and team lists too'
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/last.json
+          key: wdsf-data-${{ github.run_id }}
+          restore-keys: wdsf-data-
+      - name: Fetch WDSF data and build page
+        run: node scripts/update.mjs
+        env:
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+          FULL: ${{ github.event.inputs.full == 'true' && '1' || '0' }}
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('data/last.json') != ''
+        with:
+          path: data/last.json
+          key: wdsf-data-${{ github.run_id }}
+      - name: Publish to Cloudflare Pages
+        if: ${{ env.CF_TOKEN != '' && hashFiles('dist/index.html') != '' }}
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages project create istanbul2026-takip --production-branch=main >/dev/null 2>&1 || true
+          npx --yes wrangler@3 pages deploy dist --project-name=istanbul2026-takip --branch=main --commit-dirty=true
