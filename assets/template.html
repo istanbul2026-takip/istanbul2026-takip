@@ -521,14 +521,36 @@ try { const c = JSON.parse(localStorage.getItem('wdsfist-live') || 'null'); if(c
 const liveFresh = () => !!(LIVE && simAbs == null && Date.now() - Date.parse(LIVE.fetched) < 20*60000);
 COMPLIST.forEach(c => c.rounds.forEach(r => { r.ps = r.s; r.pe = r.e; r.shift = 0; r.lst = null; }));
 ITEMS.forEach(i => { i.ps = i.s; i.pe = i.e; });
+// marX exports have shown whole timetables moved by whole hours (a time-zone slip on export:
+// every day, even days not started yet, moved by exactly +2 h). Real delays only build up on the
+// day being danced, so a common whole-hour shift on days not yet started is taken as an offset.
+function liveOffset(){
+  if(!LIVE || !LIVE.r) return 0;
+  const today = 11 + Math.floor(nowAbs() / 1440), started = nowAbs() >= 0;
+  const pick = strict => { const cnt = {}; let n = 0;
+    COMPLIST.forEach(c => c.rounds.forEach((r, ix) => {
+      const m = LIVE.r[c.id + '.' + (ix + 1)]; if(!m || m[0] !== c.day) return;
+      if(strict && started && c.day <= today) return;
+      if(!strict && m[4] !== 'u') return;
+      let sh = m[2] - r.ps; if(sh > 720) sh -= 1440; if(sh < -720) sh += 1440;
+      cnt[sh] = (cnt[sh] || 0) + 1; n++;
+    }));
+    const top = Object.entries(cnt).sort((x, y) => y[1] - x[1])[0];
+    return top && n >= 10 && top[1] / n >= 0.7 ? +top[0] : null; };
+  let best = pick(true); if(best == null) best = pick(false);
+  return best && Math.abs(best) >= 30 && best % 30 === 0 ? best : 0;
+}
+let liveOffFor = null, liveOff = 0;
 function applyLive(){
   const a = nowAbs(), fresh = liveFresh();
+  if(LIVE !== liveOffFor){ liveOffFor = LIVE; liveOff = liveOffset(); }
   COMPLIST.forEach(c => c.rounds.forEach((r, ix) => {
     r.s = r.ps; r.e = r.pe; r.shift = 0; r.lst = null;
     const m = LIVE && LIVE.r && LIVE.r[c.id + '.' + (ix + 1)];
     if(!m || m[0] !== c.day || typeof m[2] !== 'number') return;
     const dur = m[3] > 0 ? m[3] : r.pe - r.ps;
-    r.s = m[2]; r.e = m[2] + Math.max(1, dur); r.shift = Math.round(m[2] - r.ps);
+    let t = m[2] - liveOff; if(t - r.ps > 720) t -= 1440; if(t - r.ps < -720) t += 1440;
+    r.s = t; r.e = t + Math.max(1, dur); r.shift = Math.round(t - r.ps);
     if(!fresh) return;
     r.lst = m[4];
     const now = a - ABS(c.day, 0);
