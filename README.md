@@ -8,3 +8,7 @@ published on Cloudflare Pages as a public page (not indexed by search engines).
 - `scripts/update.mjs` – builds the page from `assets/template.html`
 - `.github/workflows/loop.yml` – live updater during the event
 - `.github/workflows/update.yml` – one-off and daily updates
+
+## Club pages
+
+`club/<slug>.json` adds a club page at `/<slug>/` (e.g. `/tarz/`). The club's entries are worked out from WDSF data on every build (`scripts/club.mjs`); `notes` holds the coaches' own items.

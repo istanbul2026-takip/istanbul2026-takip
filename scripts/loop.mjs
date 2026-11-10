@@ -1,4 +1,4 @@
-// Long-running updater: checks WDSF every 5 min (every 30 min at night) for ~5h40m,
+// Long-running updater: checks WDSF every 3 min (every 30 min at night) for ~5h40m,
 // publishing when something changed. The workflow then starts a fresh copy of itself.
 import fs from 'fs';
 import { spawnSync } from 'child_process';
@@ -58,7 +58,7 @@ while (Date.now() < RUN_UNTIL && Date.now() < EVENT_END) {
     console.log(d.status === 0 ? 'published' : 'publish failed: ' + (d.stderr || '').slice(-400));
     if (d.status === 0) spawnSync('node', ['scripts/cleanup.mjs'], { stdio: 'inherit', env: process.env });
   }
-  const gap = (istHour() >= 7 ? 5 : 30) * 60e3;
+  const gap = (istHour() >= 7 ? 3 : 30) * 60e3;    // WDSF every 3 min by day; marX every minute in between
   const wait = gap - ((Date.now() - started) % gap);
   if (Date.now() + wait >= RUN_UNTIL) break;
   await waitWithLiveFeed(wait);

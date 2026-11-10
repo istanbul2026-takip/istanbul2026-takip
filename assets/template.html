@@ -81,13 +81,18 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .cfil{display:flex;gap:8px;align-items:center;margin:8px 0}.cfil select{flex:1;min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:15px;padding:0 10px}
 .cwarn{border:1px solid var(--live);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--surface)}.cwarn summary{font-weight:700;cursor:pointer;min-height:32px;line-height:32px}
 .cwarn li{margin:4px 0;font-size:14px}
-.crow{display:grid;grid-template-columns:58px 1fr;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.crow{display:grid;grid-template-columns:58px 1fr 44px;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
 .crow .tm{font-family:var(--disp);font-size:22px;font-weight:700;line-height:1}.crow .tm small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);font-weight:500;margin-top:3px}
 .crow .ti{font-weight:700}.crow .nm{margin-top:3px;font-size:14.5px}.crow .nm b{font-weight:700;color:var(--mc)}
 .crow .mt{margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .crow.past{opacity:1}.crow.past .tm,.crow.past .ti,.crow.past .nm,.crow.past .nm b{color:var(--muted)}
 .crow.live{background:var(--surface);border-left:4px solid var(--live);padding-left:8px}
 .crow.minor .ti{font-weight:500;color:var(--muted)}.crow.note{background:var(--surface);border-left:4px solid var(--gilt);padding-left:8px}
+.tick{width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:transparent;font-size:20px;font-weight:800;cursor:pointer;align-self:center}
+.tick.on{background:var(--ok);border-color:var(--ok);color:#fff}.tick:not(.on):hover{color:var(--muted)}
+.crow.done .ti{text-decoration:line-through;text-decoration-thickness:1px}
+.donetag{font-size:12px;font-weight:800;color:var(--ok)}
+.cwarn .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
 section.on{display:block}
@@ -1038,37 +1043,50 @@ function clubItems(day){
 }
 const hallChip = h => `<span class="hchip ${h}">${h} · ${esc((HALL[h]||h).split(' · ')[1] || h)}</span>`;
 function clubRow(i, a){
-  const S = ABS(i.d,i.s), E = ABS(i.d,i.e), st0 = i.kind === 'note' ? (a >= S ? 'past' : 'up') : (a >= E ? 'past' : a >= S ? 'live' : 'up');
+  const dk = doneKey(i), done = clubDone.has(dk);
+  const S = ABS(i.d,i.s), E = ABS(i.d,i.e), st0 = done ? 'past done' : i.kind === 'note' ? (a >= S ? 'past' : 'up') : (a >= E ? 'past' : a >= S ? 'live' : 'up');
+  const tick = `<button class="tick ${done?'on':''}" data-tick="${esc(dk)}" aria-pressed="${done}" aria-label="${done ? L('Bitti işaretini kaldır','Unmark finished') : L('Bitti olarak işaretle','Mark finished')}">✓</button>`;
   const person = st.cPerson;
   if(i.kind === 'round'){
     const c = i.comp, ents = clubEntries(c.id).filter(e => !person || e[2].includes(person));
     return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
       <div class="ti">${esc(c.name)}</div>
       <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
-      <div class="mt">${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${dlyTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div></div>`;
+      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':dlyTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
   }
-  if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${L('Hoca notu','Coach note')}</span>${hallChip(i.h)}</div></div></div>`;
+  if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${L('Hoca notu','Coach note')}</span>${hallChip(i.h)}</div></div>${tick}</div>`;
   const ids = CLUB.rel[i.k] || [];
   const isReh = /rehearsal/i.test(i.raw || '');
   const what = isReh ? L('Sahne provası','Stage rehearsal') : /Results/i.test(i.raw||'') ? L('Ödül töreni','Awards') : i.text;
   const names = ids.map(id => clubEntries(id).map(e => e[1]).join(', ')).filter(Boolean).join(' · ');
-  return `<div class="crow minor ${st0}" ${ids.length===1?`data-comp="${ids[0]}"`:''}><div class="tm">${fmt(i.s)}</div><div><div class="ti">${esc(what)}${names?` — <span style="color:var(--ink)">${esc(names)}</span>`:''}</div><div class="mt">${hallChip(i.h)}</div></div></div>`;
+  return `<div class="crow minor ${st0}" ${ids.length===1?`data-comp="${ids[0]}"`:''}><div class="tm">${fmt(i.s)}</div><div><div class="ti">${esc(what)}${names?` — <span style="color:var(--ink)">${esc(names)}</span>`:''}</div><div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${hallChip(i.h)}</div></div>${tick}</div>`;
 }
+// Tight changeovers: for every club athlete, every pair of their rounds on the day (in different
+// competitions) where the second starts less than 15 min after the first ends, or while it is
+// still running. All pairs are checked, not only neighbours, so a long round that overlaps two
+// later ones reports both. Times are the live ones (WDSF + marX), so this follows delays.
+const TIGHT = 15;
 function clubWarnings(day){
   const rounds = ITEMS.filter(i => i.d === day && i.kind === 'round' && CLUBIDS.has(i.comp.id));
   const by = {};
   rounds.forEach(i => new Set(clubEntries(i.comp.id).flatMap(e => e[2])).forEach(p => (by[p] = by[p] || []).push(i)));
-  const out = [];
+  const pairs = {};
   Object.entries(by).forEach(([p, list]) => {
-    list.sort((x,y) => x.s - y.s);
-    for(let k = 1; k < list.length; k++){
-      const A0 = list[k-1], B0 = list[k], gap = B0.s - A0.e;
-      if(A0.comp.id === B0.comp.id || gap >= 15) continue;
-      out.push({p, A:A0, B:B0, gap, s:A0.s});
+    list = list.slice().sort((x,y) => x.s - y.s || x.e - y.e);
+    for(let j = 1; j < list.length; j++) for(let i = 0; i < j; i++){
+      const A0 = list[i], B0 = list[j];
+      if(A0.comp.id === B0.comp.id) continue;
+      const gap = B0.s - A0.e;
+      if(gap >= TIGHT) continue;
+      const k = A0.comp.id + '.' + A0.round.r + '>' + B0.comp.id + '.' + B0.round.r;
+      (pairs[k] = pairs[k] || {A:A0, B:B0, gap, people:[]}).people.push(p);
     }
   });
-  return out.sort((x,y) => x.s - y.s);
+  return Object.values(pairs).sort((x,y) => x.B.s - y.B.s || x.A.s - y.A.s);
 }
+const doneKey = i => i.kind === 'round' ? 'r:' + i.comp.id + ':' + i.round.r : i.kind === 'note' ? 'n:' + i.d + ':' + fmt(i.s) + ':' + i.text : 'i:' + i.k;
+let clubDone = new Set(store.get('wdsfist-done', []));
+function toggleDone(k){ clubDone.has(k) ? clubDone.delete(k) : clubDone.add(k); store.set('wdsfist-done', [...clubDone]); renderClub(true); }
 function renderClub(soft){
   const a = nowAbs(), d = todayDay();
   if(st.cDay == null) st.cDay = DAYS.includes(d) ? d : (a > ABS(DAYS[DAYS.length-1], 0) ? DAYS[DAYS.length-1] : DAYS[0]);
@@ -1079,7 +1097,7 @@ function renderClub(soft){
   const roundsAll = DAYS.map(x => clubItems(x).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))).length);
   let html = `<h2 style="margin-bottom:2px">${esc(CLUB.name)}</h2><div class="plannote" style="padding:0 0 4px">${L('Kulübün tüm turları, provaları ve ödül törenleri. Saatler WDSF ve organizasyonun canlı akışından otomatik gelir.','All club rounds, rehearsals and awards. Times come automatically from WDSF and the organiser\'s live timetable.')}</div>`;
   // what's on now / next (any day)
-  const upc = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person)) && ABS(i.d,i.e) > a).sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
+  const upc = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && !clubDone.has(doneKey(i)) && (!person || clubWho(i).includes(person)) && ABS(i.d,i.e) > a).sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
   const live = upc.filter(i => ABS(i.d,i.s) <= a), nxt = upc.filter(i => ABS(i.d,i.s) > a).slice(0, 2);
   const sumLine = (i, k) => { const ents = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => e[1]).join(' · ');
     return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}</div><div class="t">${fmt(i.s)} · ${esc(i.comp.name)} ${roundTag(i.round)}${dlyTag(i.round)}</div><div class="m">${esc(ents)} · ${hallChip(i.h)}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ''}</div></div>`; };
@@ -1088,8 +1106,14 @@ function renderClub(soft){
   html += `<div class="cfil"><label for="cPer" class="sr">${L('Sporcu','Athlete')}</label><select id="cPer"><option value="">${L('Bütün kulüp','Whole club')}</option>${CLUB.members.filter(m => DAYS.some(x => clubItems(x).some(i => clubWho(i).includes(m)))).map(m => `<option ${m===person?'selected':''}>${esc(m)}</option>`).join('')}</select>
     <button class="btn" id="cIcs" style="white-space:nowrap">📅 ${L('Takvime','Calendar')}</button></div>`;
   html += `<div class="cday">${DAYS.map((x, k) => `<button class="day ${x===day?'on':''}" data-cd="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${roundsAll[k]} ${L('tur','rounds')}</small></button>`).join('')}</div>`;
-  const warns = clubWarnings(day).filter(w => !person || w.p === person);
-  if(warns.length) html += `<details class="cwarn" ${person?'open':''}><summary>⚠ ${L(`${warns.length} sıkışık geçiş`,`${warns.length} tight changeovers`)}</summary><ul>${warns.map(w => `<li><b>${esc(w.p)}</b>: ${fmt(w.A.e)} ${w.A.h} → ${fmt(w.B.s)} ${w.B.h} · ${w.gap < 0 ? L('<b>saatler çakışıyor</b>','<b>times overlap</b>') : L(`${w.gap} dk`,`${w.gap} min`)}<br><small style="color:var(--muted)">${esc(w.A.comp.short)} ${esc(w.A.round.label)} → ${esc(w.B.comp.short)} ${esc(w.B.round.label)}${isLater(w.B.comp, w.B.round)?L(' (geçerse)',' (if qualified)'):''}</small></li>`).join('')}</ul></details>`;
+  const warns = clubWarnings(day).filter(w => (!person || w.people.includes(person)) && ABS(w.B.d, w.B.s) > a && !clubDone.has(doneKey(w.B)));
+  const wline = w => { const ov = w.gap < 0;
+    return `<li><b>${esc((person ? [person] : w.people).join(', '))}</b><br>${fmt(w.A.s)}–${fmt(w.A.e)} ${hallChip(w.A.h)} ${esc(w.A.comp.short)} ${esc(w.A.round.label)}${isLater(w.A.comp, w.A.round)?L(' (geçerse)',' (if qualified)'):''}<br>→ ${fmt(w.B.s)} ${hallChip(w.B.h)} ${esc(w.B.comp.short)} ${esc(w.B.round.label)}${isLater(w.B.comp, w.B.round)?L(' (geçerse)',' (if qualified)'):''}<br><b style="color:var(--live)">${ov ? L(`Çakışma: ikincisi ilki bitmeden ${-w.gap} dk önce başlıyor`,`Overlap: the second starts ${-w.gap} min before the first ends`) : w.gap === 0 ? L('Arada hiç süre yok','No time in between') : L(`Arada ${w.gap} dk`,`${w.gap} min in between`)}</b></li>`; };
+  if(warns.length) html += `<details class="cwarn" ${person || warns.length <= 3 ? 'open' : ''}><summary>⚠ ${L(`${warns.length} sıkışık geçiş (15 dk altı)`,`${warns.length} tight changeovers (under 15 min)`)}</summary><ul>${warns.map(wline).join('')}</ul><div class="plannote" style="padding:4px 0 0">${L('Saatler değişince otomatik yeniden hesaplanır. Uzun turlarda (ör. 1/8 final) sporcu turun herhangi bir anında çıkabilir.','Recalculated automatically when times change. In long rounds (e.g. 1/8 final) the athlete may dance at any point.')}</div></details>`;
+  else if(clubItems(day).some(i => i.kind === 'round')) html += `<div class="plannote" style="padding:2px 0 6px">✓ ${L('Bu gün 15 dakikanın altında geçiş yok.','No changeovers under 15 minutes this day.')}</div>`;
+  const hideDone = store.get('wdsfist-hidedone', false);
+  html += `<label class="cfil" style="font-size:14px;gap:6px"><input type="checkbox" id="cHide" ${hideDone?'checked':''} style="width:20px;height:20px"> ${L('İşaretlenenleri gizle','Hide marked as done')} <span style="color:var(--muted)">(${items.filter(i => clubDone.has(doneKey(i))).length})</span></label>`;
+  if(hideDone) items = items.filter(i => !clubDone.has(doneKey(i)));
   if(!items.length) html += `<p class="plannote">${person ? L(`${esc(person)} bu gün yarışmıyor.`,`${esc(person)} is not competing this day.`) : L('Bu gün kulübün yarışması yok.','No club events this day.')}</p>`;
   let placed = false;
   items.forEach(i => {
@@ -1100,6 +1124,8 @@ function renderClub(soft){
   $('clubBox').innerHTML = html;
   if(soft) window.scrollTo(0, y);
   $('clubBox').querySelectorAll('[data-cd]').forEach(b => b.onclick = () => { st.cDay = +b.dataset.cd; renderClub(); const n=$('cNow'); if(n) n.scrollIntoView({block:'center'}); });
+  $('clubBox').querySelectorAll('[data-tick]').forEach(b => b.onclick = e => { e.stopPropagation(); e.preventDefault(); toggleDone(b.dataset.tick); });
+  $('cHide').onchange = e => { store.set('wdsfist-hidedone', e.target.checked); renderClub(true); };
   $('cPer').onchange = e => { st.cPerson = e.target.value; store.set('wdsfist-cperson', st.cPerson); renderClub(); };
   $('cIcs').onclick = () => downloadICS(DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))));
 }
@@ -1281,7 +1307,7 @@ async function checkVersion(onReturn){
   tryReload(onReturn);
 }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkVersion(true); });
-setInterval(() => checkVersion(false), 120000);
+setInterval(() => checkVersion(false), 60000);
 setInterval(pullLive, 60000); setTimeout(pullLive, 2500);
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') pullLive(); });
 setTimeout(() => checkVersion(false), 15000);
