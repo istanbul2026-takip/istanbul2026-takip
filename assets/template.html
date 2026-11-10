@@ -217,6 +217,8 @@ details.tools[open] summary::after{content:" –"}
 .info .bx b{display:block;font-weight:700;margin-bottom:2px}
 .stats{display:none}
 footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
+.stalebar{background:color-mix(in srgb,var(--gilt) 22%,var(--surface));border-left:4px solid var(--gilt);border-radius:10px;padding:9px 12px;font-size:14px;margin:4px 0 6px}
+.stalebar[hidden]{display:none}
 .simbox{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;font-size:13px}
 .simbox.on{display:flex}
 .simbox input{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px;font:inherit}
@@ -229,6 +231,7 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
     <button class="lng" id="lngBtn" aria-label="Language"></button>
   </header>
   <div class="status"><span id="clockTxt">–</span><span id="updTxt"></span></div>
+  <div class="stalebar" id="stale" hidden></div>
   <div class="simbox" id="simBox">
     <span><span class="tr">Test saati (İstanbul):</span><span class="en">Test time (Istanbul):</span></span>
     <input type="datetime-local" id="simInput" min="2026-11-11T07:00" max="2026-11-15T23:59" step="60">
@@ -815,6 +818,31 @@ $('lngBtn').onclick = () => { lang = lang==='en' ? 'tr' : 'en'; try{ localStorag
 applyLang();
 route();
 setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
+
+/* ---------- keep open pages fresh ---------- */
+const LOADED_AT = Date.now();
+let lastInput = Date.now();
+['touchstart','keydown','wheel','click'].forEach(ev => addEventListener(ev, () => { lastInput = Date.now(); }, {passive:true}));
+const canReload = () => { try { return !!localStorage.getItem('wdsfist-k'); } catch(e) { return false; } };
+function maybeReload(onReturn){
+  if(!canReload() || simAbs != null) return;
+  if((Date.now() - LOADED_AT) / 60000 < 8) return;
+  if($('ov').classList.contains('on')) return;
+  const ae = document.activeElement; if(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)) return;
+  if(!onReturn && Date.now() - lastInput < 45000) return;
+  location.reload();
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') maybeReload(true); });
+setInterval(() => maybeReload(false), 60000);
+function renderStale(){
+  const age = Math.round((Date.now() - Date.parse(DATA.fetched)) / 60000);
+  const a = (Date.now() - EPOCH) / 60000;
+  const during = a > firstAbs - 120 && a < lastAbs + 60;
+  const el = $('stale');
+  if(during && age > 40){ el.hidden = false; el.textContent = L(`Veriler ${age} dk önce güncellendi. Saatler kaymış olabilir; salondaki anonsları takip et.`, `Data last updated ${age} min ago. Times may have shifted; follow the announcements in the hall.`); }
+  else el.hidden = true;
+}
+renderStale(); setInterval(renderStale, 60000);
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 name: Update site
 on:
   schedule:
-    - cron: '*/15 * 9-16 11 *'   # every 15 min, 9–16 Nov (UTC)
+    - cron: '3,13,23,33,43,53 * 9-16 11 *'   # every 10 min, 9–16 Nov (UTC)
     - cron: '17 5 * * *'         # once a day otherwise
   workflow_dispatch:
     inputs:
