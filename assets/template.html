@@ -239,6 +239,7 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
   </header>
   <div class="status"><span id="clockTxt">–</span><span id="updTxt"></span></div>
   <div class="stalebar" id="stale" hidden></div>
+  <div class="stalebar" id="upd" hidden></div>
   <div class="simbox" id="simBox">
     <span><span class="tr">Test saati (İstanbul):</span><span class="en">Test time (Istanbul):</span></span>
     <input type="datetime-local" id="simInput" min="2026-11-11T07:00" max="2026-11-15T23:59" step="60">
@@ -320,6 +321,7 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 <script>
 const DATA = /*DATA*/null;
 const SLUG = /*SLUGS*/null;
+const BUILD = /*BUILD*/null;
 
 /* ---------- language ---------- */
 let lang = 'tr';
@@ -338,7 +340,7 @@ function applyTheme(){
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+const toMin = t => { const m = /^(\d{1,2}):(\d{2})/.exec(String(t == null ? '' : t).trim()); return m && +m[1] < 30 && +m[2] < 60 ? (+m[1])*60 + (+m[2]) : null; };
 const fmt = m => String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 const ABS = (d,m) => (d-11)*1440 + m;               // minutes since 11 Nov 00:00 Istanbul
 const EPOCH = Date.UTC(2026,10,10,21,0);            // 11 Nov 2026 00:00 Istanbul (UTC+3)
@@ -391,8 +393,9 @@ function parseTitle(t){
 const COMPS = {};
 DATA.E.forEach(e => {
   const [d,h,s,en,title,id] = e;
-  if(!id) return;
-  const p = parseTitle(title);
+  if(!id || toMin(s) == null || !(d >= 1 && d <= 31)) return;
+  const cs = toMin(s), ce = toMin(en) != null && toMin(en) > cs ? toMin(en) : cs + 30;
+  const p = parseTitle(String(title || ''));
   const T = (DATA.T||{})[id];
   const parts = (DATA.P[id]||[]).map(([n,c],ix) => {
     const m = n.match(/^(.*?)\s*\((.*)\)\s*$/);
@@ -401,9 +404,11 @@ DATA.E.forEach(e => {
   const RKL = (DATA.RK||{})[id] || [];
   const rkMap = {}; RKL.forEach(([r,n]) => rkMap[n.replace(/\s+/g,' ').trim()] = r);
   parts.forEach(p => { p.place = rkMap[p.raw] || null; });
-  COMPS[id] = {id, day:d, hall:h, s:toMin(s), e:toMin(en), ...p, parts,
-    tur: parts.filter(x=>x.cty==='TUR').length, ranking: RKL,
-    rounds: (DATA.R[id]||[]).map(([r,n,dn,tm]) => { const [a,b]=tm.split('-'); return {r, get label(){ return ROUNDTR(r); }, s:toMin(a), e:toMin(b), final:r==='F'}; })};
+  let rounds = (DATA.R[id]||[]).map(row => { const [r,n,dn,tm] = row || []; const [a,b] = String(tm || '').split('-'); const rs = toMin(a), re = toMin(b);
+      if(rs == null) return null; const rr = String(r || '?'); return {r: rr, get label(){ return ROUNDTR(rr); }, s: rs, e: re != null && re > rs ? re : rs + 10, final: rr==='F'}; }).filter(Boolean);
+  if(!rounds.length) rounds = [{r:'?', get label(){ return L('Yarışma','Competition'); }, s: cs, e: ce, final:false}];
+  COMPS[id] = {id, day:d, hall:h, s:cs, e:ce, ...p, parts,
+    tur: parts.filter(x=>x.cty==='TUR').length, ranking: RKL, rounds};
 });
 const COMPLIST = Object.values(COMPS).sort((a,b)=>ABS(a.day,a.s)-ABS(b.day,b.s));
 
@@ -411,7 +416,8 @@ function shortName(t){ const p = parseTitle(t.replace(/^\d+\.\s*/,'')); return (
 const ITEMS = [];
 COMPLIST.forEach(c => c.rounds.forEach(r => ITEMS.push({kind:'round', d:c.day, h:c.hall, s:r.s, e:r.e, comp:c, round:r})));
 DATA.E.forEach(([d,h,s,en,t,id]) => {
-  if(id) return;
+  if(id || toMin(s) == null || !(d >= 1 && d <= 31)) return;
+  t = String(t || '');
   let kind='break', names=[];
   let tx = () => t;
   if(/^Results presentation/.test(t)){ kind='result'; const raw=t.replace(/^Results presentation:\s*/,'').split(' · ').map(x=>x.replace(/^\d+\.\s*/,'')); names=raw.map(x=>parseTitle(x).name); tx = () => L('Ödül töreni: ','Awards: ')+raw.map(shortName).join(', '); }
@@ -421,11 +427,12 @@ DATA.E.forEach(([d,h,s,en,t,id]) => {
   else if(/Dinner/i.test(t)) tx = () => L('Akşam yemeği arası','Dinner break');
   else if(/attire/i.test(t)) tx = () => L('Kostüm değişim arası','Costume change break');
   else if(/Break/i.test(t)) tx = () => L('Ara','Break');
-  ITEMS.push({kind, d, h, s:toMin(s), e:toMin(en), get text(){ return tx(); }, names});
+  const is = toMin(s), ie = toMin(en) != null && toMin(en) > is ? toMin(en) : is + 5;
+  ITEMS.push({kind, d, h, s:is, e:ie, get text(){ return tx(); }, names});
 });
 ITEMS.sort((a,b)=>ABS(a.d,a.s)-ABS(b.d,b.s) || (a.h<b.h?-1:1));
-const firstAbs = Math.min(...ITEMS.map(i=>ABS(i.d,i.s)));
-const lastAbs = Math.max(...ITEMS.map(i=>ABS(i.d,i.e)));
+const firstAbs = ITEMS.length ? Math.min(...ITEMS.map(i=>ABS(i.d,i.s))) : 0;
+const lastAbs = ITEMS.length ? Math.max(...ITEMS.map(i=>ABS(i.d,i.e))) : 0;
 
 /* ---------- state ---------- */
 let favs = new Set(store.get('wdsfist-favs', []));
@@ -839,20 +846,36 @@ route();
 setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
 
 /* ---------- keep open pages fresh ---------- */
-const LOADED_AT = Date.now();
-let lastInput = Date.now();
+// The page checks a tiny version file and reloads only when the data really changed.
+let lastInput = Date.now(), pendingUpdate = false;
 ['touchstart','keydown','wheel','click'].forEach(ev => addEventListener(ev, () => { lastInput = Date.now(); }, {passive:true}));
 const canReload = () => { try { return !!localStorage.getItem('wdsfist-k'); } catch(e) { return false; } };
-function maybeReload(onReturn){
-  if(!canReload() || simAbs != null) return;
-  if((Date.now() - LOADED_AT) / 60000 < 8) return;
-  if($('ov').classList.contains('on')) return;
-  const ae = document.activeElement; if(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)) return;
-  if(!onReturn && Date.now() - lastInput < 45000) return;
+const busy = () => { if($('ov').classList.contains('on')) return true; const ae = document.activeElement; return !!(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)); };
+function tryReload(onReturn){
+  if(!pendingUpdate || simAbs != null) return;
+  if(!canReload()){ showUpdateNote(); return; }
+  if(busy() || (!onReturn && Date.now() - lastInput < 45000)) return;
   location.reload();
 }
-document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') maybeReload(true); });
-setInterval(() => maybeReload(false), 60000);
+function showUpdateNote(){
+  const el = $('upd'); if(!el || !el.hidden) return;
+  el.hidden = false;
+  el.innerHTML = `${L('Program güncellendi.','The schedule has been updated.')} <button class="linkbtn" id="updGo">${L('Yenile','Refresh')}</button>`;
+  $('updGo').onclick = () => location.reload();
+}
+async function checkVersion(onReturn){
+  if(!BUILD || location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  try {
+    const r = await fetch('version.txt', {cache:'no-store'}); if(!r.ok) return;
+    const [h, f] = (await r.text()).trim().split('\n');
+    if(f && Date.parse(f) > Date.parse(DATA.fetched)){ DATA.fetched = f; applyLang(); renderStale(); }
+    if(h && h !== BUILD) pendingUpdate = true;
+  } catch(e) {}
+  tryReload(onReturn);
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkVersion(true); });
+setInterval(() => checkVersion(false), 120000);
+setTimeout(() => checkVersion(false), 15000);
 function renderStale(){
   const age = Math.round((Date.now() - Date.parse(DATA.fetched)) / 60000);
   const a = (Date.now() - EPOCH) / 60000;

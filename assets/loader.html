@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#7C1528">
@@ -26,6 +26,7 @@ label{display:flex;gap:8px;align-items:center;font-size:14px;color:#6E6574;margi
 <button type="submit" id="go">Giriş · Enter</button><div class="err" id="err"></div>
 <p style="font-size:12.5px;margin:14px 0 0">Bağımsız takip sayfası, resmi WDSF sitesi değildir.<br>Independent page, not an official WDSF site.</p></form>
 <script>
+(()=>{
 const S="__S__",I="__I__",C="__C__",N=__N__;
 const u=s=>Uint8Array.from(atob(s),ch=>ch.charCodeAt(0));
 const b=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
@@ -62,4 +63,5 @@ document.getElementById('f').onsubmit=async e=>{
     show(h); }
   catch(x){ await new Promise(r=>setTimeout(r,900)); err.textContent='Şifre yanlış. · Wrong password.'; go.disabled=false; go.textContent='Giriş · Enter'; busy=false; }
 };
+})();
 </script></body></html>

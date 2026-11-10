@@ -1,9 +1,7 @@
 name: Update site
 on:
   schedule:
-    - cron: '*/5 4-20 11-15 11 *'      # every 5 min, 07:00–23:59 Istanbul on event days (11–15 Nov)
-    - cron: '7,37 * 9-16 11 *'         # every 30 min around the event
-    - cron: '17 5 * * *'               # once a day otherwise
+    - cron: '17 5 * * *'               # once a day (the live updater runs during the event)
   workflow_dispatch:
     inputs:
       full:
@@ -46,8 +44,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          npx --yes wrangler@3 pages project create istanbul2026-takip --production-branch=main >/dev/null 2>&1 || true
-          npx --yes wrangler@3 pages deploy dist --project-name=istanbul2026-takip --branch=main --commit-dirty=true
+          npx --yes wrangler@3.114.17 pages project create istanbul2026-takip --production-branch=main >/dev/null 2>&1 || true
+          npx --yes wrangler@3.114.17 pages deploy dist --project-name=istanbul2026-takip --branch=main --commit-dirty=true
+      - name: Remove older deployments
+        if: ${{ env.CF_TOKEN != '' && steps.build.outputs.deploy == 'true' }}
+        continue-on-error: true
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/cleanup.mjs
       - uses: actions/cache/save@v4
         if: success() && hashFiles('data/last.json') != ''
         with:
