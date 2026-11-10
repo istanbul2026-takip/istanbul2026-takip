@@ -95,6 +95,7 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .cwarn .dtag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:0 6px;border-radius:5px;border:2px solid var(--dc);color:var(--ink);background:var(--surface);vertical-align:2px;line-height:17px}
 .srcs{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0 8px;font-size:14px}.srcs summary{cursor:pointer;font-weight:700;min-height:32px;line-height:1.5;padding:4px 0}.srcs li{margin:6px 0;line-height:1.45}
 .plan{font-size:12px;color:var(--muted)}
+.wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
@@ -529,9 +530,8 @@ try { const c = JSON.parse(localStorage.getItem('wdsfist-live') || 'null'); if(c
 const liveFresh = () => !!(LIVE && simAbs == null && Date.now() - Date.parse(LIVE.fetched) < 20*60000);
 COMPLIST.forEach(c => c.rounds.forEach(r => { r.ps = r.s; r.pe = r.e; r.shift = 0; r.lst = null; }));
 ITEMS.forEach(i => { i.ps = i.s; i.pe = i.e; });
-// marX exports have shown whole timetables moved by whole hours (a time-zone slip on export:
-// every day, even days not started yet, moved by exactly +2 h). Real delays only build up on the
-// day being danced, so a common whole-hour shift on days not yet started is taken as an offset.
+// How far marX's whole programme sits from WDSF (e.g. +120 min). Not used to change any time:
+// only to tell the user, and to place rounds that marX puts after midnight on the right day.
 function liveOffset(){
   if(!LIVE || !LIVE.r) return 0;
   const today = 11 + Math.floor(nowAbs() / 1440), started = nowAbs() >= 0;
@@ -552,29 +552,46 @@ let liveOffFor = null, liveOff = 0;
 function applyLive(){
   const a = nowAbs(), fresh = liveFresh();
   if(LIVE !== liveOffFor){ liveOffFor = LIVE; liveOff = liveOffset(); }
-  COMPLIST.forEach(c => c.rounds.forEach((r, ix) => {
-    r.s = r.ps; r.e = r.pe; r.shift = 0; r.lst = null;
+  COMPLIST.forEach(c => { let prev = null; c.rounds.forEach((r, ix) => {
+    r.s = r.ps; r.e = r.pe; r.shift = 0; r.lst = null; r.base = r.ps;
     const m = LIVE && LIVE.r && LIVE.r[c.id + '.' + (ix + 1)];
     if(!m || m[0] !== c.day || typeof m[2] !== 'number') return;
     const dur = m[3] > 0 ? m[3] : r.pe - r.ps;
-    let t = m[2] - liveOff; if(t - r.ps > 720) t -= 1440; if(t - r.ps < -720) t += 1440;
-    r.s = t; r.e = t + Math.max(1, dur); r.shift = Math.round(t - r.ps);
+    // marX is the main source: its times are shown as they are. Its programme as a whole may sit
+    // a fixed amount away from WDSF (liveOff); only movement beyond that counts as a delay.
+    // marX is the main source: its times are shown exactly as marX gives them (no correction).
+    r.base = r.ps;
+    let t = m[2]; if(t - r.ps - liveOff > 720) t -= 1440; if(t - r.ps - liveOff < -720) t += 1440;   // only to place after-midnight rounds on the right side of midnight
+    if(prev != null && t < prev - 60) t += 1440;          // after midnight: still later than the round before
+    prev = t;
+    r.s = t; r.e = t + Math.max(1, dur); r.shift = Math.round(t - r.base);
     if(!fresh) return;
     r.lst = m[4];
     const now = a - ABS(c.day, 0);
     if(m[4] === 'd' && r.e > now) r.e = Math.max(r.s + 1, Math.floor(now));                 // finished early
-    if(m[4] === 'c'){ if(now < r.s) r.s = Math.floor(now); if(now >= r.e) r.e = Math.ceil(now) + 3; }   // on stage now (early or running long)
-  }));
-  // other programme items (breaks, ceremonies) move with the round before them in the same hall
+    if(m[4] === 'c' && now >= r.e) r.e = Math.ceil(now) + 3;   // marX says still on stage: keep it as 'now' (start time stays as marX gives it)
+  }); });
+  // other programme items (rehearsals, results, breaks, ceremonies): marX's own time when marX
+  // lists the same item; otherwise they move with the round before them in the same hall
+  const mxx = {}, used = new Set();
+  ((LIVE && LIVE.x) || []).forEach((m, n) => { const k = m[0] + '|' + m[1] + '|' + m[4]; (mxx[k] = mxx[k] || []).push(n); });
+  const keyOf = i => { const raw = String(i.raw || '').trim();
+    const rm = raw.match(/^Results presentation:\s*(.*)$/i);
+    return rm ? 'R:' + rm[1].split(/\s+·\s+/).map(t => t.replace(/^\d+\.\s*/, '').trim()).sort().join('|') : raw; };
   const off = {};
   ITEMS.slice().sort((x,y) => ABS(x.d,x.ps) - ABS(y.d,y.ps)).forEach(i => {
     const k = i.d + i.h;
-    if(i.kind === 'round'){ i.s = i.round.s; i.e = i.round.e; off[k] = i.round.shift; }
-    else { const o = off[k] || 0; i.s = i.ps + o; i.e = i.pe + o; }
+    if(i.kind === 'round'){ i.s = i.round.s; i.e = i.round.e; off[k] = i.round.s - i.round.ps; i.mx = !!(LIVE && LIVE.r && LIVE.r[i.comp.id + '.' + (i.comp.rounds.indexOf(i.round) + 1)]); return; }
+    const cand = (mxx[i.d + '|' + i.h + '|' + keyOf(i)] || []).filter(n => !used.has(n));
+    if(cand.length){ const m = LIVE.x[cand[0]]; used.add(cand[0]);
+      let t = m[2]; if(t - i.ps - liveOff > 720) t -= 1440; if(t - i.ps - liveOff < -720) t += 1440;
+      i.s = t; i.e = t + Math.max(1, m[3] || (i.pe - i.ps)); i.mx = true; }
+    else { const o = off[k] || 0; i.s = i.ps + o; i.e = i.pe + o; i.mx = false; }
   });
   ITEMS.sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s) || (x.h < y.h ? -1 : 1));
 }
-const dlyTag = r => !r || !r.shift || Math.abs(r.shift) < 2 ? '' : `<span class="dly" title="${L('WDSF planı','WDSF plan')} ${fmt(r.ps)}">${r.shift > 0 ? '+' + r.shift + L(' dk gecikme',' min late') : r.shift + L(' dk erken',' min early')}</span>`;
+// When marX and WDSF disagree, show WDSF's time next to marX's, without judging which is right.
+const dlyTag = r => !r || !r.shift || Math.abs(r.shift) < 1 ? '' : `<span class="wdsft" title="${L('WDSF sitesindeki saat','Time on the WDSF site')}">WDSF ${fmt(r.ps)}</span>`;
 const nowLabel = r => r && r.lst === 'c' ? L('SALONDA ŞU AN','ON STAGE NOW') : L('PLANA GÖRE ŞU AN','SCHEDULED NOW');
 async function pullLive(){
   if(location.protocol === 'file:' || document.visibilityState === 'hidden') return;
@@ -1041,7 +1058,7 @@ const clubWho = it => it.kind === 'round' ? clubEntries(it.comp.id).flatMap(e =>
   : it.kind === 'note' ? (it.people || []) : ((CLUB.rel[it.k] || []).flatMap(id => clubEntries(id).flatMap(e => e[2])));
 function clubItems(day){
   const out = ITEMS.filter(i => i.d === day && (i.kind === 'round' ? CLUBIDS.has(i.comp.id) : !!(i.k && CLUB.rel[i.k])));
-  (CLUB.notes || []).forEach(n => { const s0 = toMin(n.time); if(n.day === day && s0 != null) out.push({kind:'note', d:day, h:n.hall || 'A', s:s0, e:s0, text:n.text, people:n.people || []}); });
+  (CLUB.notes || []).forEach(n => { const s0 = toMin(n.time); if(n.day === day && s0 != null) out.push({kind:'note', d:day, h:n.hall || 'A', s:s0, e:s0, written:n.time, text:n.text, people:n.people || []}); });
   return out.sort((a,b) => a.s - b.s || (a.h < b.h ? -1 : 1));
 }
 // Discipline first, as its own tag: Show / Jazz / Modern are different competitions.
@@ -1058,7 +1075,7 @@ function clubRow(i, a){
     return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
       <div class="ti">${klas(c)}</div>
       <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
-      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':dlyTag(i.round)}${!done && i.round.shift && Math.abs(i.round.shift)>=2 ? `<span class="plan">${L('WDSF planı','WDSF plan')} ${fmt(i.round.ps)}</span>` : ''}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
+      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':dlyTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
   }
   if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${L('Hoca notu','Coach note')}</span>${hallChip(i.h)}</div></div>${tick}</div>`;
   const ids = CLUB.rel[i.k] || [];
@@ -1097,14 +1114,14 @@ const tTxt = iso => iso ? new Date(iso).toLocaleString(L('tr-TR','en-GB'), {time
 const agoTxt = iso => { if(!iso) return ''; const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? L('az önce','just now') : m < 60 ? L(`${m} dk önce`,`${m} min ago`) : L(`${Math.floor(m/60)} sa ${m%60} dk önce`,`${Math.floor(m/60)} h ${m%60} min ago`); };
 function clubSources(){
   const comps = Object.keys(CLUB.entries).length, ents = Object.values(CLUB.entries).reduce((n, v) => n + v.length, 0);
-  const shifted = COMPLIST.filter(c => CLUBIDS.has(c.id)).flatMap(c => c.rounds).filter(r => Math.abs(r.shift || 0) >= 2).length;
+  const shifted = COMPLIST.filter(c => CLUBIDS.has(c.id)).flatMap(c => c.rounds).filter(r => Math.abs(r.shift || 0) >= 1).length;
   const fresh = liveFresh();
   return `<details class="srcs"><summary>ⓘ ${L('Bu bilgiler nereden geliyor?','Where does this come from?')} <span style="color:var(--muted);font-weight:500">· WDSF ${agoTxt(DATA.fetched)}${LIVE ? ' · marX ' + agoTxt(LIVE.fetched) : ''}</span></summary><ul>
-    <li><b>${L('Program ve kayıtlar: WDSF','Schedule and entries: WDSF')}</b> (worlddancesport.org). ${L('Son kontrol','Last check')}: ${tTxt(DATA.fetched)}. ${L('Gündüz her 3 dakikada kontrol edilir; değişiklik olursa site kendini yeniler.','Checked every 3 minutes by day; the page reloads itself when something changes.')}</li>
-    <li><b>${L('Salondaki gerçek akış: organizasyonun canlı sayfası (marX)','Real flow in the hall: organiser\'s live page (marX)')}</b>. ${LIVE ? `${L('Son kontrol','Last check')}: ${tTxt(LIVE.fetched)}; ${L('marX\'ın son güncellemesi','marX last updated')}: ${tTxt(LIVE.at)}.` : L('Henüz alınamadı.','Not received yet.')} ${L('Her dakika kontrol edilir.','Checked every minute.')} ${fresh ? (shifted ? L(`Şu an ${shifted} kulüp turunun saati marX'a göre WDSF planından farklı; bu turlarda gecikme ve WDSF planı ayrıca yazıyor.`,`${shifted} club rounds currently differ from the WDSF plan; those show the delay and the WDSF plan time.`) : L('Şu an marX ile WDSF saatleri aynı.','marX and WDSF times currently match.')) : L('Canlı akış 20 dakikadır güncellenmediği için "şu an sahnede" bilgisi WDSF planına göre gösteriliyor.','The live timetable has not updated for 20 minutes, so "on stage now" follows the WDSF plan.')}</li>
-    ${liveOff ? `<li><b>${L('Düzeltme','Correction')}:</b> ${L(`marX'taki saatler, henüz başlamamış günler dahil bütün programda WDSF'ye göre ${liveOff > 0 ? '+' : ''}${liveOff} dk kaymış geliyor. Gerçek bir gecikme bütün günleri birden aynı miktarda kaydırmaz; büyük ihtimalle marX'ın saat dilimi ayarı hatalı (Orta Avrupa ile İstanbul arası tam 2 saat). Bu yüzden site WDSF saatlerini gösteriyor ve marX sayfası şu an sitedekinden ${Math.abs(liveOff)/60} saat farklı görünüyor. Emin olmak için organizasyona sorulmalı.`,`marX times are shifted by ${liveOff > 0 ? '+' : ''}${liveOff} min against WDSF across the whole programme, including days not started. A real delay would not move every day by the same amount, so this is most likely a time-zone setting in marX; the page shows WDSF times and marX currently looks ${Math.abs(liveOff)/60} h off. Worth confirming with the organiser.`)}</li>` : ''}
+    <li><b>${L('Saatler: organizasyonun canlı sayfası (marX) — ana kaynak','Times: organiser\'s live page (marX), main source')}</b>. ${LIVE ? `${L('Son kontrol','Last check')}: ${tTxt(LIVE.fetched)}; ${L('marX\'ın son güncellemesi','marX last updated')}: ${tTxt(LIVE.at)}.` : L('Henüz alınamadı; saatler şimdilik WDSF\'den.','Not received yet; times come from WDSF for now.')} ${L('Her dakika kontrol edilir; sitedeki saatler marX\'takiyle aynıdır.','Checked every minute; times here are the same as on marX.')} ${fresh ? (shifted ? L(`${shifted} kulüp turunda marX ile WDSF saati farklı; bu turlarda yanında küçük "WDSF" saati yazıyor.`,`${shifted} club rounds have a different time on WDSF; those show the WDSF time in small print.`) : L('Şu an marX ile WDSF saatleri aynı.','marX and WDSF times currently match.')) : L('Canlı akış 20 dakikadır güncellenmediği için "sahnede" bilgisi saate göre tahmin ediliyor.','The live timetable has not updated for 20 minutes, so "on stage" is estimated from the clock.')}</li>
+    ${liveOff ? `<li><b>${L('WDSF ile fark','Difference from WDSF')}:</b> ${L(`WDSF sitesindeki saatler, marX'takilerden bütün programda ${Math.abs(liveOff)} dk ${liveOff > 0 ? 'erken' : 'geç'}. Site marX'ı olduğu gibi gösteriyor, hiçbir düzeltme yapmıyor; hangisinin doğru olduğunu organizasyon belirler.`,`Times on the WDSF site are ${Math.abs(liveOff)} min ${liveOff > 0 ? 'earlier' : 'later'} than marX across the programme. This page follows marX; the WDSF site shows different times.`)}</li>` : ''}
+    <li><b>${L('Yarışmalar, turlar ve kayıtlar: WDSF','Competitions, rounds and entries: WDSF')}</b> (worlddancesport.org). ${L('Son kontrol','Last check')}: ${tTxt(DATA.fetched)}. ${L('Gündüz her 3 dakikada kontrol edilir; değişiklik olursa site kendini yeniler.','Checked every 3 minutes by day; the page reloads itself when something changes.')}</li>
     <li><b>${L('Kulüp kayıtları','Club entries')}</b>: ${L(`${comps} yarışmada ${ents} kayıt, ${CLUB.members.length} sporcu.`,`${ents} entries in ${comps} competitions, ${CLUB.members.length} athletes.`)} ${L('Adında "Tarz" geçen takımlar, ayrıca Secret ve Marvellous; bu takımların üyeleri; üyelerin solo ve düetleri. Elle eklenen: Necla Nehir Demirkurnali, Koray Ege Ozdemir. Her WDSF güncellemesinde yeniden hesaplanır.','Teams named "Tarz", plus Secret and Marvellous; their members; the members\' solos and duos. Added by hand: Necla Nehir Demirkurnali, Koray Ege Ozdemir. Recalculated on every WDSF update.')}</li>
-    <li><b>${L('Hoca notları','Coach notes')}</b>: ${L(`${(CLUB.notes||[]).length} not (📝 ile gösterilir). WDSF'de olmayan bilgiler.`,`${(CLUB.notes||[]).length} notes (marked 📝), information not on WDSF.`)}</li>
+    <li><b>${L('Hoca notları','Coach notes')}</b>: ${L(`${(CLUB.notes||[]).length} not (📝 ile gösterilir). WDSF'de olmayan bilgiler.${liveOff ? ' Defterdeki saatle gösterilir; marX ile karşılaştırırken bunu göz önünde bulundur.' : ''}`,`${(CLUB.notes||[]).length} notes (marked 📝), information not on WDSF.`)}</li>
     <li><b>${L('Sıkışık geçiş','Tight changeover')}</b>: ${L('aynı sporcunun farklı iki yarışmadaki turları arasında 15 dakikadan az olması. Bütün tur çiftleri güncel saatlerle karşılaştırılır.','under 15 minutes between an athlete\'s rounds in two different competitions. All pairs of rounds are compared using the current times.')}</li>
     <li><b>${L('Bitti işaretleri','Done ticks')}</b>: ${L('sadece bu telefonda saklanır, başkasıyla paylaşılmaz.','stored on this phone only, not shared.')}</li>
   </ul></details>`;
