@@ -228,7 +228,9 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 .seg a{flex:1;text-align:center;text-decoration:none;padding:9px 6px;border-radius:9px;font-weight:600;font-size:15px;color:var(--muted)}
 .seg a.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .find{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 14px;margin-top:12px}
-.find h3{font-family:var(--display);font-size:26px;font-weight:800;margin:0 0 4px;line-height:1.05}
+.find{position:relative}
+.find .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;font-size:14px}
+.find h3{margin-right:44px!important;font-family:var(--display);font-size:26px;font-weight:800;margin:0 0 4px;line-height:1.05}
 .find p{margin:0 0 12px;color:var(--muted);font-size:14.5px;line-height:1.45}
 .find .steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--muted)}
 .find .steps span{background:var(--sunk);border-radius:999px;padding:3px 10px}
@@ -568,17 +570,19 @@ function renderNow(){
       else if(m >= E){ const nd = DAYS.find(x=>x>d); if(nd){ const ni = ITEMS.find(i=>i.d===nd); hero = `<div class="hero"><div class="k">${L(`Bugünkü program bitti`,`Today's programme is over`)}</div><div class="big">${L(`Yarın `,`Tomorrow `)}${fmt(ni.s)}</div><div class="s">${nd} ${L('Kasım','November')} ${DAYN[nd]} · ${ni.kind==='round'?esc(ni.comp.name):esc(ni.text)}</div></div>`; } }
     }
   }
-  $('heroBox').innerHTML = hero + (myCompIds().size ? '' : `<div class="find"><h3>${L('Ne zaman dans ediyorsun?','When do you dance?')}</h3>
-    <p>${L('Adını ya da takımının adını yaz; hangi gün, hangi salonda ve saat kaçta olduğunu gör.','Type your name or your team; see the day, hall and time of each round.')}</p>
-    <input class="search" id="homeQ" type="search" placeholder="${L('Örn. Ayşe Yılmaz veya Team Ibiza','e.g. Ayse Yilmaz or Team Ibiza')}" autocomplete="off">
-    <div class="steps"><span>1 · ${L('Kendini bul','Find yourself')}</span><span>2 · ${L('Takip et','Follow')}</span><span>3 · ${L('Turlarını Takibim\'de gör, 30 dk önce uyarı al','See your rounds in Following, get a 30-min alert')}</span></div></div>`);
+  let findHidden = false; try { findHidden = localStorage.getItem('wdsfist-findhide') === '1'; } catch(e) {}
+  $('heroBox').innerHTML = hero + (myCompIds().size || findHidden ? '' : `<div class="find"><button class="x" id="findX" aria-label="${L('Kapat','Close')}">✕</button><h3>${L('Kimi takip ediyorsun?','Who are you following?')}</h3>
+    <p>${L('Kendini, çocuğunu, sporcularını ya da takımını bul; hangi gün, hangi salonda ve saat kaçta olduklarını gör. İstediğin kadar kişi ekleyebilirsin.','Find yourself, your child, your athletes or your team; see the day, hall and time of each round. Add as many as you like.')}</p>
+    <input class="search" id="homeQ" type="search" placeholder="${L('Sporcu veya takım adı','Athlete or team name')}" autocomplete="off">
+    <div class="steps"><span>1 · ${L('Bul','Find')}</span><span>2 · ${L('Takip et','Follow')}</span><span>3 · ${L('Turları Takibim\'de, 30 dk önce uyarı','Rounds in Following, 30-min alert')}</span></div></div>`);
+  if($('findX')) $('findX').onclick = () => { try { localStorage.setItem('wdsfist-findhide','1'); } catch(e) {} renderNow(); toast(L('Kapatıldı. Aramaya Ara sekmesinden ulaşabilirsin.','Hidden. Search is always in the Search tab.')); };
   if($('homeQ')) $('homeQ').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); goSearch(e.target.value); } });
   if($('homeQ')) $('homeQ').addEventListener('input', e => { clearTimeout(goSearch._t); const v = e.target.value; if(v.trim().length >= 3) goSearch._t = setTimeout(() => goSearch(v), 700); });
 
   // my next
   const mine = myCompIds();
   const myNext = ITEMS.filter(i => i.kind==='round' && mine.has(i.comp.id) && ABS(i.d,i.e) > a).slice(0,3);
-  $('mineBox').innerHTML = mine.size ? `<div class="mine"><div class="k">${L(`★ Takip ettiklerinde sırada`,`★ Up next for you`)}</div><div class="nexts">${
+  $('mineBox').innerHTML = mine.size ? `<div class="mine"><div class="k" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span>${L(`★ Takip ettiklerinde sırada`,`★ Up next for you`)}</span><a href="#sporcu" style="font-weight:600;font-size:13.5px;color:var(--mc);text-decoration:none;white-space:nowrap">${L('+ Kişi ekle','+ Add')}</a></div><div class="nexts">${
     myNext.length ? myNext.map(i => { const S=ABS(i.d,i.s); const live=a>=S;
       return `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx"><b>${esc(i.comp.name)}</b> ${roundTag(i.round)} ${myTags(i.comp.id)}<div class="in">${i.d!==d?DAYS3[i.d]+' '+i.d+' Kas · ':''}${L('Salon','Hall')} ${i.h}</div></div><div class="cd">${live?`<span class="livetag">${L('CANLI','LIVE')}</span>`:relTxt(S-a)}</div></div>`; }).join('')
     : `<div class="nx minor">${L('Takip ettiğin yarışmaların hepsi tamamlandı.','All competitions you follow are finished.')}</div>`}</div></div>` : '';
