@@ -72,6 +72,7 @@ nav.tabs a.on::before{content:"";position:absolute;top:0;left:28%;right:28%;heig
 
 h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.livelink{display:block;margin:10px 0;padding:11px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--live);color:var(--ink);text-decoration:none;font-size:14px;line-height:1.4}.livelink b{display:block;font-size:15px}.livelink span{color:var(--muted)}.livelink b span{color:var(--ink)}
 section{display:none}
 section.on{display:block}
 h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;margin:26px 0 10px;line-height:1.1}
@@ -291,6 +292,7 @@ button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:va
   <!-- NOW -->
   <section id="v-simdi">
     <div id="heroBox"></div>
+    <a class="livelink" href="https://marx.dance/reg/LIVE/2026/20261111_Istanbul/index.html" target="_blank" rel="noopener"><b><span class="tr">Salondaki gerçek akış</span><span class="en">Real-time flow in the hall</span></b><span class="tr">Gecikmeler, çıkış sırası ve anlık sonuçlar: organizasyonun canlı sayfası (marX) ↗</span><span class="en">Delays, start order and instant results: the organiser's live page (marX) ↗</span></a>
     <div id="mineBox"></div>
     <div class="halls" id="hallsBox"></div>
     <details class="tools"><summary><span class="tr">Mekân ve bilgiler</span><span class="en">Venue and info</span></summary>
@@ -345,7 +347,7 @@ button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:va
   <footer>
     <span class="tr">Takım için hazırlanmış bağımsız takip sayfasıdır; WDSF'nin resmi sitesi değildir.</span><span class="en">An independent tracking page made for the team; not an official WDSF site.</span><br>
     <button class="linkbtn" id="simToggle" hidden><span class="tr">Saati test et</span><span class="en">Test a time</span></button>
-    <span class="tr">Kaynak</span><span class="en">Source</span>: <a href="https://www.worlddancesport.org/Events/Istanbul-T%C3%BCrkiye-11112026-15112026-8773#tab=schedule" target="_blank" rel="noopener">WDSF</a> · <span class="tr">Son güncelleme</span><span class="en">Last update</span>: <span id="fetched"></span>.
+    <span class="tr">Canlı akış</span><span class="en">Live flow</span>: <a href="https://marx.dance/reg/LIVE/2026/20261111_Istanbul/index.html" target="_blank" rel="noopener">marX</a> · <span class="tr">Kaynak</span><span class="en">Source</span>: <a href="https://www.worlddancesport.org/Events/Istanbul-T%C3%BCrkiye-11112026-15112026-8773#tab=schedule" target="_blank" rel="noopener">WDSF</a> · <span class="tr">Son güncelleme</span><span class="en">Last update</span>: <span id="fetched"></span>.
     <span class="tr">Saatler WDSF'nin planlanan programıdır; yarışma sırasında kayma olabilir, salondaki duyuruları takip edin.</span><span class="en">Times are WDSF's planned schedule and may shift during the event; follow the announcements in the hall.</span>
   </footer>
 </div>
@@ -889,6 +891,7 @@ function openComp(id){
       <a class="lk" href="${base}Schedule/${slug}-${id}" target="_blank" rel="noopener">${L(`WDSF programı ↗`,`WDSF schedule ↗`)}</a>
       <a class="lk" href="${base}Participants/${slug}-${id}" target="_blank" rel="noopener">${L(`Katılımcılar ↗`,`Participants ↗`)}</a>
       <a class="lk" href="${base}Ranking/${slug}-${id}" target="_blank" rel="noopener">${L(`Sonuçlar ↗`,`Results ↗`)}</a>
+      <a class="lk" href="https://marx.dance/reg/LIVE/2026/20261111_Istanbul/index.html" target="_blank" rel="noopener">${L(`Canlı akış ve sonuçlar (marX) ↗`,`Live timetable & results (marX) ↗`)}</a>
     </div>
     ${c.ranking.length ? `${L(`<h2>🏅 Sonuçlar</h2>`,`<h2>🏅 Results</h2>`)}<div class="plist">${c.ranking.slice(0,60).map(([r,n,ct]) => { const nm = n.replace(/\s*\(.*\)\s*$/,''); const mine = pins.has(c.id+'|'+nm);
       return `<div class="pr" ${mine?'style="background:rgba(140,100,20,.16);background:color-mix(in srgb,var(--gilt) 18%,transparent);border-radius:8px"':''}><b style="width:30px;font-variant-numeric:tabular-nums">${esc(r)}.</b><button class="cty" ${ctyStyle(ct)} data-cty="${esc(ct)}">${ctyLabel(ct)}</button><div class="n">${esc(nm)}${mine?' ★':''}</div></div>`; }).join('')}</div>` : ''}
