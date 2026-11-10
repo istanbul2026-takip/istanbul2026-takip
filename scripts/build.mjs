@@ -8,7 +8,11 @@ const A = p => path.join(root, p);
 export async function buildPage(data, outDir = A('dist')) {
   const { S, _hash, _lastDeployAt, ...payload } = data;
   const { fetched: _f, ...stable } = payload;
-  const buildHash = createHash('sha256').update(JSON.stringify(stable)).digest('hex').slice(0, 16);
+  // The version covers the data AND the page/worker code, so a design change also counts as an update
+  // (otherwise phones keep opening their stored copy of the previous page).
+  const buildHash = createHash('sha256').update(JSON.stringify(stable))
+    .update(fs.readFileSync(A('assets/template.html'))).update(fs.readFileSync(A('assets/sw.js')))
+    .digest('hex').slice(0, 16);
   // Fonts and hall photos are not secret: ship them as separate, long-cached files so the
   // page stays small and repeat visits only download what changed.
   const assetDir = path.join(outDir, 'a');
