@@ -1,0 +1,1 @@
+# istanbul2026-takip
