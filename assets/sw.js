@@ -1,4 +1,4 @@
-// Keeps the last downloaded (encrypted) page on the phone so the site opens fast and without signal.
+// Keeps the last downloaded page on the phone so the site opens fast and without signal.
 // - Page: if version.txt says nothing changed, the stored copy opens instantly;
 //   otherwise the new page is downloaded (6s limit, then the stored copy).
 // - Fonts and photos under a/ never change (their names carry a hash): stored once, reused.

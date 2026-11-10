@@ -35,7 +35,6 @@ jobs:
         run: node scripts/update.mjs
         env:
           EVENT_NAME: ${{ github.event_name }}
-          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           FULL: ${{ github.event.inputs.full == 'true' && '1' || '0' }}
       - name: Publish to Cloudflare Pages
         if: ${{ env.CF_TOKEN != '' && steps.build.outputs.deploy == 'true' && hashFiles('dist/index.html') != '' }}

@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#7C1528">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="İstanbul 2026">
+<meta name="description" content="WDSF İstanbul 2026 yarışma programı: salonlar, turlar, sporcular ve takip.">
+<link rel="icon" href="data:,">
 <title>WDSF İstanbul 2026 · Yarışma Programı</title>
 <style>
 @font-face{font-family:"Big Shoulders Display";font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,/*F_BSD_LATIN*/) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -338,7 +344,7 @@ button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:va
   </main>
   <footer>
     <span class="tr">Takım için hazırlanmış bağımsız takip sayfasıdır; WDSF'nin resmi sitesi değildir.</span><span class="en">An independent tracking page made for the team; not an official WDSF site.</span><br>
-    <button class="linkbtn" id="forgetMe"><span class="tr">Bu cihazda çıkış yap</span><span class="en">Sign out on this device</span></button><br><button class="linkbtn" id="simToggle" hidden><span class="tr">Saati test et</span><span class="en">Test a time</span></button>
+    <button class="linkbtn" id="simToggle" hidden><span class="tr">Saati test et</span><span class="en">Test a time</span></button>
     <span class="tr">Kaynak</span><span class="en">Source</span>: <a href="https://www.worlddancesport.org/Events/Istanbul-T%C3%BCrkiye-11112026-15112026-8773#tab=schedule" target="_blank" rel="noopener">WDSF</a> · <span class="tr">Son güncelleme</span><span class="en">Last update</span>: <span id="fetched"></span>.
     <span class="tr">Saatler WDSF'nin planlanan programıdır; yarışma sırasında kayma olabilir, salondaki duyuruları takip edin.</span><span class="en">Times are WDSF's planned schedule and may shift during the event; follow the announcements in the hall.</span>
   </footer>
@@ -1036,7 +1042,11 @@ function applyLang(){
   $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
   $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
 }
-$('forgetMe').onclick = () => { try { localStorage.removeItem('wdsfist-k'); } catch(e) {} location.reload(); };
+// Offline copy on the phone (service worker); old sign-in key from the password version is no longer needed.
+try { localStorage.removeItem('wdsfist-k'); localStorage.removeItem('wdsfist-pw'); } catch(e) {}
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 $('themeBtn').onclick = () => { theme = isDark() ? 'light' : 'dark'; try{ localStorage.setItem('wdsfist-theme', theme); }catch(e){} applyTheme(); };
 if(window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch(e) {}
 $('lngBtn').onclick = () => { lang = lang==='en' ? 'tr' : 'en'; try{ localStorage.setItem('wdsfist-lang', lang); }catch(e){} applyLang(); rerender(); };
@@ -1048,7 +1058,7 @@ setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
 // The page checks a tiny version file and reloads only when the data really changed.
 let lastInput = Date.now(), pendingUpdate = false;
 ['touchstart','keydown','wheel','click'].forEach(ev => addEventListener(ev, () => { lastInput = Date.now(); }, {passive:true}));
-const canReload = () => { try { return !!localStorage.getItem('wdsfist-k'); } catch(e) { return false; } };
+const canReload = () => true;
 const busy = () => { if($('ov').classList.contains('on')) return true; const ae = document.activeElement; return !!(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)); };
 function tryReload(onReturn){
   if(!pendingUpdate || simAbs != null) return;

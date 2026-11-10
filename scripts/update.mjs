@@ -1,4 +1,4 @@
-// Scrape WDSF -> build the app -> encrypt with SITE_PASSWORD -> dist/index.html
+// Scrape WDSF -> build the app -> dist/index.html
 import fs from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
@@ -7,7 +7,6 @@ import { buildPage } from './build.mjs';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const A = p => path.join(root, p);
-const password = process.env.SITE_PASSWORD;
 
 const cacheFile = A('data/last.json');
 const prev = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : null;
@@ -33,12 +32,8 @@ const deploy = changed || heartbeatDue || forced || nowMs - lastDeployAt > 20 * 
 console.log(`changed: ${changed} · heartbeat due: ${heartbeatDue} · forced: ${forced} → deploy: ${deploy}`);
 if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy=${deploy}\n`);
 fs.mkdirSync(A('data'), { recursive: true });
-fs.writeFileSync(cacheFile, JSON.stringify({ ...data, _hash: hash, _lastDeployAt: deploy && password ? nowMs : lastDeployAt }));
+fs.writeFileSync(cacheFile, JSON.stringify({ ...data, _hash: hash, _lastDeployAt: deploy ? nowMs : lastDeployAt }));
 if (!deploy) process.exit(0);
 
-if (!password) {
-  console.log('::warning::SITE_PASSWORD secret is not set yet — data was fetched successfully, but the page was not built.');
-  process.exit(0);
-}
-const { bytes } = await buildPage(data, password);
+const { bytes } = await buildPage(data);
 console.log('dist/index.html', bytes, 'bytes');

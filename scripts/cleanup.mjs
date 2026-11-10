@@ -1,4 +1,4 @@
-// Delete older Cloudflare Pages deployments so earlier copies (and earlier passwords) stop working.
+// Delete older Cloudflare Pages deployments to keep the project tidy.
 const token = process.env.CLOUDFLARE_API_TOKEN, account = process.env.CLOUDFLARE_ACCOUNT_ID;
 const project = 'istanbul2026-takip', KEEP = 3;
 if (!token || !account) process.exit(0);
