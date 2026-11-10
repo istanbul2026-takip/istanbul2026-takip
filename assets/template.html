@@ -22,11 +22,15 @@ html[lang=en] .tr,html[lang=tr] .en{display:none!important}
   --r:14px; --ok:#1E8F5A;
 }
 @media (prefers-color-scheme:dark){
-  :root{--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#6D6373;--line:#352C3A;
-  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6}
+  :root:not([data-theme=light]){--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#6D6373;--line:#352C3A;
+  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6;color-scheme:dark}
 }
+:root[data-theme=dark]{--paper:#17121A;--surface:#211A25;--sunk:#2B2330;--ink:#F3EEF5;--muted:#A99FAF;--faint:#6D6373;--line:#352C3A;
+  --velvet:#8E1A30;--gilt:#E2B652;--gilt-soft:#3A2E17;--live:#FF4D66;--mc:#7B96FF;--jz:#FF8A55;--sd:#C77DFF;--im:#3FD3A6;color-scheme:dark}
+:root[data-theme=light]{color-scheme:light}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:hidden}
 body{margin:0;font-family:var(--body);background:var(--paper);color:var(--ink);font-size:16px;line-height:1.45;padding-bottom:calc(76px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit}
 a{color:inherit}
@@ -35,11 +39,13 @@ a{color:inherit}
 
 /* header */
 .top{display:flex;align-items:flex-end;justify-content:space-between;padding:18px 0 4px}
-.brand{display:flex;align-items:baseline;gap:10px}
+.brand{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
 .brand .mark{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;letter-spacing:.01em;color:var(--velvet)}
-@media (prefers-color-scheme:dark){.brand .mark{color:var(--live)}}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand .mark{color:var(--live)}}
+:root[data-theme=dark] .brand .mark{color:var(--live)}
 .brand .city{font-family:var(--display);font-weight:600;font-size:30px;line-height:1}
-.lng{border:1px solid var(--line);background:var(--surface);border-radius:999px;min-width:44px;height:36px;padding:0 12px;font-size:13px;font-weight:700;cursor:pointer}
+.tbtns{display:flex;gap:8px;flex:none}
+.lng{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;min-width:44px;height:36px;padding:0 12px;font-size:13px;font-weight:700;cursor:pointer}
 .status{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);padding-bottom:6px}
 .status .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:6px;vertical-align:1px}
 .sim{color:var(--gilt);font-weight:600}
@@ -160,7 +166,8 @@ details.more summary::-webkit-details-marker{display:none}
 .ath .cp b{color:var(--ink);font-weight:600}
 .cty{border:none;cursor:pointer;font-family:inherit;line-height:1.4;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--sunk);color:var(--ink);flex:none;margin-top:1px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .cty[style*='--h']{background:hsl(var(--h) 55% 90%);color:hsl(var(--h) 60% 25%)}
-@media (prefers-color-scheme:dark){.cty[style*='--h']{background:hsl(var(--h) 35% 24%);color:hsl(var(--h) 70% 85%)}}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .cty[style*='--h']{background:hsl(var(--h) 35% 24%);color:hsl(var(--h) 70% 85%)}}
+:root[data-theme=dark] .cty[style*='--h']{background:hsl(var(--h) 35% 24%);color:hsl(var(--h) 70% 85%)}
 .cty .fg{font-size:15px;line-height:1}
 .pin{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 14px;height:38px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
 .pin.on{background:var(--gilt);color:#fff;border-color:var(--gilt)}
@@ -228,7 +235,7 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 <div class="wrap">
   <header class="top">
     <div class="brand"><span class="mark">WDSF</span><span class="city">İstanbul 2026</span></div>
-    <button class="lng" id="lngBtn" aria-label="Language"></button>
+    <div class="tbtns"><button class="lng" id="themeBtn" aria-label="Tema / Theme"></button><button class="lng" id="lngBtn" aria-label="Language"></button></div>
   </header>
   <div class="status"><span id="clockTxt">–</span><span id="updTxt"></span></div>
   <div class="stalebar" id="stale" hidden></div>
@@ -318,6 +325,16 @@ const SLUG = /*SLUGS*/null;
 let lang = 'tr';
 try { lang = localStorage.getItem('wdsfist-lang') || ((navigator.language||'').toLowerCase().startsWith('tr') ? 'tr' : 'en'); } catch(e) {}
 const L = (tr, en) => lang==='en' ? en : tr;
+/* ---------- theme ---------- */
+let theme = null; try { theme = localStorage.getItem('wdsfist-theme'); } catch(e) {}
+const sysDark = () => !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+const isDark = () => theme ? theme === 'dark' : sysDark();
+function applyTheme(){
+  if(theme) document.documentElement.setAttribute('data-theme', theme); else document.documentElement.removeAttribute('data-theme');
+  const b = document.getElementById('themeBtn'); if(b){ b.textContent = isDark() ? '☀' : '☾'; b.title = isDark() ? L('Açık mod','Light mode') : L('Karanlık mod','Dark mode'); }
+  let m = document.querySelector('meta[name=theme-color]'); if(!m){ m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+  m.content = isDark() ? '#17121A' : '#7C1528';
+}
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -814,8 +831,10 @@ function applyLang(){
   $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
   $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
 }
+$('themeBtn').onclick = () => { theme = isDark() ? 'light' : 'dark'; try{ localStorage.setItem('wdsfist-theme', theme); }catch(e){} applyTheme(); };
+if(window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch(e) {}
 $('lngBtn').onclick = () => { lang = lang==='en' ? 'tr' : 'en'; try{ localStorage.setItem('wdsfist-lang', lang); }catch(e){} applyLang(); rerender(); };
-applyLang();
+applyLang(); applyTheme();
 route();
 setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
 

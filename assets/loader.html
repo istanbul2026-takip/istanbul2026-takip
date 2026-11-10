@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="İstanbul 2026">
 <title>İstanbul 2026 · Yarışma Programı</title>
 <style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#7C1528;color:#211A25;padding:20px;box-sizing:border-box}
 .box{width:100%;max-width:360px;background:#F4F2F6;border-radius:20px;padding:26px 22px}
 .k{font-size:15px;font-weight:800;color:#7C1528;letter-spacing:.02em}
@@ -34,7 +35,18 @@ async function fromPw(pw){
   return crypto.subtle.deriveKey({name:'PBKDF2',salt:u(S),iterations:N,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['decrypt']);
 }
 async function dec(key){ return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u(I)},key,u(C))); }
-function show(html){ document.open(); document.write(html); document.close(); }
+function show(html){
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  document.title = doc.title;
+  document.documentElement.lang = doc.documentElement.lang || 'tr';
+  document.querySelectorAll('head style').forEach(x => x.remove());
+  doc.head.querySelectorAll('style').forEach(x => document.head.appendChild(document.importNode(x, true)));
+  const body = document.importNode(doc.body, true);
+  const scripts = [...body.querySelectorAll('script')];
+  scripts.forEach(x => x.remove());
+  document.body.replaceWith(body);
+  scripts.forEach(x => { const n = document.createElement('script'); n.textContent = x.textContent; document.body.appendChild(n); });
+}
 try{ localStorage.removeItem('wdsfist-pw'); }catch(e){}
 let saved=null; try{ saved=localStorage.getItem(KEY); }catch(e){}
 const go=document.getElementById('go'), err=document.getElementById('err');
