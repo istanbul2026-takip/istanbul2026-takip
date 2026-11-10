@@ -74,6 +74,21 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .livelink{display:block;margin:10px 0;padding:11px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--live);color:var(--ink);text-decoration:none;font-size:14px;line-height:1.4}.livelink b{display:block;font-size:15px}.livelink span{color:var(--muted)}.livelink b span{color:var(--ink)}
 .dly{font-size:12px;font-weight:800;color:var(--live);background:var(--surface);border:1px solid var(--live);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
+#v-kulup .cday{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px}
+.csum{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.csum .k{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--live)}
+.csum .t{font-weight:700;font-size:16px;margin-top:2px}.csum .m{color:var(--muted);font-size:14px;margin-top:2px}
+.cfil{display:flex;gap:8px;align-items:center;margin:8px 0}.cfil select{flex:1;min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:15px;padding:0 10px}
+.cwarn{border:1px solid var(--live);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--surface)}.cwarn summary{font-weight:700;cursor:pointer;min-height:32px;line-height:32px}
+.cwarn li{margin:4px 0;font-size:14px}
+.crow{display:grid;grid-template-columns:58px 1fr;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.crow .tm{font-family:var(--disp);font-size:22px;font-weight:700;line-height:1}.crow .tm small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);font-weight:500;margin-top:3px}
+.crow .ti{font-weight:700}.crow .nm{margin-top:3px;font-size:14.5px}.crow .nm b{font-weight:700;color:var(--mc)}
+.crow .mt{margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.crow.past{opacity:1}.crow.past .tm,.crow.past .ti,.crow.past .nm,.crow.past .nm b{color:var(--muted)}
+.crow.live{background:var(--surface);border-left:4px solid var(--live);padding-left:8px}
+.crow.minor .ti{font-weight:500;color:var(--muted)}.crow.note{background:var(--surface);border-left:4px solid var(--gilt);padding-left:8px}
+.hchip{font-size:12px;font-weight:800;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
 section.on{display:block}
 h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;margin:26px 0 10px;line-height:1.1}
@@ -338,6 +353,11 @@ button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:va
     <div class="tl" id="aList"></div>
   </section>
 
+  <!-- CLUB -->
+  <section id="v-kulup">
+    <div id="clubBox"></div>
+  </section>
+
   <!-- MY PROGRAM -->
   <section id="v-programim">
     <h2><span class="tr">Takip ettiklerim</span><span class="en">Following</span></h2>
@@ -366,6 +386,7 @@ button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:va
 
 <script>
 const DATA = /*DATA*/null;
+const CLUB = /*CLUB*/null;   // club page: {slug,name,short,members,entries:{compId:[[entry,label,athletes]]},rel,notes}
 const SLUG = /*SLUGS*/null;
 const BUILD = /*BUILD*/null;
 
@@ -408,8 +429,9 @@ const CATN = new Proxy({}, {get:(_,k)=>CATN_()[k]});
 const ROUNDTR = r => (lang==='en' ? {'1st':'Round 1','1/16 F':'1/16 Final','1/8 F':'1/8 Final','1/4 F':'Quarter-final','1/2 F':'Semi-final','F':'Final'} : {'1st':'1. Tur','1/16 F':'1/16 Final','1/8 F':'1/8 Final','1/4 F':'Çeyrek Final','1/2 F':'Yarı Final','F':'Final'})[r] || r;
 const dur = m => m < 60 ? `${m} dk` : `${Math.floor(m/60)} sa ${m%60 ? (m%60)+' dk' : ''}`.trim();
 const store = {
-  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
-  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  ns(k){ return CLUB && !/-(lang|theme)$/.test(k) ? k.replace(/^wdsfist-/, CLUB.slug + '-') : k; },
+  get(k, d){ try{ const v = localStorage.getItem(this.ns(k)); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(this.ns(k), JSON.stringify(v)); }catch(e){} }
 };
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),3500); }
 
@@ -477,7 +499,7 @@ DATA.E.forEach(([d,h,s,en,t,id]) => {
   else if(/attire/i.test(t)) tx = () => L('Kostüm değişim arası','Costume change break');
   else if(/Break/i.test(t)) tx = () => L('Ara','Break');
   const is = toMin(s), ie = toMin(en) != null && toMin(en) > is ? toMin(en) : is + 5;
-  ITEMS.push({kind, d, h, s:is, e:ie, get text(){ return tx(); }, names});
+  ITEMS.push({kind, d, h, s:is, e:ie, k: d+'|'+h+'|'+s, raw: t, get text(){ return tx(); }, names});
 });
 ITEMS.sort((a,b)=>ABS(a.d,a.s)-ABS(b.d,b.s) || (a.h<b.h?-1:1));
 const firstAbs = ITEMS.length ? Math.min(...ITEMS.map(i=>ABS(i.d,i.s))) : 0;
@@ -555,8 +577,8 @@ const utcStamp = (d,m) => { const t = new Date(EPOCH + ABS(d,m)*60000); return t
 function icsFor(items){
   const st = (d,m) => utcStamp(d,m);
   const escI = t => String(t).replace(/[\\;,]/g, m => '\\' + m).replace(/\n/g, ' ');
-  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//istanbul2026-takip//TR','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:İstanbul 2026'];
-  items.forEach(i => { const mn = myNames(i.comp.id);
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//istanbul2026-takip//TR','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:' + (CLUB ? CLUB.short + ' · ' : '') + 'İstanbul 2026'];
+  items.forEach(i => { const mn = CLUB ? clubEntries(i.comp.id).map(e => e[1]) : myNames(i.comp.id);
     lines.push('BEGIN:VEVENT', `UID:ist2026-${i.comp.id}-${String(i.round.r).replace(/[^\w]/g,'')}@istanbul2026-takip`, 'DTSTAMP:' + st(11, 0),
       'DTSTART:' + st(i.d, i.s), 'DTEND:' + st(i.d, i.e),
       'SUMMARY:' + escI(`${mn.length ? mn.join(', ') + ' · ' : ''}${i.comp.name} · ${i.round.label}${isLater(i.comp, i.round) ? ' ' + L('(geçerse)','(if qualified)') : ''}`),
@@ -981,6 +1003,85 @@ window.addEventListener('popstate', () => { if($('ov').classList.contains('on'))
 $('ov').addEventListener('click', e => { if(e.target.id==='ov') closeSheet(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
 
+/* ---------- club page ---------- */
+const todayDay = () => 11 + Math.floor(nowAbs()/1440);
+const CLUBIDS = new Set(CLUB ? Object.keys(CLUB.entries).map(Number) : []);
+const clubEntries = id => (CLUB && CLUB.entries[id]) || [];
+const clubWho = it => it.kind === 'round' ? clubEntries(it.comp.id).flatMap(e => e[2])
+  : it.kind === 'note' ? (it.people || []) : ((CLUB.rel[it.k] || []).flatMap(id => clubEntries(id).flatMap(e => e[2])));
+function clubItems(day){
+  const out = ITEMS.filter(i => i.d === day && (i.kind === 'round' ? CLUBIDS.has(i.comp.id) : !!(i.k && CLUB.rel[i.k])));
+  (CLUB.notes || []).forEach(n => { const s0 = toMin(n.time); if(n.day === day && s0 != null) out.push({kind:'note', d:day, h:n.hall || 'A', s:s0, e:s0, text:n.text, people:n.people || []}); });
+  return out.sort((a,b) => a.s - b.s || (a.h < b.h ? -1 : 1));
+}
+const hallChip = h => `<span class="hchip ${h}">${h} · ${esc((HALL[h]||h).split(' · ')[1] || h)}</span>`;
+function clubRow(i, a){
+  const S = ABS(i.d,i.s), E = ABS(i.d,i.e), st0 = i.kind === 'note' ? (a >= S ? 'past' : 'up') : (a >= E ? 'past' : a >= S ? 'live' : 'up');
+  const person = st.cPerson;
+  if(i.kind === 'round'){
+    const c = i.comp, ents = clubEntries(c.id).filter(e => !person || e[2].includes(person));
+    return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
+      <div class="ti">${esc(c.name)}</div>
+      <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
+      <div class="mt">${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${dlyTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div></div>`;
+  }
+  if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${L('Hoca notu','Coach note')}</span>${hallChip(i.h)}</div></div></div>`;
+  const ids = CLUB.rel[i.k] || [];
+  const isReh = /rehearsal/i.test(i.raw || '');
+  const what = isReh ? L('Sahne provası','Stage rehearsal') : /Results/i.test(i.raw||'') ? L('Ödül töreni','Awards') : i.text;
+  const names = ids.map(id => clubEntries(id).map(e => e[1]).join(', ')).filter(Boolean).join(' · ');
+  return `<div class="crow minor ${st0}" ${ids.length===1?`data-comp="${ids[0]}"`:''}><div class="tm">${fmt(i.s)}</div><div><div class="ti">${esc(what)}${names?` — <span style="color:var(--ink)">${esc(names)}</span>`:''}</div><div class="mt">${hallChip(i.h)}</div></div></div>`;
+}
+function clubWarnings(day){
+  const rounds = ITEMS.filter(i => i.d === day && i.kind === 'round' && CLUBIDS.has(i.comp.id));
+  const by = {};
+  rounds.forEach(i => new Set(clubEntries(i.comp.id).flatMap(e => e[2])).forEach(p => (by[p] = by[p] || []).push(i)));
+  const out = [];
+  Object.entries(by).forEach(([p, list]) => {
+    list.sort((x,y) => x.s - y.s);
+    for(let k = 1; k < list.length; k++){
+      const A0 = list[k-1], B0 = list[k], gap = B0.s - A0.e;
+      if(A0.comp.id === B0.comp.id || gap >= 15) continue;
+      out.push({p, A:A0, B:B0, gap, s:A0.s});
+    }
+  });
+  return out.sort((x,y) => x.s - y.s);
+}
+function renderClub(soft){
+  const a = nowAbs(), d = todayDay();
+  if(st.cDay == null) st.cDay = DAYS.includes(d) ? d : (a > ABS(DAYS[DAYS.length-1], 0) ? DAYS[DAYS.length-1] : DAYS[0]);
+  if(st.cPerson == null) st.cPerson = store.get('wdsfist-cperson', '');
+  const day = st.cDay, person = st.cPerson;
+  let items = clubItems(day);
+  if(person) items = items.filter(i => clubWho(i).includes(person) || (i.kind !== 'round' && !clubWho(i).length && i.kind !== 'note'));
+  const roundsAll = DAYS.map(x => clubItems(x).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))).length);
+  let html = `<h2 style="margin-bottom:2px">${esc(CLUB.name)}</h2><div class="plannote" style="padding:0 0 4px">${L('Kulübün tüm turları, provaları ve ödül törenleri. Saatler WDSF ve organizasyonun canlı akışından otomatik gelir.','All club rounds, rehearsals and awards. Times come automatically from WDSF and the organiser\'s live timetable.')}</div>`;
+  // what's on now / next (any day)
+  const upc = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person)) && ABS(i.d,i.e) > a).sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
+  const live = upc.filter(i => ABS(i.d,i.s) <= a), nxt = upc.filter(i => ABS(i.d,i.s) > a).slice(0, 2);
+  const sumLine = (i, k) => { const ents = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => e[1]).join(' · ');
+    return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}</div><div class="t">${fmt(i.s)} · ${esc(i.comp.name)} ${roundTag(i.round)}${dlyTag(i.round)}</div><div class="m">${esc(ents)} · ${hallChip(i.h)}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ''}</div></div>`; };
+  live.forEach(i => html += sumLine(i, i.round.lst==='c' ? L('● SAHNEDE','● ON STAGE') : L('● PLANA GÖRE ŞU AN','● SCHEDULED NOW')));
+  nxt.forEach((i, k) => html += sumLine(i, k ? L('SONRAKİ','AFTER THAT') : L('SIRADAKİ','NEXT UP')));
+  html += `<div class="cfil"><label for="cPer" class="sr">${L('Sporcu','Athlete')}</label><select id="cPer"><option value="">${L('Bütün kulüp','Whole club')}</option>${CLUB.members.filter(m => DAYS.some(x => clubItems(x).some(i => clubWho(i).includes(m)))).map(m => `<option ${m===person?'selected':''}>${esc(m)}</option>`).join('')}</select>
+    <button class="btn" id="cIcs" style="white-space:nowrap">📅 ${L('Takvime','Calendar')}</button></div>`;
+  html += `<div class="cday">${DAYS.map((x, k) => `<button class="day ${x===day?'on':''}" data-cd="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${roundsAll[k]} ${L('tur','rounds')}</small></button>`).join('')}</div>`;
+  const warns = clubWarnings(day).filter(w => !person || w.p === person);
+  if(warns.length) html += `<details class="cwarn" ${person?'open':''}><summary>⚠ ${L(`${warns.length} sıkışık geçiş`,`${warns.length} tight changeovers`)}</summary><ul>${warns.map(w => `<li><b>${esc(w.p)}</b>: ${fmt(w.A.e)} ${w.A.h} → ${fmt(w.B.s)} ${w.B.h} · ${w.gap < 0 ? L('<b>saatler çakışıyor</b>','<b>times overlap</b>') : L(`${w.gap} dk`,`${w.gap} min`)}<br><small style="color:var(--muted)">${esc(w.A.comp.short)} ${esc(w.A.round.label)} → ${esc(w.B.comp.short)} ${esc(w.B.round.label)}${isLater(w.B.comp, w.B.round)?L(' (geçerse)',' (if qualified)'):''}</small></li>`).join('')}</ul></details>`;
+  if(!items.length) html += `<p class="plannote">${person ? L(`${esc(person)} bu gün yarışmıyor.`,`${esc(person)} is not competing this day.`) : L('Bu gün kulübün yarışması yok.','No club events this day.')}</p>`;
+  let placed = false;
+  items.forEach(i => {
+    if(!placed && ABS(i.d,i.e) > a && ABS(i.d,0) <= a && a < ABS(i.d,1440)){ html += `<div class="nowline" id="cNow">${L('ŞİMDİ ','NOW ')}${fmt(Math.floor(((a%1440)+1440)%1440))}</div>`; placed = true; }
+    html += clubRow(i, a);
+  });
+  const y = window.scrollY;
+  $('clubBox').innerHTML = html;
+  if(soft) window.scrollTo(0, y);
+  $('clubBox').querySelectorAll('[data-cd]').forEach(b => b.onclick = () => { st.cDay = +b.dataset.cd; renderClub(); const n=$('cNow'); if(n) n.scrollIntoView({block:'center'}); });
+  $('cPer').onchange = e => { st.cPerson = e.target.value; store.set('wdsfist-cperson', st.cPerson); renderClub(); };
+  $('cIcs').onclick = () => downloadICS(DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))));
+}
+
 /* ---------- global delegation ---------- */
 // Switching tabs replaces the history entry, so the phone's back button leaves the page
 // (or closes an open sheet) instead of walking back through every tab visited.
@@ -1051,10 +1152,10 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- routing ---------- */
-const VIEWS = ['simdi','program','yarismalar','sporcu','programim'];
+const VIEWS = ['simdi','program','yarismalar','sporcu','programim'].concat(CLUB ? ['kulup'] : []);
 let view = 'simdi';
 function route(){
-  const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'simdi';
+  const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : (CLUB ? 'kulup' : 'simdi');
   VIEWS.forEach(v => $('v-'+v).classList.toggle('on', v===view));
   document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.v===(view==='yarismalar'?'sporcu':view)));
   document.querySelectorAll('[data-seg]').forEach(a => a.classList.toggle('on', a.dataset.seg===view));
@@ -1069,6 +1170,7 @@ function rerender0(){
   if(view==='yarismalar') renderComps();
   if(view==='sporcu') renderAth();
   if(view==='programim') renderMine();
+  if(view==='kulup') renderClub();
   if($('ov').dataset.comp){ const y=$('sheet').scrollTop; const q=$('sq')?$('sq').value:''; openComp(+$('ov').dataset.comp); $('sq').value=q; $('sq').oninput(); $('sheet').scrollTop=y; }
 }
 function tick(force){ keepFocus(() => tick0(force)); }
@@ -1078,9 +1180,19 @@ function tick0(force){
   if(force) rerender();
   else if(view==='simdi') renderNow();
   else if(view==='programim') renderMine();
+  else if(view==='kulup') renderClub(true);
   else if(view==='program'){ const y=window.scrollY; renderProgram(); window.scrollTo(0,y); }
 }
 window.addEventListener('hashchange', route);
+if(CLUB){
+  // club page: own first tab and title; the rest of the app works as usual
+  const nav = document.querySelector('nav.tabs');
+  const a0 = document.createElement('a'); a0.href = '#kulup'; a0.dataset.v = 'kulup';
+  a0.innerHTML = `<span class="ic" aria-hidden="true">✦</span><span class="tr">${esc(CLUB.short)}</span><span class="en">${esc(CLUB.short)}</span>`;
+  const first = nav.querySelector('a[data-v]'); first.parentNode.insertBefore(a0, first);
+  const city = document.querySelector('.brand .city'); if(city) city.textContent = CLUB.short + ' · İstanbul 2026';
+  document.title = CLUB.short + ' · İstanbul 2026';
+}
 function updLine(){
   const t = x => new Date(x).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const lv = liveFresh() ? ' · ' + L('Canlı akış ','Live timetable ') + new Date(LIVE.fetched).toLocaleTimeString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}) : '';
@@ -1101,7 +1213,7 @@ function applyLang(){
 // Offline copy on the phone (service worker); old sign-in key from the password version is no longer needed.
 try { localStorage.removeItem('wdsfist-k'); localStorage.removeItem('wdsfist-pw'); } catch(e) {}
 if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register(CLUB ? '../sw.js' : 'sw.js').catch(() => {});
 }
 $('themeBtn').onclick = () => { theme = isDark() ? 'light' : 'dark'; try{ localStorage.setItem('wdsfist-theme', theme); }catch(e){} applyTheme(); };
 if(window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch(e) {}

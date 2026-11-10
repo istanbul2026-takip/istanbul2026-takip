@@ -1,0 +1,39 @@
+{
+  "slug": "tarz",
+  "name": "Tarz Dans Spor Kulübü",
+  "short": "Tarz",
+  "teamPattern": "\\bTarz\\b",
+  "extraTeams": [
+    "Secret",
+    "Marvellous"
+  ],
+  "extraPeople": [
+    "Necla Nehir Demirkurnali",
+    "Koray Ege Ozdemir"
+  ],
+  "excludePeople": [],
+  "notes": [
+    {
+      "day": 11,
+      "hall": "B",
+      "time": "22:00",
+      "text": "Auditorium 22:00 itibarıyla boşalıyor, isteyen çalışma alabilir"
+    },
+    {
+      "day": 11,
+      "hall": "A",
+      "time": "21:00",
+      "text": "Grand Ballroom 21:00 itibarıyla boşalıyor, isteyen çalışma alabilir"
+    },
+    {
+      "day": 13,
+      "hall": "B",
+      "time": "09:55",
+      "text": "Sadettin Ege solo",
+      "people": [
+        "Sadettin Ege Eldem"
+      ]
+    }
+  ],
+  "_help": "notes: hocaların notları. day 11-15, hall A (Grand Ballroom) / B (Auditorium), time HH:MM, text, isteğe bağlı people."
+}
