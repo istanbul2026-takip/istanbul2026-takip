@@ -224,6 +224,14 @@ details.tools[open] summary::after{content:" –"}
 .info .bx b{display:block;font-weight:700;margin-bottom:2px}
 .stats{display:none}
 footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
+.seg{display:flex;background:var(--sunk);border-radius:12px;padding:3px;margin:14px 0 10px}
+.seg a{flex:1;text-align:center;text-decoration:none;padding:9px 6px;border-radius:9px;font-weight:600;font-size:15px;color:var(--muted)}
+.seg a.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.find{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 14px;margin-top:12px}
+.find h3{font-family:var(--display);font-size:26px;font-weight:800;margin:0 0 4px;line-height:1.05}
+.find p{margin:0 0 12px;color:var(--muted);font-size:14.5px;line-height:1.45}
+.find .steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--muted)}
+.find .steps span{background:var(--sunk);border-radius:999px;padding:3px 10px}
 .stalebar{background:color-mix(in srgb,var(--gilt) 22%,var(--surface));border-left:4px solid var(--gilt);border-radius:10px;padding:9px 12px;font-size:14px;margin:4px 0 6px}
 .stalebar[hidden]{display:none}
 .simbox{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;font-size:13px}
@@ -276,8 +284,8 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 
   <!-- COMPETITIONS -->
   <section id="v-yarismalar">
-    <h2><span class="tr">Yarışmalar</span><span class="en">Competitions</span></h2>
-    <input class="search" id="cQ" type="search" placeholder="Yarışma ara: örn. Jazz Duo Adult" data-en="Search competitions, e.g. Jazz Duo Adult">
+    <div class="seg"><a href="#sporcu" data-seg="sporcu"><span class="tr">Kişi / takım</span><span class="en">People / teams</span></a><a href="#yarismalar" data-seg="yarismalar"><span class="tr">Klasmanlar</span><span class="en">Categories</span></a></div>
+    <input class="search" id="cQ" type="search" placeholder="Klasman ara: örn. Jazz Duo Adult" data-en="Search categories, e.g. Jazz Duo Adult">
     <div class="fl" id="cDisc" style="margin-top:8px"></div>
     <div class="fl" id="cAge"></div>
     <div class="cnt" id="cCnt"></div>
@@ -286,8 +294,8 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 
   <!-- ATHLETES -->
   <section id="v-sporcu">
-    <h2><span class="tr">Sporcu / takım ara</span><span class="en">Find athlete / team</span></h2>
-    <input class="search" id="aQ" type="search" placeholder="Ad, takım, takım üyesi veya koreografi adı…" data-en="Name, team, team member or choreography title…" autocomplete="off">
+    <div class="seg"><a href="#sporcu" data-seg="sporcu"><span class="tr">Kişi / takım</span><span class="en">People / teams</span></a><a href="#yarismalar" data-seg="yarismalar"><span class="tr">Klasmanlar</span><span class="en">Categories</span></a></div>
+    <input class="search" id="aQ" type="search" placeholder="Adını veya takımının adını yaz" data-en="Type your name or your team's name" autocomplete="off">
     <div class="fl" id="aCty" style="margin-top:8px"></div>
     <div class="cnt" id="aCnt"></div>
     <div class="tl" id="aList"></div>
@@ -295,13 +303,13 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 
   <!-- MY PROGRAM -->
   <section id="v-programim">
-    <h2><span class="tr">Programım</span><span class="en">My schedule</span></h2>
+    <h2><span class="tr">Takip ettiklerim</span><span class="en">Following</span></h2>
     <div id="myBox"></div>
   </section>
 
   <footer>
     <span class="tr">Takım için hazırlanmış bağımsız takip sayfasıdır; WDSF'nin resmi sitesi değildir.</span><span class="en">An independent tracking page made for the team; not an official WDSF site.</span><br>
-    <button class="linkbtn" id="simToggle"><span class="tr">Saati test et</span><span class="en">Test a time</span></button><br>
+    <button class="linkbtn" id="simToggle" hidden><span class="tr">Saati test et</span><span class="en">Test a time</span></button>
     <span class="tr">Kaynak</span><span class="en">Source</span>: <a href="https://www.worlddancesport.org/Events/Istanbul-T%C3%BCrkiye-11112026-15112026-8773#tab=schedule" target="_blank" rel="noopener">WDSF</a> · <span class="tr">Son güncelleme</span><span class="en">Last update</span>: <span id="fetched"></span>.
     <span class="tr">Saatler WDSF'nin planlanan programıdır; yarışma sırasında kayma olabilir, salondaki duyuruları takip edin.</span><span class="en">Times are WDSF's planned schedule and may shift during the event; follow the announcements in the hall.</span>
   </footer>
@@ -310,9 +318,8 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
 <nav class="tabs"><div class="in">
   <a href="#simdi" data-v="simdi"><span class="ic">◉</span><span class="tr">Şimdi</span><span class="en">Now</span></a>
   <a href="#program" data-v="program"><span class="ic">☰</span>Program</a>
-  <a href="#yarismalar" data-v="yarismalar"><span class="ic">◆</span><span class="tr">Yarışmalar</span><span class="en">Events</span></a>
-  <a href="#sporcu" data-v="sporcu"><span class="ic">⌕</span><span class="tr">Sporcu</span><span class="en">Athletes</span></a>
-  <a href="#programim" data-v="programim"><span class="ic">★</span><span class="tr">Programım</span><span class="en">Mine</span><span class="badge" id="favBadge" hidden></span></a>
+  <a href="#sporcu" data-v="sporcu"><span class="ic">⌕</span><span class="tr">Ara</span><span class="en">Search</span></a>
+  <a href="#programim" data-v="programim"><span class="ic">★</span><span class="tr">Takibim</span><span class="en">Following</span><span class="badge" id="favBadge" hidden></span></a>
 </div></nav>
 
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
@@ -450,7 +457,7 @@ function myTags(cid){ return myNames(cid).map(n => { const pl = placeOf(cid,n); 
 function saveFavs(){ store.set('wdsfist-favs',[...favs]); store.set('wdsfist-pins',[...pins]); updateBadge(); }
 function myCompIds(){ const s = new Set(favs); pins.forEach(p => s.add(+p.split('|')[0])); return s; }
 function updateBadge(){ const n = myCompIds().size; const b=$('favBadge'); b.hidden=!n; b.textContent=n; }
-function toggleFav(id){ id=+id; favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Programına eklendi ★','Added to your schedule ★'):L('Programından çıkarıldı','Removed from your schedule')); rerender(); }
+function toggleFav(id){ id=+id; favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Takibine eklendi ★','Added to Following ★'):L('Takipten çıkarıldı','Removed from Following')); rerender(); }
 function togglePin(key){ pins.has(key)?pins.delete(key):pins.add(key); saveFavs(); toast(pins.has(key)?L('Takibe alındı','Now following'):L('Takipten çıkarıldı','Unfollowed')); rerender(); }
 
 /* ---------- calendar & alerts ---------- */
@@ -511,6 +518,7 @@ function renderClock(){
   const real = new Intl.DateTimeFormat(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(EPOCH + a*60000));
   $('clockTxt').innerHTML = simAbs!=null ? `<span class="sim">Test · ${esc(real)}</span>` : `<span class="live-dot"></span>${esc(real)}`;
 }
+let clockTaps = 0; $('clockTxt').addEventListener('click', () => { if(++clockTaps >= 5){ $('simToggle').hidden = false; $('simToggle').click(); clockTaps = 0; } setTimeout(() => clockTaps = 0, 3000); });
 $('simToggle').onclick = () => { $('simBox').classList.toggle('on'); window.scrollTo(0,0); if(!$('simInput').value) $('simInput').value='2026-11-12T18:00'; };
 $('simInput').onchange = e => {
   const v = e.target.value; if(!v) return;
@@ -560,7 +568,12 @@ function renderNow(){
       else if(m >= E){ const nd = DAYS.find(x=>x>d); if(nd){ const ni = ITEMS.find(i=>i.d===nd); hero = `<div class="hero"><div class="k">${L(`Bugünkü program bitti`,`Today's programme is over`)}</div><div class="big">${L(`Yarın `,`Tomorrow `)}${fmt(ni.s)}</div><div class="s">${nd} ${L('Kasım','November')} ${DAYN[nd]} · ${ni.kind==='round'?esc(ni.comp.name):esc(ni.text)}</div></div>`; } }
     }
   }
-  $('heroBox').innerHTML = hero;
+  $('heroBox').innerHTML = hero + (myCompIds().size ? '' : `<div class="find"><h3>${L('Ne zaman dans ediyorsun?','When do you dance?')}</h3>
+    <p>${L('Adını ya da takımının adını yaz; hangi gün, hangi salonda ve saat kaçta olduğunu gör.','Type your name or your team; see the day, hall and time of each round.')}</p>
+    <input class="search" id="homeQ" type="search" placeholder="${L('Örn. Ayşe Yılmaz veya Team Ibiza','e.g. Ayse Yilmaz or Team Ibiza')}" autocomplete="off">
+    <div class="steps"><span>1 · ${L('Kendini bul','Find yourself')}</span><span>2 · ${L('Takip et','Follow')}</span><span>3 · ${L('Turlarını Takibim\'de gör, 30 dk önce uyarı al','See your rounds in Following, get a 30-min alert')}</span></div></div>`);
+  if($('homeQ')) $('homeQ').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); goSearch(e.target.value); } });
+  if($('homeQ')) $('homeQ').addEventListener('input', e => { clearTimeout(goSearch._t); const v = e.target.value; if(v.trim().length >= 3) goSearch._t = setTimeout(() => goSearch(v), 700); });
 
   // my next
   const mine = myCompIds();
@@ -600,6 +613,7 @@ function renderNow(){
   }).join('');
 }
 
+function goSearch(v){ st.aQ = v; st.aCty = ''; location.hash = 'sporcu'; setTimeout(() => { const q = $('aQ'); if(q){ q.value = v; renderAth(); q.focus(); } }, 30); }
 /* ---------- PROGRAM view ---------- */
 function chipRow(el, items, set, cb, single){
   el.innerHTML = items.map(([v,l,c]) => `<button class="chip ${set.has? (set.has(v)?'on':'') : (set===v?'on':'')}" data-v="${esc(v)}" ${c?`style="--c:${c}"`:''}>${c?'<span class="sw"></span>':''}${esc(l)}</button>`).join('');
@@ -653,7 +667,7 @@ function renderComps(){
     if(c.day!==last){ last=c.day; html += `<h2 style="margin:14px 0 4px">${c.day} ${L('Kasım','November')} · ${DAYN[c.day]}</h2>`; }
     const fin = c.rounds.find(r=>r.final);
     html += `<div class="cc" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="bd"><div class="ti">${esc(c.name)}</div>
-      <div class="mt">${catTag(c)}<span class="hb">${c.hall}</span><span>${fmt(c.s)}–${fmt(c.e)}</span><span>· ${c.rounds.length} ${L('tur','rounds')}</span>${fin?`<span>${L(`· Final `,`· Final `)}${fmt(fin.s)}</span>`:''}<span>· ${c.parts.length} ${L('kayıt','entries')}</span>${turTag(c)}${c.ranking.length?`<span class="rb final">${L('Sonuçlar ✓','Results ✓')}</span>`:''}</div></div>
+      <div class="mt"><span>${L('Salon','Hall')} ${c.hall} · ${fmt(c.s)}${fin && fin.s !== c.rounds[0].s ? ` · ${L('Final','Final')} ${fmt(fin.s)}` : ''}</span><span>· ${c.parts.length} ${L('kayıt','entries')}</span>${turTag(c)}${c.ranking.length?`<span class="rb final">${L('Sonuçlar ✓','Results ✓')}</span>`:''}</div></div>
       <button class="star ${favs.has(c.id)?'on':''}" data-star="${c.id}" aria-label="Follow">★</button></div>`;
   });
   $('cList').innerHTML = html || `<div class="empty">${L('Yarışma bulunamadı.','No competitions found.')}</div>`;
@@ -674,7 +688,7 @@ function renderAth(){
   if(!q && !st.aCty){
     const pinned = ALLP.filter(p => pins.has(p.key));
     $('aCnt').textContent = '';
-    $('aList').innerHTML = `<div class="note">${L(`Adını, takımının adını veya koreografi adını yaz (grup yarışmalarında takım üyelerinin adları da aranıyor); hangi yarışmada, hangi salonda ve hangi saatlerde dans ettiğini gör. "Takip et" ile sporcuyu Programım'a ekle. Ülke seçerek o ülkenin tüm kayıtlarını listeleyebilirsin.`,`Type a name, team or choreography title (team members are searchable too) to see the competition, hall and times. Tap "Follow" to add it to My schedule. Pick a country to list all its entries.`)}</div>`
+    $('aList').innerHTML = `<div class="note">${L('Örnek: <b>Yılmaz</b>, <b>Team Ibiza</b> ya da koreografi adı. Grup yarışmalarında takım üyelerinin adlarıyla da bulunur.','Example: <b>Smith</b>, <b>Team Ibiza</b> or a choreography title. Team members can be found by their own names too.')}</div>`
       + (pinned.length ? `<h2>${L('Takip ettiğin sporcular','Athletes you follow')}</h2>` + pinned.map(athRow).join('') : '');
     return;
   }
@@ -699,7 +713,7 @@ $('aQ').oninput = e => { st.aQ = e.target.value; renderAth(); };
 function renderMine(){
   const ids = myCompIds();
   if(!ids.size){
-    $('myBox').innerHTML = `<div class="empty">${L(`Henüz bir şey eklemedin.<br><br>Yarışmalar sekmesinde ★ ile yarışma ekle ya da Sporcu sekmesinde kendini/takımını bulup "Takip et"e dokun. Takip ettiklerinin tüm turları burada tek akışta toplanır ve çakışmalar işaretlenir.`,`Nothing here yet.<br><br>Star a competition in Events, or find yourself/your team in Athletes and tap "Follow". All rounds you follow are collected here, with clashes flagged.`)}</div>`;
+    $('myBox').innerHTML = `<div class="empty">${L('Henüz kimseyi takip etmiyorsun.','You are not following anyone yet.')}<br><br><a class="btn pri" href="#sporcu">${L('Kendini bul','Find yourself')}</a><br><br><span style="font-size:13.5px">${L('Takip ettiğin sporcu ve klasmanların tüm turları burada toplanır; 30 dk önce uyarı alırsın.','All rounds of the people and categories you follow appear here, with a 30-minute alert.')}</span></div>`;
     return;
   }
   const items = ITEMS.filter(i => i.kind==='round' && ids.has(i.comp.id));
@@ -763,7 +777,7 @@ function openComp(id){
     <div class="mt">${catTag(c)}<span style="color:${c.disc.c};font-weight:700">${c.disc.tr}</span></div>
     <h3>${esc(c.name)}</h3>
     <div class="mt">${c.day} ${L('Kasım','November')} ${DAYN[c.day]} · ${L('Salon','Hall')} ${HALL[c.hall]}</div>${myNames(c.id).length?`<div class="mt" style="margin-top:6px">${L(`Takip ettiğin: `,`Following: `)}${myTags(c.id)}</div>`:''}
-    <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Programımda','★ In my schedule')}`:`${L('☆ Programıma ekle','☆ Add to my schedule')}`}</button></div>
+    <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Takipte','★ Following')}`:`${L('☆ Takip et','☆ Follow')}`}</button></div>
     <h2>Turlar</h2>
     <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('CANLI','LIVE'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
     ${res?`<tr>${L(`<td>Ödül töreni</td>`,`<td>Awards</td>`)}<td class="t">${fmt(res.s)}</td><td></td></tr>`:''}</table>
@@ -805,7 +819,8 @@ let view = 'simdi';
 function route(){
   const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'simdi';
   VIEWS.forEach(v => $('v-'+v).classList.toggle('on', v===view));
-  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.v===view));
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.v===(view==='yarismalar'?'sporcu':view)));
+  document.querySelectorAll('[data-seg]').forEach(a => a.classList.toggle('on', a.dataset.seg===view));
   rerender(); window.scrollTo(0,0);
   if(view==='program') setTimeout(scrollToNow, 30);
 }
