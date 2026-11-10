@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#7C1528">
@@ -36,7 +36,7 @@ async function fromPw(pw){
   return crypto.subtle.deriveKey({name:'PBKDF2',salt:u(S),iterations:N,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['decrypt']);
 }
 async function dec(key){ return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u(I)},key,u(C))); }
-function show(html){
+function swap(html){
   const doc = new DOMParser().parseFromString(html, 'text/html');
   document.title = doc.title;
   document.documentElement.lang = doc.documentElement.lang || 'tr';
@@ -47,6 +47,25 @@ function show(html){
   scripts.forEach(x => x.remove());
   document.body.replaceWith(body);
   scripts.forEach(x => { const n = document.createElement('script'); n.textContent = x.textContent; document.body.appendChild(n); });
+}
+function show(html){
+  // Close the keyboard and undo any zoom from typing the password before the page changes.
+  try { document.activeElement && document.activeElement.blur(); } catch(e) {}
+  const vp = document.querySelector('meta[name=viewport]');
+  const normal = 'width=device-width, initial-scale=1';
+  if(vp) vp.setAttribute('content', normal + ', maximum-scale=1');
+  const go = () => {
+    swap(html);
+    window.scrollTo(0, 0);
+    setTimeout(() => { if(vp) vp.setAttribute('content', normal); window.scrollTo(0, 0); }, 400);
+  };
+  // give the on-screen keyboard a moment to close so the layout uses the full screen
+  if(window.visualViewport && window.visualViewport.height < window.innerHeight * 0.85) setTimeout(go, 250);
+  else if(document.activeElement && document.activeElement.tagName === 'INPUT') setTimeout(go, 150);
+  else go();
+}
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 try{ localStorage.removeItem('wdsfist-pw'); }catch(e){}
 let saved=null; try{ saved=localStorage.getItem(KEY); }catch(e){}

@@ -240,6 +240,7 @@ footer{font-size:13px;color:var(--muted);margin:30px 0 14px;line-height:1.6}
   <div class="status"><span id="clockTxt">–</span><span id="updTxt"></span></div>
   <div class="stalebar" id="stale" hidden></div>
   <div class="stalebar" id="upd" hidden></div>
+  <div class="stalebar" id="offl" hidden></div>
   <div class="simbox" id="simBox">
     <span><span class="tr">Test saati (İstanbul):</span><span class="en">Test time (Istanbul):</span></span>
     <input type="datetime-local" id="simInput" min="2026-11-11T07:00" max="2026-11-15T23:59" step="60">
@@ -863,6 +864,13 @@ function showUpdateNote(){
   el.innerHTML = `${L('Program güncellendi.','The schedule has been updated.')} <button class="linkbtn" id="updGo">${L('Yenile','Refresh')}</button>`;
   $('updGo').onclick = () => location.reload();
 }
+function setOffline(off){
+  const el = $('offl'); if(!el) return;
+  el.hidden = !off;
+  if(off) el.textContent = L('İnternet yok: telefona kaydedilen son program gösteriliyor. Bağlantı gelince kendiliğinden güncellenir.', 'No connection: showing the last schedule saved on this phone. It updates by itself once you are back online.');
+}
+addEventListener('offline', () => setOffline(true));
+addEventListener('online', () => { setOffline(false); checkVersion(true); });
 async function checkVersion(onReturn){
   if(!BUILD || location.protocol === 'file:' || document.visibilityState === 'hidden') return;
   try {
@@ -870,7 +878,8 @@ async function checkVersion(onReturn){
     const [h, f] = (await r.text()).trim().split('\n');
     if(f && Date.parse(f) > Date.parse(DATA.fetched)){ DATA.fetched = f; applyLang(); renderStale(); }
     if(h && h !== BUILD) pendingUpdate = true;
-  } catch(e) {}
+    setOffline(false);
+  } catch(e) { setOffline(true); }
   tryReload(onReturn);
 }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkVersion(true); });
@@ -885,6 +894,7 @@ function renderStale(){
   else el.hidden = true;
 }
 renderStale(); setInterval(renderStale, 60000);
+if(navigator.onLine === false) setOffline(true);
 </script>
 </body>
 </html>
