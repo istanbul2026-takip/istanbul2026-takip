@@ -9,7 +9,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const istHour = () => (new Date().getUTCHours() + 3) % 24;
 const deployCmd = ['--yes', 'wrangler@3.114.17', 'pages', 'deploy', 'dist', '--project-name=istanbul2026-takip', '--branch=main', '--commit-dirty=true'];
 
-let round = 0;
+let round = 0, failures = 0;
 while (Date.now() < RUN_UNTIL && Date.now() < EVENT_END) {
   round++;
   const started = Date.now();
@@ -17,6 +17,8 @@ while (Date.now() < RUN_UNTIL && Date.now() < EVENT_END) {
   const r = spawnSync('node', ['scripts/update.mjs'], { encoding: 'utf8', env: { ...process.env, GITHUB_OUTPUT: '', EVENT_NAME: 'loop' } });
   const out = (r.stdout || '') + (r.stderr || '');
   console.log(`— round ${round} · ${new Date().toISOString()}\n${out.trim()}`);
+  failures = r.status === 0 ? 0 : failures + 1;
+  if (failures >= 3) { console.error('::error::3 checks in a row failed — stopping so the failure shows up; a new run takes over.'); process.exit(1); }
   if (r.status === 0 && /deploy: true/.test(out) && fs.existsSync('dist/index.html') && process.env.CLOUDFLARE_API_TOKEN) {
     const d = spawnSync('npx', deployCmd, { encoding: 'utf8', env: process.env });
     console.log(d.status === 0 ? 'published' : 'publish failed: ' + (d.stderr || '').slice(-400));
