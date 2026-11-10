@@ -91,6 +91,17 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .tick{width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:transparent;font-size:20px;font-weight:800;cursor:pointer;align-self:center}
 .tick.on{background:var(--ok);border-color:var(--ok);color:#fff}.tick:not(.on):hover{color:var(--muted)}
 .crow.done .ti{text-decoration:line-through;text-decoration-thickness:1px}
+.cact{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.cact .btn{flex:1 1 auto;padding:0 8px;white-space:nowrap;font-size:14.5px}.cfil select{min-width:0}.cfil .btn{flex:none}.cact .btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cchg{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--surface)}.cchg.new{border:2px solid var(--gilt)}
+.cchg summary{font-weight:700;cursor:pointer;min-height:32px;line-height:32px}.cchg ul{margin:4px 0 6px;padding-left:18px}.cchg li{margin:9px 0;font-size:14px;line-height:1.45}
+.cchg .when{color:var(--muted);font-size:12.5px}.cchg .dtag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:0 6px;border-radius:5px;border:2px solid var(--dc);color:var(--ink);background:var(--surface);vertical-align:2px;line-height:17px}
+.newtag{font-size:11px;font-weight:800;letter-spacing:.04em;background:var(--gilt);color:var(--on-gilt);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.chgt{font-size:12px;color:var(--ink);border:1px solid var(--gilt);border-radius:5px;padding:0 5px;white-space:nowrap}
+dialog.ndlg{border:1px solid var(--line);border-radius:16px;background:var(--paper);color:var(--ink);padding:16px;width:min(420px,calc(100% - 32px));font:inherit}
+dialog.ndlg::backdrop{background:rgba(0,0,0,.45)}
+dialog.ndlg h3{margin:0 0 10px;font-size:18px}dialog.ndlg label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:10px 0 0}
+dialog.ndlg input,dialog.ndlg select{display:block;width:100%;min-height:44px;margin-top:4px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:16px;padding:0 10px;box-sizing:border-box}
+dialog.ndlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}dialog.ndlg .acts{display:flex;gap:8px;margin-top:14px}dialog.ndlg .acts .btn{flex:1}
 .donetag{font-size:12px;font-weight:800;color:var(--ok)}
 .cwarn .dtag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:0 6px;border-radius:5px;border:2px solid var(--dc);color:var(--ink);background:var(--surface);vertical-align:2px;line-height:17px}
 .srcs{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0 8px;font-size:14px}.srcs summary{cursor:pointer;font-weight:700;min-height:32px;line-height:1.5;padding:4px 0}.srcs li{margin:6px 0;line-height:1.45}
@@ -98,7 +109,7 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .anom{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px;margin-left:4px}
 .wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 .hchip{font-size:11px}
-.hchip{font-size:12px;font-weight:800;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
+.hchip{font-size:12px;font-weight:800;white-space:nowrap;display:inline-block;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
 section.on{display:block}
 h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;margin:26px 0 10px;line-height:1.1}
@@ -392,6 +403,14 @@ button.fchip{font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:va
 
 <div class="ov" id="ov"><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<dialog class="ndlg" id="noteDlg" aria-labelledby="nTitle"><form id="noteForm">
+  <h3 id="nTitle"></h3>
+  <div class="two"><label><span id="nDayL"></span><select id="nDay"></select></label><label><span id="nTimeL"></span><input type="time" id="nTime" required></label></div>
+  <label><span id="nHallL"></span><select id="nHall"></select></label>
+  <label><span id="nTextL"></span><input type="text" id="nText" maxlength="140" required autocomplete="off"></label>
+  <div class="plannote" id="nHint" style="padding:8px 0 0"></div>
+  <div class="acts"><button type="button" class="btn" id="nCancel"></button><button type="submit" class="btn pri" id="nSave"></button></div>
+</form></dialog>
 <div class="alert" id="alert" role="alert"><div class="b" id="alertB"></div><button id="alertX">OK</button></div>
 
 <script>
@@ -441,8 +460,11 @@ const dur = m => m < 60 ? `${m} dk` : `${Math.floor(m/60)} sa ${m%60 ? (m%60)+' 
 const store = {
   ns(k){ return CLUB && !/-(lang|theme)$/.test(k) ? k.replace(/^wdsfist-/, CLUB.slug + '-') : k; },
   get(k, d){ try{ const v = localStorage.getItem(this.ns(k)); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
-  set(k, v){ try{ localStorage.setItem(this.ns(k), JSON.stringify(v)); }catch(e){} }
+  set(k, v){ try{ localStorage.setItem(this.ns(k), JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
+// Does this browser keep what we save? (Private tabs and some in-app browsers do not.)
+const storeOK = (() => { try { localStorage.setItem('wdsfist-probe', '1'); const ok = localStorage.getItem('wdsfist-probe') === '1'; localStorage.removeItem('wdsfist-probe'); return ok; } catch(e) { return false; } })();
+const saved = ok => { if(!ok && storeOK) toast(L('Kaydedilemedi: telefonun depolama alanı dolu olabilir','Could not save: phone storage may be full')); return ok; };
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),3500); }
 
 /* ---------- countries ---------- */
@@ -527,7 +549,12 @@ const nowAbs = () => simAbs != null ? simAbs : (Date.now()-EPOCH)/60000;
    current / done. A 1-minute mirror lives on GitHub; the page also carries the copy from its build. */
 const LIVE_URL = 'https://raw.githubusercontent.com/istanbul2026-takip/istanbul2026-takip/live/live.json';
 let LIVE = DATA.MX || null;
-try { const c = JSON.parse(localStorage.getItem('wdsfist-live') || 'null'); if(c && c.r && (!LIVE || Date.parse(c.fetched) > Date.parse(LIVE.fetched))) LIVE = c; } catch(e) {}
+/* What marX moved, and when (kept by the 1-minute mirror). Only used to tell people "this was 19:22, now 19:40". */
+let CHG = [], CHG0 = 0, CHGOK = false, chgIdx = null, chgSig = '';
+const chgSigOf = j => j.chg.length + '|' + (j.chg.length ? j.chg[j.chg.length - 1][0] : '') + '|' + (j.chg0 || '');
+function setChg(j){ if(!j || !Array.isArray(j.chg)) return; CHG = j.chg; CHG0 = Date.parse(j.chg0) || 0; CHGOK = true; chgIdx = null; chgSig = chgSigOf(j); }
+try { const c = JSON.parse(localStorage.getItem('wdsfist-live') || 'null'); if(c && c.r){ setChg(c); if(!LIVE || Date.parse(c.fetched) > Date.parse(LIVE.fetched)) LIVE = c; } } catch(e) {}
+setChg(DATA.MX);
 const liveFresh = () => !!(LIVE && simAbs == null && Date.now() - Date.parse(LIVE.fetched) < 20*60000);
 COMPLIST.forEach(c => c.rounds.forEach(r => { r.ps = r.s; r.pe = r.e; r.shift = 0; r.lst = null; }));
 ITEMS.forEach(i => { i.ps = i.s; i.pe = i.e; });
@@ -550,6 +577,10 @@ function liveOffset(){
   return best && Math.abs(best) >= 30 && best % 30 === 0 ? best : 0;
 }
 let liveOffFor = null, liveOff = 0;
+// How marX names a rehearsal / awards / ceremony item, worked out from the WDSF text of the same item.
+const mxKeyOf = i => { const raw = String(i.raw || '').trim();
+  const rm = raw.match(/^Results presentation:\s*(.*)$/i);
+  return rm ? 'R:' + rm[1].split(/\s+·\s+/).map(t => t.replace(/^\d+\.\s*/, '').trim()).sort().join('|') : raw; };
 function applyLive(){
   const a = nowAbs(), fresh = liveFresh();
   if(LIVE !== liveOffFor){ liveOffFor = LIVE; liveOff = liveOffset(); }
@@ -579,9 +610,7 @@ function applyLive(){
   // lists the same item; otherwise they move with the round before them in the same hall
   const mxx = {}, used = new Set();
   ((LIVE && Array.isArray(LIVE.x)) ? LIVE.x : []).forEach((m, n) => { if(!Array.isArray(m) || m.length < 5 || typeof m[2] !== 'number') return; const k = m[0] + '|' + m[1] + '|' + m[4]; (mxx[k] = mxx[k] || []).push(n); });
-  const keyOf = i => { const raw = String(i.raw || '').trim();
-    const rm = raw.match(/^Results presentation:\s*(.*)$/i);
-    return rm ? 'R:' + rm[1].split(/\s+·\s+/).map(t => t.replace(/^\d+\.\s*/, '').trim()).sort().join('|') : raw; };
+  const keyOf = mxKeyOf;
   const off = {};
   ITEMS.slice().sort((x,y) => ABS(x.d,x.ps) - ABS(y.d,y.ps)).forEach(i => {
     const k = i.d + i.h;
@@ -605,13 +634,84 @@ async function pullLive(){
     const res = await fetch(LIVE_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
     if(!res.ok) return;
     const j = await res.json();
-    if(!j || !j.r || typeof j.r !== 'object' || !j.fetched || isNaN(Date.parse(j.fetched)) || (LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched))) return;
+    if(!j || !j.r || typeof j.r !== 'object' || !j.fetched || isNaN(Date.parse(j.fetched))) return;
+    if(LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched)){
+      // the timetable on the page is already as new (it came with the page itself); the change log is still worth taking
+      if(Array.isArray(j.chg) && (!CHGOK || chgSigOf(j) !== chgSig)){ setChg(j); if(typeof rerender === 'function') rerender(); }
+      return;
+    }
     if(Object.values(j.r).filter(m => Array.isArray(m) && m.length >= 5 && typeof m[2] === 'number').length < 50) return;   // half-empty file: keep the last good one
-    LIVE = j; try { localStorage.setItem('wdsfist-live', JSON.stringify(j)); } catch(e) {}
+    LIVE = j; setChg(j); try { localStorage.setItem('wdsfist-live', JSON.stringify(j)); } catch(e) {}
     if(typeof rerender === 'function') rerender();
   } catch(e) {}
 }
 applyLive();
+function chgIndex(){
+  if(chgIdx) return chgIdx;
+  const m = new Map();
+  CHG.forEach(g => { if(!Array.isArray(g) || !Array.isArray(g[1])) return; const ts = Date.parse(g[0]); if(isNaN(ts)) return;
+    g[1].forEach(c => { if(!Array.isArray(c) || c.length < 7 || typeof c[0] !== 'string' || typeof c[3] !== 'number' || typeof c[6] !== 'number') return;
+      if(!m.has(c[0])) m.set(c[0], []); m.get(c[0]).push({ts, o:[c[1], c[2], c[3]], n:[c[4], c[5], c[6]]}); }); });
+  m.forEach(l => l.sort((x, y) => x.ts - y.ts));
+  return chgIdx = m;
+}
+const CHG_RECENT = 6 * 3600e3;
+let chgSeen = +store.get('wdsfist-chgseen', 0) || 0;
+if(!chgSeen){ chgSeen = Date.now(); store.set('wdsfist-chgseen', chgSeen); }      // first visit: only what changes from now on is "new"
+const chgKey = i => i.kind === 'round' ? i.comp.id + '.' + (i.comp.rounds.indexOf(i.round) + 1) : i.kind === 'note' ? null : 'x|' + mxKeyOf(i);
+const samePl = (p, q) => p[0] === q[0] && p[1] === q[1] && p[2] === q[2];
+const mod1440 = m => ((m % 1440) + 1440) % 1440;
+// What marX changed for this item since the user last looked, or in the last 6 hours: null, or
+// {from, to, steps, at, isNew}. Changes that were taken back (same place again) do not count.
+function chgOf(i){ try { return chgOf0(i); } catch(e) { return null; } }
+function chgOf0(i){
+  if(!CHGOK) return null;
+  const k = chgKey(i); if(!k) return null;
+  const all = chgIndex().get(k); if(!all) return null;
+  const show = all.filter(e => e.ts > Math.min(chgSeen, Date.now() - CHG_RECENT));
+  if(!show.length) return null;
+  const from = show[0].o, to = show[show.length - 1].n;
+  if(samePl(from, to)) return null;
+  // only when the log and the timetable on screen agree (they come from the same file, but one may be a minute older)
+  if(i.kind !== 'round' && !i.mx) return null;
+  if(mod1440(i.s) !== mod1440(to[2]) || i.h !== to[1]) return null;
+  const un = show.filter(e => e.ts > chgSeen);
+  return {from, to, steps: show, at: show[show.length - 1].ts, isNew: !!un.length && !samePl(un[0].o, un[un.length - 1].n)};
+}
+const chgPl = (p, q) => (p[0] !== q[0] ? p[0] + ' ' + L('Kas','Nov') + ' ' : '') + fmt(mod1440(p[2])) + (p[1] !== q[1] ? ' · ' + L('Salon','Hall') + ' ' + esc(p[1]) : '');
+const chgClock = ts => new Date(ts).toLocaleTimeString(L('tr-TR','en-GB'), {timeZone:'Europe/Istanbul', hour:'2-digit', minute:'2-digit'});
+const chgWhen = ts => { const day = t => new Date(t).toLocaleDateString('en-CA', {timeZone:'Europe/Istanbul'});
+  return (day(ts) !== day(Date.now()) ? new Date(ts).toLocaleDateString(L('tr-TR','en-GB'), {timeZone:'Europe/Istanbul', day:'numeric', month:'short'}) + ' ' : '') + chgClock(ts); };
+function chgDelta(c){
+  if(c.from[0] !== c.to[0]) return '';
+  let d = c.to[2] - c.from[2]; if(d > 720) d -= 1440; if(d < -720) d += 1440;
+  if(!d) return '';
+  const n = Math.abs(d), t = n < 60 ? n + L(' dk',' min') : Math.floor(n / 60) + L(' sa',' h') + (n % 60 ? ' ' + (n % 60) + L(' dk',' min') : '');
+  return d > 0 ? L(`${t} sonraya alındı`, `${t} later`) : L(`${t} öne alındı`, `${t} earlier`);
+}
+const chgTag = i => { const c = chgOf(i); return c ? `<span class="chgt" title="${L('marX bu saati değiştirdi','marX changed this time')}">↻ ${L('önce','was')} ${chgPl(c.from, c.to)}</span>` : ''; };
+// The list shown on the club page and under "Takibim". rows: [[item, htmlDescription], ...] (upcoming items only).
+function chgBlock(rows, scope){ try { return chgBlock0(rows, scope); } catch(e) { return {html:'', n:0}; } }
+function chgBlock0(rows, scope){
+  if(!CHGOK) return {html:'', n:0};
+  const list = rows.map(([i, d]) => [i, d, chgOf(i)]).filter(x => x[2]).sort((x, y) => ABS(x[0].d, x[0].s) - ABS(y[0].d, y[0].s));
+  const n = list.filter(x => x[2].isNew).length;
+  if(!list.length){
+    const since = Math.max(CHG0 || 0, Date.now() - CHG_RECENT);
+    return {html: rows.length ? `<div class="plannote" style="padding:2px 0 6px">✓ ${L(`${scope.tr} saat değişikliği yok (marX, ${chgWhen(since)} – şimdi).`, `No time changes ${scope.en} (marX, ${chgWhen(since)} – now).`)}</div>` : '', n:0};
+  }
+  const li = ([i, d, c]) => { const dl = chgDelta(c);
+    return `<li>${d}<br>${chgPl(c.from, c.to)} → <b>${chgPl(c.to, c.from)}</b>${dl ? ` <span style="color:var(--muted)">(${dl})</span>` : ''} ${c.isNew ? `<span class="newtag">${L('YENİ','NEW')}</span>` : ''}<br><span class="when">${L(`marX'ta görüldü: ${chgWhen(c.at)}`, `seen on marX at ${chgWhen(c.at)}`)}${c.steps.length > 1 ? L(` · ${c.steps.length} değişiklik: `, ` · ${c.steps.length} changes: `) + [c.steps[0].o].concat(c.steps.map(e => e.n)).map(p => fmt(mod1440(p[2]))).join(' → ') : ''}</span></li>`; };
+  return {n, html: `<details class="cchg ${n ? 'new' : ''}" data-dk="chg" ${detOpen('chg', n > 0)}><summary>↻ ${n ? L(`${n} yeni saat değişikliği`, `${n} new time change${n > 1 ? 's' : ''}`) : L(`Saat değişiklikleri (${list.length})`, `Time changes (${list.length})`)}</summary><ul>${list.map(li).join('')}</ul>
+    <div class="plannote" style="padding:0 0 6px">${L('marX\'ın değiştirdiği saatler: eski → yeni. Görmediklerin ve son 6 saattekiler listelenir; geri alınan değişiklikler gösterilmez.','Times marX has changed: old → new. Unseen changes and those of the last 6 hours are listed; changes that were taken back are not shown.')}</div>
+    ${n ? `<button class="btn" id="chgSeenBtn" style="width:100%">✓ ${L('Gördüm','Seen')}</button>` : ''}</details>`};
+}
+function chgMarkSeen(){ chgSeen = Math.max(Date.now(), ...CHG.map(g => (Array.isArray(g) && Date.parse(g[0])) || 0));   // also right when the phone's clock runs behind
+  store.set('wdsfist-chgseen', chgSeen); st.chgN = 0; rerender(); }
+// <details> opened or closed by the user stay that way when the page redraws itself.
+const detState = {};
+const detOpen = (k, def) => (k in detState ? detState[k] : def) ? 'open' : '';
+document.addEventListener('click', e => { const sm = e.target.closest && e.target.closest('summary'); const d = sm && sm.parentElement; if(d && d.tagName === 'DETAILS' && d.dataset.dk) detState[d.dataset.dk] = !d.open; });
 const st = { pDay:null, pHall:null, pOnly:false, pDisc:new Set(), pAge:new Set(), pCat:new Set(), pFav:false, pTur:false,
              cQ:'', cDisc:new Set(), cAge:new Set(), aQ:'', aCty:'' };
 
@@ -621,8 +721,8 @@ function myTags(cid){ return myNames(cid).map(n => { const pl = placeOf(cid,n); 
 function saveFavs(){ store.set('wdsfist-favs',[...favs]); store.set('wdsfist-pins',[...pins]); updateBadge(); }
 function myCompIds(){ const s = new Set(favs); pins.forEach(p => s.add(+p.split('|')[0])); return s; }
 function updateBadge(){ const n = pins.size + favs.size; const b=$('favBadge'); b.hidden=!n; b.textContent=n; }
-function toggleFav(id){ id=+id; favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Takibine eklendi ★','Added to Following ★'):L('Takipten çıkarıldı','Removed from Following')); rerender(); }
-function togglePin(key){ pins.has(key)?pins.delete(key):pins.add(key); saveFavs(); toast(pins.has(key)?L('Takibe alındı','Now following'):L('Takipten çıkarıldı','Unfollowed')); rerender(); }
+function toggleFav(id){ id=+id; if(typeof syncState === 'function') syncState(); favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Takibine eklendi ★','Added to Following ★'):L('Takipten çıkarıldı','Removed from Following')); rerender(); }
+function togglePin(key){ if(typeof syncState === 'function') syncState(); pins.has(key)?pins.delete(key):pins.add(key); saveFavs(); toast(pins.has(key)?L('Takibe alındı','Now following'):L('Takipten çıkarıldı','Unfollowed')); rerender(); }
 
 /* ---------- calendar & alerts ---------- */
 const HALLIMG = {A:'data:image/jpeg;base64,/*IMGA*/', B:'data:image/jpeg;base64,/*IMGB*/'};
@@ -733,7 +833,7 @@ function itemRow(it, opts={}){
     return `<div class="row ${st0} ${my?'fav':''}" style="--c:${c.disc.c}" data-comp="${c.id}">
       <div class="tm" style="padding-left:6px">${fmt(it.s)}<small>${fmt(it.e)}</small></div>
       <div class="bd"><div class="ti">${esc(c.name)}</div>
-        <div class="mt">${st0==='live'?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${dlyTag(it.round)}${anomTag(it.comp, it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
+        <div class="mt">${st0==='live'?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${st0==='past'?'':chgTag(it)}${dlyTag(it.round)}${anomTag(it.comp, it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
   }
   return `<div class="row minor ${st0}" style="--c:transparent">
     <div class="tm" style="padding-left:6px">${fmt(it.s)}</div>
@@ -958,19 +1058,20 @@ function renderMine(){
   const showPins = st.allPins || pinList.length <= 10 ? pinList : pinList.slice(0, 8);
   if(pins.size) html += `<div class="fchips">${showPins.map(k => `<span class="fchip">${esc(k.slice(k.indexOf('|') + 1))}${dupName(k.slice(k.indexOf('|') + 1)) && COMPS[+k.slice(0, k.indexOf('|'))] ? ` <small style="color:var(--muted)">${esc(COMPS[+k.slice(0, k.indexOf('|'))].name)}</small>` : ''}<button data-pin="${esc(k)}" aria-label="${L('Takipten çıkar','Unfollow')}: ${esc(k.slice(k.indexOf('|') + 1))}">✕</button></span>`).join('')}${showPins.length < pinList.length ? `<button class="fchip add" id="morePins">${L(`+${pinList.length - showPins.length} kişi daha`,`+${pinList.length - showPins.length} more`)}</button>` : ''}<a class="fchip add" href="#sporcu">${L('+ Kişi ekle','+ Add')}</a></div>`;
   html += calBox;
+  html += chgBlock(upcoming.map(i => { const mn = myNames(i.comp.id); return [i, `<b>${esc(mn.length ? mn.join(' · ') : i.comp.name)}</b>${mn.length ? ' — ' + esc(i.comp.name) : ''} · <b>${esc(i.round.label)}</b>`]; }), {tr:'Takip ettiğin yaklaşan turlarda', en:'in the upcoming rounds you follow'}).html;
   if(items.some(i => isLater(i.comp, i.round))) html += `<div class="note" style="padding-top:0">${L('Not: Her turda sporcuların bir kısmı elenir (1/8 Final → Çeyrek → Yarı → Final). "(geçerse)" yazan turlar, önceki turu geçenler içindir.','Note: some dancers are eliminated each round (1/8 → quarter → semi → final). Rounds marked "(if qualified)" are for those who go through.')}</div>`;
   const upc = x => ABS(x.d,x.e) > nowAbs();
   const tightUp = tight.filter(([A,B]) => upc(B));
   if(tightUp.length) html += `<div class="warn" style="border-left-color:var(--gilt);background:var(--surface);background:color-mix(in srgb,var(--gilt) 12%,var(--surface))"><b>⏱ ${L('Sıkı geçişler','Tight transitions')}</b><br>${tightUp.slice(0,6).map(([A,B,g]) => `${DAYS3[A.d]} ${fmt(A.e)} → ${fmt(B.s)} (${g} ${L('dk','min')}): ${esc(myNames(A.comp.id)[0] || A.comp.name)} → ${esc(myNames(B.comp.id)[0] || B.comp.name)}${A.h!==B.h ? ' · ' + L('salon değişiyor','hall change') : ''}`).join('<br>')}</div>`;
   if(!conf.length && items.length > 1) html += `<div class="note" style="padding:2px 0 8px;color:var(--ok);font-weight:600">✓ ${L('Saat çakışması yok','No time clashes')}</div>`;
   if(conf.length) html += `<div class="warn"><b>⚠ ${conf.length}${L(` saat çakışması</b>`,` time clash(es)</b>`)}<br>${conf.slice(0,6).map(([A,B])=>`${DAYS3[A.d]} ${fmt(Math.max(A.s,B.s))}: ${esc(A.comp.name)} (${esc(A.round.label)}, ${A.h}) ↔ ${esc(B.comp.name)} (${esc(B.round.label)}, ${B.h})`).join('<br>')}</div>`;
-  let tools = `<details class="tools"><summary>${L('Uyarı ayarları','Alert settings')}</summary><div class="set"><label><input type="checkbox" id="optAlert" ${prefs.alert?'checked':''}>${L(` Turdan 30 dk önce ekranda uyar</label>`,` Alert me on screen 30 min before a round</label>`)}
+  let tools = `<details class="tools" data-dk="alerts" ${detOpen('alerts', false)}><summary>${L('Uyarı ayarları','Alert settings')}</summary><div class="set"><label><input type="checkbox" id="optAlert" ${prefs.alert?'checked':''}>${L(` Turdan 30 dk önce ekranda uyar</label>`,` Alert me on screen 30 min before a round</label>`)}
     <label><input type="checkbox" id="optSound" ${prefs.sound?'checked':''}>${L(` Uyarıda ses çal</label>`,` Play a sound with the alert</label>`)}
     <div style="color:var(--muted);font-size:12px;margin-top:4px">${L(`Uyarılar yalnızca bu sayfa telefonda açıkken çalışır. <b>Telefon kilitliyken de hatırlatma için yukarıdaki "Telefonuma hatırlatıcı kur" düğmesini kullan.</b>`,`Alerts only work while this page is open. <b>For reminders with the phone locked, use "Set phone reminders" above.</b>`)}</div></div></details>`;
   const actBox = `<div class="fl" style="margin-top:14px"><button class="btn pri" id="copyPlan">${L(`Programı kopyala`,`Copy schedule`)}</button><button class="btn" id="clearPlan">${L(`Temizle`,`Clear`)}</button></div>`;
   let last=0; const a = nowAbs(); let placed=false;
   const pastItems = items.filter(i => ABS(i.d,i.e) <= a), restItems = items.filter(i => ABS(i.d,i.e) > a);
-  if(pastItems.length) html += `<details class="tools" style="margin-top:6px"><summary>${L(`Bitmiş turlar (${pastItems.length})`,`Finished rounds (${pastItems.length})`)}</summary>${pastItems.map(i => itemRow(i, {hall:true, mine:true, day:true})).join('')}</details>`;
+  if(pastItems.length) html += `<details class="tools" data-dk="past" ${detOpen('past', false)} style="margin-top:6px"><summary>${L(`Bitmiş turlar (${pastItems.length})`,`Finished rounds (${pastItems.length})`)}</summary>${pastItems.map(i => itemRow(i, {hall:true, mine:true, day:true})).join('')}</details>`;
   restItems.forEach(i => {
     if(i.d!==last){ last=i.d; html += `<h2 style="margin:16px 0 4px">${i.d} ${L('Kasım','November')} · ${DAYN[i.d]}</h2>`; }
     if(!placed && ABS(i.d,i.s) > a && a > firstAbs){ html += `<div class="nowline">${L(`ŞİMDİ`,`NOW`)}</div>`; placed=true; }
@@ -982,6 +1083,7 @@ function renderMine(){
   $('myBox').innerHTML = html;
   if($('morePins')) $('morePins').onclick = () => { st.allPins = true; renderMine(); };
   if($('icsBtn')) $('icsBtn').onclick = () => downloadICS(upcoming);
+  if($('chgSeenBtn')) $('chgSeenBtn').onclick = chgMarkSeen;
   $('optAlert').onchange = e => { prefs.alert = e.target.checked; store.set('wdsfist-prefs', prefs); };
   $('optSound').onchange = e => { prefs.sound = e.target.checked; store.set('wdsfist-prefs', prefs); if(prefs.sound) beep(); };
   $('copyPlan').onclick = async () => {
@@ -1063,9 +1165,24 @@ const CLUBIDS = new Set(CLUB ? Object.keys(CLUB.entries).map(Number) : []);
 const clubEntries = id => (CLUB && CLUB.entries[id]) || [];
 const clubWho = it => it.kind === 'round' ? clubEntries(it.comp.id).flatMap(e => e[2])
   : it.kind === 'note' ? (it.people || []) : ((CLUB.rel[it.k] || []).flatMap(id => clubEntries(id).flatMap(e => e[2])));
+// Notes a coach adds on the page: kept on this phone only.
+const readNotes = () => [].concat(CLUB ? store.get('wdsfist-mynotes', []) : []).filter(n => n && n.id && typeof n.text === 'string' && DAYS.includes(n.day) && toMin(n.time) != null);
+let myNotes = readNotes();
+// Everything kept on the phone is read again whenever another tab saved something or the page comes
+// back to the front, so two open tabs (or a page restored from the background) never overwrite each other.
+function syncState(){
+  if(!storeOK) return;                           // nothing is kept in this browser: what is on screen is all there is
+  favs = new Set([].concat(store.get('wdsfist-favs', []))); pins = new Set([].concat(store.get('wdsfist-pins', [])));
+  if(CLUB){ clubDone = new Set([].concat(store.get('wdsfist-done', []))); myNotes = readNotes(); st.cPerson = store.get('wdsfist-cperson', '') || ''; }
+  chgSeen = Math.max(chgSeen, +store.get('wdsfist-chgseen', 0) || 0);
+}
+addEventListener('storage', e => { if(e.storageArea === localStorage){ syncState(); if(!($('noteDlg') && $('noteDlg').open)) rerender(); } });
+addEventListener('pageshow', e => { if(e.persisted){ syncState(); rerender(); } });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ syncState(); rerender(); } });
 function clubItems(day){
   const out = ITEMS.filter(i => i.d === day && (i.kind === 'round' ? CLUBIDS.has(i.comp.id) : !!(i.k && CLUB.rel[i.k])));
   (CLUB.notes || []).forEach(n => { const s0 = toMin(n.time); if(n.day === day && s0 != null) out.push({kind:'note', d:day, h:n.hall || 'A', s:s0, e:s0, written:n.time, text:n.text, people:n.people || []}); });
+  myNotes.forEach(n => { const s0 = toMin(n.time); if(n.day === day && s0 != null) out.push({kind:'note', own:n.id, d:day, h:n.hall || 'A', noHall:!n.hall, s:s0, e:s0, written:n.time, text:n.text, people:[]}); });
   return out.sort((a,b) => a.s - b.s || (a.h < b.h ? -1 : 1));
 }
 // Discipline first, as its own tag: Show / Jazz / Modern are different competitions.
@@ -1073,23 +1190,23 @@ const DTAG = c => ({'Show Dance Stage':'SHOW','Jazz':'JAZZ','Modern & Contempora
 const klas = c => `<span class="dtag" style="--dc:${c.disc.c}">${DTAG(c)}</span> ${esc(c.short.replace(/ F\+M$/,''))}`;
 const hallChip = h => `<span class="hchip ${h}">${h} · ${esc((HALL[h]||h).split(' · ')[1] || h)}</span>`;
 function clubRow(i, a){
-  const dk = doneKey(i), done = clubDone.has(dk);
+  const dk = doneKey(i), done = isDone(i);
   const S = ABS(i.d,i.s), E = ABS(i.d,i.e), st0 = done ? 'past done' : i.kind === 'note' ? (a >= S ? 'past' : 'up') : (a >= E ? 'past' : a >= S ? 'live' : 'up');
-  const tick = `<button class="tick ${done?'on':''}" data-tick="${esc(dk)}" aria-pressed="${done}" aria-label="${done ? L('Bitti işaretini kaldır','Unmark finished') : L('Bitti olarak işaretle','Mark finished')}">✓</button>`;
+  const tick = `<button class="tick ${done?'on':''}" data-tick="${esc(dk)}" data-tick0="${esc(doneKeyOld(i))}" aria-pressed="${done}" aria-label="${done ? L('Bitti işaretini kaldır','Unmark finished') : L('Bitti olarak işaretle','Mark finished')}">✓</button>`;
   const person = st.cPerson;
   if(i.kind === 'round'){
     const c = i.comp, ents = clubEntries(c.id).filter(e => !person || e[2].includes(person));
     return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
       <div class="ti">${klas(c)}</div>
       <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
-      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
+      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':chgTag(i)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
   }
-  if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${L('Hoca notu','Coach note')}</span>${hallChip(i.h)}</div></div>${tick}</div>`;
+  if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${i.own ? L('Benim notum · bu telefonda','My note · this phone only') : L('Hoca notu','Coach note')}</span>${i.noHall ? '' : hallChip(i.h)}${i.own ? `<button class="linkbtn" data-delnote="${esc(i.own)}" style="min-height:32px;padding:0 6px">${st.delNote === i.own ? L('Emin misin? Tekrar dokun','Sure? Tap again') : L('Sil','Delete')}</button>` : ''}</div></div>${tick}</div>`;
   const ids = CLUB.rel[i.k] || [];
   const isReh = /rehearsal/i.test(i.raw || '');
   const what = isReh ? L('Sahne provası','Stage rehearsal') : /Results/i.test(i.raw||'') ? L('Ödül töreni','Awards') : i.text;
   const names = ids.filter(id => COMPS[id] && clubEntries(id).length).map(id => `${klas(COMPS[id])}: <span style="color:var(--ink)">${esc(clubEntries(id).map(e => e[1]).join(', '))}</span>`).join('<br>');
-  return `<div class="crow minor ${st0}" ${ids.length===1?`data-comp="${ids[0]}"`:''}><div class="tm">${fmt(i.s)}</div><div><div class="ti">${esc(what)}</div>${names?`<div class="nm">${names}</div>`:''}<div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${hallChip(i.h)}</div></div>${tick}</div>`;
+  return `<div class="crow minor ${st0}" ${ids.length===1?`data-comp="${ids[0]}"`:''}><div class="tm">${fmt(i.s)}</div><div><div class="ti">${esc(what)}</div>${names?`<div class="nm">${names}</div>`:''}<div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:chgTag(i)}${hallChip(i.h)}</div></div>${tick}</div>`;
 }
 // Tight changeovers: for every club athlete, every pair of their events on the day (rounds and
 // stage rehearsals of different competitions) where the second starts less than 15 min after the
@@ -1123,25 +1240,109 @@ function clubWarnings(day){
   });
   return Object.values(pairs).sort((x,y) => x.B.s - y.B.s || x.A.s - y.A.s);
 }
-const doneKey = i => i.kind === 'round' ? 'r:' + i.comp.id + ':' + i.round.r : i.kind === 'note' ? 'n:' + i.d + ':' + fmt(i.s) + ':' + i.text : 'i:' + i.k;
-let clubDone = new Set(store.get('wdsfist-done', []));
-function toggleDone(k){ clubDone.has(k) ? clubDone.delete(k) : clubDone.add(k); store.set('wdsfist-done', [...clubDone]); renderClub(true); }
+// A mark belongs to the round / rehearsal / awards itself, not to its time, so it stays when the time moves.
+const doneKey = i => i.kind === 'round' ? 'r:' + i.comp.id + ':' + i.round.r : i.kind === 'note' ? 'n:' + i.d + ':' + fmt(i.s) + ':' + i.text : 'x:' + i.d + '|' + mxKeyOf(i);
+const doneKeyOld = i => i.kind === 'round' || i.kind === 'note' ? '' : 'i:' + i.k;      // marks made before the keys were made time-proof
+const isDone = i => clubDone.has(doneKey(i)) || (!!doneKeyOld(i) && clubDone.has(doneKeyOld(i)));
+let clubDone = new Set([].concat(store.get('wdsfist-done', [])));
+function toggleDone(k, k0){
+  syncState();                                   // another tab may have saved marks since this one last looked
+  const was = clubDone.has(k) || (!!k0 && clubDone.has(k0));
+  clubDone.delete(k); if(k0) clubDone.delete(k0);
+  if(!was) clubDone.add(k);
+  saved(store.set('wdsfist-done', [...clubDone])); renderClub(true);
+}
 const tTxt = iso => iso ? new Date(iso).toLocaleString(L('tr-TR','en-GB'), {timeZone:'Europe/Istanbul', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '—';
 const agoTxt = iso => { if(!iso) return ''; const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? L('az önce','just now') : m < 60 ? L(`${m} dk önce`,`${m} min ago`) : L(`${Math.floor(m/60)} sa ${m%60} dk önce`,`${Math.floor(m/60)} h ${m%60} min ago`); };
 function clubSources(){
   const comps = Object.keys(CLUB.entries).length, ents = Object.values(CLUB.entries).reduce((n, v) => n + v.length, 0);
   const shifted = COMPLIST.filter(c => CLUBIDS.has(c.id)).flatMap(c => c.rounds).filter(r => Math.abs(r.shift || 0) >= 1).length;
   const fresh = liveFresh();
-  return `<details class="srcs"><summary>ⓘ ${L('Bu bilgiler nereden geliyor?','Where does this come from?')} <span style="color:var(--muted);font-weight:500">· WDSF ${agoTxt(DATA.fetched)}${LIVE ? ' · marX ' + agoTxt(LIVE.fetched) : ''}</span></summary><ul>
+  return `<details class="srcs" data-dk="srcs" ${detOpen('srcs', false)}><summary>ⓘ ${L('Bu bilgiler nereden geliyor?','Where does this come from?')} <span style="color:var(--muted);font-weight:500">· WDSF ${agoTxt(DATA.fetched)}${LIVE ? ' · marX ' + agoTxt(LIVE.fetched) : ''}</span></summary><ul>
     <li><b>${L('Saatler: organizasyonun canlı sayfası (marX) — ana kaynak','Times: organiser\'s live page (marX), main source')}</b>. ${LIVE ? `${L('Son kontrol','Last check')}: ${tTxt(LIVE.fetched)}; ${L('marX\'ın son güncellemesi','marX last updated')}: ${tTxt(LIVE.at)}.` : L('Henüz alınamadı; saatler şimdilik WDSF\'den.','Not received yet; times come from WDSF for now.')} ${L('Her dakika kontrol edilir; sitedeki saatler marX\'takiyle aynıdır.','Checked every minute; times here are the same as on marX.')} ${fresh ? (shifted ? L(`${shifted} kulüp turunda marX ile WDSF saati farklı; bu turlarda yanında küçük "WDSF" saati yazıyor.`,`${shifted} club rounds have a different time on WDSF; those show the WDSF time in small print.`) : L('Şu an marX ile WDSF saatleri aynı.','marX and WDSF times currently match.')) : L('Canlı akış 20 dakikadır güncellenmediği için "sahnede" bilgisi saate göre tahmin ediliyor.','The live timetable has not updated for 20 minutes, so "on stage" is estimated from the clock.')}</li>
     ${(() => { const an = COMPLIST.filter(c => CLUBIDS.has(c.id) && c.rounds.some(r => r.anom)); return an.length ? `<li><b style="color:var(--live)">⚠ ${L('Sıra hatası','Order problem')}:</b> ${L(`marX'ta ${an.length} kulüp yarışmasında bir tur, önceki turdan daha erken görünüyor: ${an.map(c => esc(c.name)).join(', ')}. Site marX'ı olduğu gibi gösteriyor; organizasyona sorulmalı.`,`In ${an.length} club competitions marX lists a round earlier than the one before: ${an.map(c => esc(c.name)).join(', ')}. Shown as given; check with the organiser.`)}</li>` : ''; })()}
     ${liveOff ? `<li><b>${L('WDSF ile fark','Difference from WDSF')}:</b> ${L(`WDSF sitesindeki saatler, marX'takilerden bütün programda ${Math.abs(liveOff)} dk ${liveOff > 0 ? 'erken' : 'geç'}. Site marX'ı olduğu gibi gösteriyor, hiçbir düzeltme yapmıyor; hangisinin doğru olduğunu organizasyon belirler.`,`Times on the WDSF site are ${Math.abs(liveOff)} min ${liveOff > 0 ? 'earlier' : 'later'} than marX across the programme. This page follows marX; the WDSF site shows different times.`)}</li>` : ''}
     <li><b>${L('Yarışmalar, turlar ve kayıtlar: WDSF','Competitions, rounds and entries: WDSF')}</b> (worlddancesport.org). ${L('Son kontrol','Last check')}: ${tTxt(DATA.fetched)}. ${L('Gündüz her 3 dakikada kontrol edilir; değişiklik olursa site kendini yeniler.','Checked every 3 minutes by day; the page reloads itself when something changes.')}</li>
     <li><b>${L('Kulüp kayıtları','Club entries')}</b>: ${L(`${comps} yarışmada ${ents} kayıt, ${CLUB.members.length} sporcu.`,`${ents} entries in ${comps} competitions, ${CLUB.members.length} athletes.`)} ${L('Adında "Tarz" geçen takımlar, ayrıca Secret ve Marvellous; bu takımların üyeleri; üyelerin solo ve düetleri. Elle eklenen: Necla Nehir Demirkurnali, Koray Ege Ozdemir. Her WDSF güncellemesinde yeniden hesaplanır.','Teams named "Tarz", plus Secret and Marvellous; their members; the members\' solos and duos. Added by hand: Necla Nehir Demirkurnali, Koray Ege Ozdemir. Recalculated on every WDSF update.')}</li>
     <li><b>${L('Hoca notları','Coach notes')}</b>: ${L(`${(CLUB.notes||[]).length} not (📝 ile gösterilir). WDSF'de olmayan bilgiler.${liveOff ? ' Defterdeki saatle gösterilir; marX ile karşılaştırırken bunu göz önünde bulundur.' : ''}`,`${(CLUB.notes||[]).length} notes (marked 📝), information not on WDSF.`)}</li>
+    <li><b>${L('Saat değişiklikleri','Time changes')}</b>: ${L('marX bir turun, provanın ya da ödül töreninin saatini, salonunu veya gününü değiştirdiğinde eski → yeni olarak listelenir ve satırda "↻ önce 10:11" yazar. Her dakika karşılaştırılır; site saatlere dokunmaz, sadece marX\'ın neyi değiştirdiğini söyler.','when marX moves a round, rehearsal or awards (time, hall or day) it is listed as old → new and the row shows "↻ was 10:11". Compared every minute; the page never alters a time, it only reports what marX changed.')}${CHGOK ? '' : L(' (Henüz veri gelmedi.)',' (No data yet.)')}</li>
+    <li><b>${L('Kendi notların','Your own notes')}</b>: ${L('"＋ Not" ile eklediklerin sadece bu telefonda saklanır.','notes added with "＋ Note" are kept on this phone only.')}</li>
     <li><b>${L('Sıkışık geçiş','Tight changeover')}</b>: ${L('aynı sporcunun farklı iki yarışmadaki turları ya da sahne provaları arasında 15 dakikadan az olması. Bütün çiftler marX\'ın güncel saatleriyle karşılaştırılır.','under 15 minutes between an athlete\'s rounds or stage rehearsals in two different competitions. All pairs are compared using the current marX times.')}</li>
     <li><b>${L('Bitti işaretleri','Done ticks')}</b>: ${L('sadece bu telefonda saklanır, başkasıyla paylaşılmaz.','stored on this phone only, not shared.')}</li>
   </ul></details>`;
+}
+// Plain description of a club item for the change list.
+function chgDesc(i, person){
+  const who = person ? [person] : null;
+  if(i.kind === 'round') return `<b>${esc(entryNames(i.comp.id, who).join(' · '))}</b> — ${klas(i.comp)} · <b>${esc(i.round.label)}</b>${isLater(i.comp, i.round) ? L(' (geçerse)',' (if qualified)') : ''}`;
+  const ids = evComps(i);
+  const what = isReh(i) ? L('Sahne provası','Stage rehearsal') : /Results/i.test(i.raw || '') ? L('Ödül töreni','Awards') : esc(i.text);
+  return `<b>${esc(ids.flatMap(id => entryNames(id, who)).join(' · ') || CLUB.short)}</b> — ${what}${ids.length ? ' · ' + ids.map(id => COMPS[id] ? klas(COMPS[id]) : '').join(', ') : ''}`;
+}
+/* ---------- share the day as text (WhatsApp etc.) ---------- */
+const klasTxt = c => DTAG(c) + ' ' + c.short.replace(/ F\+M$/, '');
+function clubShareText(day, person){
+  const a = nowAbs();
+  let items = clubItems(day);
+  if(person) items = items.filter(i => clubWho(i).includes(person) || (i.kind !== 'round' && !clubWho(i).length && i.kind !== 'note'));
+  const who = person ? [person] : null;
+  const lines = [`${person || CLUB.name} · ${day} ${L('Kasım','November')} ${DAYN[day]}`];
+  lines.push(LIVE ? L(`Saatler: marX (organizasyonun canlı programı), ${tTxt(LIVE.fetched)} itibarıyla`, `Times: marX (organiser's live timetable) as of ${tTxt(LIVE.fetched)}`) : L(`Saatler: WDSF, ${tTxt(DATA.fetched)} itibarıyla`, `Times: WDSF as of ${tTxt(DATA.fetched)}`), '');
+  if(!items.length) lines.push(person ? L('Bu gün yarışma yok.','No events this day.') : L('Bu gün kulübün yarışması yok.','No club events this day.'));
+  items.forEach(i => {
+    const hall = i.noHall ? '' : ` · ${(HALL[i.h] || i.h).replace(' · ', ' ')}`;
+    if(i.kind === 'round') lines.push(`${fmt(i.s)}–${fmt(i.e)}${hall} · ${klasTxt(i.comp)} · ${i.round.label}${isLater(i.comp, i.round) ? L(' (geçerse)',' (if qualified)') : ''} — ${entryNames(i.comp.id, who).join(', ')}`);
+    else if(i.kind === 'note') lines.push(`${fmt(i.s)}${hall} · 📝 ${i.text}`);
+    else { const ids = evComps(i), names = ids.flatMap(id => entryNames(id, who)).join(', ');
+      const what = isReh(i) ? L('Sahne provası','Stage rehearsal') : /Results/i.test(i.raw || '') ? L('Ödül töreni','Awards') : i.text;
+      lines.push(`${fmt(i.s)}${hall} · ${what}${ids.length ? ': ' + ids.map(id => COMPS[id] ? klasTxt(COMPS[id]) : '').filter(Boolean).join(', ') : ''}${names ? ' — ' + names : ''}`); }
+  });
+  const warns = clubWarnings(day).filter(w => !person || w.people.includes(person));
+  if(warns.length){ lines.push('', L('⚠ Sıkışık geçişler (15 dk altı):','⚠ Tight changeovers (under 15 min):'));
+    warns.forEach(w => lines.push(`• ${(person ? [person] : w.people).join(', ')}: ${fmt(w.A.s)}–${fmt(w.A.e)} → ${fmt(w.B.s)} (${w.gap < 0 ? L(`çakışma, ${-w.gap} dk`,`overlap, ${-w.gap} min`) : L(`arada ${w.gap} dk`,`${w.gap} min between`)})`)); }
+  lines.push('', L('Saatler değişebilir; güncel hali:','Times can change; latest:') + ' ' + location.origin + location.pathname);
+  return lines.join('\n');
+}
+async function shareText(txt){
+  if(navigator.share){ try { await navigator.share({text: txt}); return; } catch(e) { if(e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(txt); toast(L('Kopyalandı, WhatsApp\'a yapıştır','Copied — paste into WhatsApp')); return; } catch(e) {}
+  try { const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove();
+    toast(ok ? L('Kopyalandı, WhatsApp\'a yapıştır','Copied — paste into WhatsApp') : L('Kopyalanamadı','Could not copy')); } catch(e) { toast(L('Kopyalanamadı','Could not copy')); }
+}
+/* ---------- keep the screen on (backstage) ---------- */
+let wakeOn = false, wakeLockObj = null;
+async function wakeAcquire(){
+  try { wakeLockObj = await navigator.wakeLock.request('screen'); wakeLockObj.addEventListener('release', () => { wakeLockObj = null; }); return true; } catch(e) { wakeLockObj = null; return false; }
+}
+async function toggleWake(){
+  if(wakeOn){ wakeOn = false; try { if(wakeLockObj) await wakeLockObj.release(); } catch(e) {} wakeLockObj = null; toast(L('Ekran normale döndü','Screen back to normal')); }
+  else if(await wakeAcquire()){ wakeOn = true; toast(L('Sayfa açıkken ekran kapanmaz','Screen stays on while this page is open')); }
+  else toast(L('Açılamadı (pil tasarrufu açık olabilir)','Not available (battery saver may be on)'));
+  if(view === 'kulup') renderClub(true);
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && wakeOn && !wakeLockObj) wakeAcquire(); });
+/* ---------- coach's own notes (this phone only) ---------- */
+function openNote(day){
+  const d = $('noteDlg'); if(!d || !d.showModal) { toast(L('Bu tarayıcıda not eklenemiyor','Notes are not available in this browser')); return; }
+  $('nTitle').textContent = L('Not ekle','Add a note'); $('nDayL').textContent = L('Gün','Day'); $('nTimeL').textContent = L('Saat','Time');
+  $('nHallL').textContent = L('Salon','Hall'); $('nTextL').textContent = L('Not','Note'); $('nCancel').textContent = L('Vazgeç','Cancel'); $('nSave').textContent = L('Kaydet','Save');
+  $('nHint').textContent = L('Sadece bu telefonda saklanır; diğer hocalar görmez. Herkesin görmesi gereken notu Yağız\'a ilet.','Kept on this phone only; other coaches do not see it.');
+  $('nDay').innerHTML = DAYS.map(x => `<option value="${x}" ${x === day ? 'selected' : ''}>${x} ${L('Kas','Nov')} ${DAYN[x]}</option>`).join('');
+  $('nHall').innerHTML = `<option value="">${L('Salon yok / genel','No hall / general')}</option><option value="A">${esc(HALL.A)}</option><option value="B">${esc(HALL.B)}</option>`;
+  $('nTime').value = ''; $('nText').value = '';
+  d.showModal(); try { $('nTime').focus(); } catch(e) {}
+}
+if($('noteForm')){
+  $('nCancel').onclick = () => $('noteDlg').close();
+  $('noteForm').onsubmit = e => {
+    e.preventDefault();
+    const time = $('nTime').value, text = $('nText').value.trim(), day = +$('nDay').value;
+    if(toMin(time) == null || !text || !DAYS.includes(day)) return;
+    syncState();
+    myNotes.push({id: 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), day, hall: $('nHall').value, time: time.slice(0, 5), text: text.slice(0, 140)});
+    const kept = saved(store.set('wdsfist-mynotes', myNotes));
+    $('noteDlg').close(); st.cDay = day; if(kept || !storeOK) toast(L('Not eklendi','Note added')); if(view === 'kulup') renderClub(true);
+  };
 }
 function renderClub(soft){
   const a = nowAbs(), d = todayDay();
@@ -1153,8 +1354,15 @@ function renderClub(soft){
   const roundsAll = DAYS.map(x => clubItems(x).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))).length);
   let html = `<h2 style="margin-bottom:2px">${esc(CLUB.name)}</h2><div class="plannote" style="padding:0 0 4px">${L('Kulübün tüm turları, provaları ve ödül törenleri. Saatler WDSF ve organizasyonun canlı akışından otomatik gelir.','All club rounds, rehearsals and awards. Times come automatically from WDSF and the organiser\'s live timetable.')}</div>`;
   html += clubSources();
+  if(!storeOK) html += `<div class="cwarn" style="padding:10px 12px;font-size:14px"><b>⚠ ${L('Bu tarayıcı kayıt tutmuyor','This browser does not keep data')}</b><br>${L('Gizli sekmede ya da bir uygulamanın içinde açılmış olabilir. Bitti işaretleri ve notların sayfa kapanınca silinir; sayfayı Safari ya da Chrome\'da normal sekmede aç.','It may be a private tab or an in-app browser. Done marks and notes are lost when the page closes; open the page in a normal Safari or Chrome tab.')}</div>`;
+  // what marX moved lately, for the club's upcoming rounds, rehearsals and awards
+  const chgRows = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind !== 'note' && ABS(i.d,i.e) > a && !isDone(i) && (!person || clubWho(i).includes(person))).map(i => [i, chgDesc(i, person)]);
+  const chg = chgBlock(chgRows, {tr: person ? 'Yaklaşan turlarında' : 'Yaklaşan kulüp turlarında', en: person ? 'in the upcoming rounds' : 'in the club\'s upcoming rounds'});
+  html += chg.html;
+  if(st.chgN != null && chg.n > st.chgN){ toast(L('↻ marX saat değiştirdi','↻ marX changed a time')); try { navigator.vibrate && navigator.vibrate([200,100,200]); } catch(e) {} }
+  st.chgN = chg.n;
   // what's on now / next (any day)
-  const upc = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && !clubDone.has(doneKey(i)) && (!person || clubWho(i).includes(person)) && ABS(i.d,i.e) > a).sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
+  const upc = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && !isDone(i) && (!person || clubWho(i).includes(person)) && ABS(i.d,i.e) > a).sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
   const live = upc.filter(i => ABS(i.d,i.s) <= a), nxt = upc.filter(i => ABS(i.d,i.s) > a).slice(0, 2);
   const sumLine = (i, k) => { const ents = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => e[1]).join(' · ');
     return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}</div><div class="t">${fmt(i.s)} · ${klas(i.comp)} ${roundTag(i.round)}${dlyTag(i.round)}</div><div class="m">${esc(ents)} · ${hallChip(i.h)}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ''}</div></div>`; };
@@ -1162,15 +1370,16 @@ function renderClub(soft){
   nxt.forEach((i, k) => html += sumLine(i, k ? L('SONRAKİ','AFTER THAT') : L('SIRADAKİ','NEXT UP')));
   html += `<div class="cfil"><label for="cPer" class="sr">${L('Sporcu','Athlete')}</label><select id="cPer"><option value="">${L('Bütün kulüp','Whole club')}</option>${CLUB.members.filter(m => DAYS.some(x => clubItems(x).some(i => clubWho(i).includes(m)))).map(m => `<option ${m===person?'selected':''}>${esc(m)}</option>`).join('')}</select>
     <button class="btn" id="cIcs" style="white-space:nowrap">📅 ${L('Takvime','Calendar')}</button></div>`;
+  html += `<div class="cact"><button class="btn" id="cShare">📤 ${L('Günü paylaş','Share day')}</button>${'wakeLock' in navigator ? `<button class="btn ${wakeOn ? 'on' : ''}" id="cWake" aria-pressed="${wakeOn}">🔆 ${L('Ekran açık','Keep awake')}</button>` : ''}<button class="btn" id="cNote">＋ ${L('Not','Note')}</button></div>`;
   html += `<div class="cday">${DAYS.map((x, k) => `<button class="day ${x===day?'on':''}" data-cd="${x}">${x} ${L('Kas','Nov')} ${x===d?`<span class="td">${L('BUGÜN','TODAY')}</span>`:''}<small>${DAYN[x]} · ${roundsAll[k]} ${L('tur','rounds')}</small></button>`).join('')}</div>`;
-  const warns = clubWarnings(day).filter(w => (!person || w.people.includes(person)) && ABS(w.B.d, w.B.s) > a && !clubDone.has(doneKey(w.B)));
+  const warns = clubWarnings(day).filter(w => (!person || w.people.includes(person)) && ABS(w.B.d, w.B.s) > a && !isDone(w.B));
   const wline = w => { const ov = w.gap < 0;
     return `<li><b>${esc((person ? [person] : w.people).join(', '))}</b><br>${fmt(w.A.s)}–${fmt(w.A.e)} ${hallChip(w.A.h)} ${evDesc(w.A, w.people)}<br>→ ${fmt(w.B.s)} ${hallChip(w.B.h)} ${evDesc(w.B, w.people)}<br><small style="color:var(--muted)">${L('İki ayrı yarışma','Two different competitions')}</small><br><b style="color:var(--live)">${ov ? L(`Çakışma: ikincisi ilki bitmeden ${-w.gap} dk önce başlıyor`,`Overlap: the second starts ${-w.gap} min before the first ends`) : w.gap === 0 ? L('Arada hiç süre yok','No time in between') : L(`Arada ${w.gap} dk`,`${w.gap} min in between`)}</b></li>`; };
-  if(warns.length) html += `<details class="cwarn" ${person || warns.length <= 3 ? 'open' : ''}><summary>⚠ ${L(`${warns.length} sıkışık geçiş (15 dk altı)`,`${warns.length} tight changeovers (under 15 min)`)}</summary><ul>${warns.map(wline).join('')}</ul><div class="plannote" style="padding:4px 0 0">${L('Turlar ve sahne provaları karşılaştırılır. Saatler değişince otomatik yeniden hesaplanır. Uzun turlarda (ör. 1/8 final) sporcu turun herhangi bir anında çıkabilir.','Rounds and stage rehearsals are compared. Recalculated automatically when times change. In long rounds (e.g. 1/8 final) the athlete may dance at any point.')}</div></details>`;
+  if(warns.length) html += `<details class="cwarn" data-dk="cwarn" ${detOpen('cwarn', !!person || warns.length <= 3)}><summary>⚠ ${L(`${warns.length} sıkışık geçiş (15 dk altı)`,`${warns.length} tight changeovers (under 15 min)`)}</summary><ul>${warns.map(wline).join('')}</ul><div class="plannote" style="padding:4px 0 0">${L('Turlar ve sahne provaları karşılaştırılır. Saatler değişince otomatik yeniden hesaplanır. Uzun turlarda (ör. 1/8 final) sporcu turun herhangi bir anında çıkabilir.','Rounds and stage rehearsals are compared. Recalculated automatically when times change. In long rounds (e.g. 1/8 final) the athlete may dance at any point.')}</div></details>`;
   else if(clubItems(day).some(i => i.kind === 'round')) html += `<div class="plannote" style="padding:2px 0 6px">✓ ${L('Bu gün 15 dakikanın altında geçiş yok.','No changeovers under 15 minutes this day.')}</div>`;
   const hideDone = store.get('wdsfist-hidedone', false);
-  html += `<label class="cfil" style="font-size:14px;gap:6px"><input type="checkbox" id="cHide" ${hideDone?'checked':''} style="width:20px;height:20px"> ${L('İşaretlenenleri gizle','Hide marked as done')} <span style="color:var(--muted)">(${items.filter(i => clubDone.has(doneKey(i))).length})</span></label>`;
-  if(hideDone) items = items.filter(i => !clubDone.has(doneKey(i)));
+  html += `<label class="cfil" style="font-size:14px;gap:6px"><input type="checkbox" id="cHide" ${hideDone?'checked':''} style="width:20px;height:20px"> ${L('İşaretlenenleri gizle','Hide marked as done')} <span style="color:var(--muted)">(${items.filter(i => isDone(i)).length})</span></label>`;
+  if(hideDone) items = items.filter(i => !isDone(i));
   if(!items.length) html += `<p class="plannote">${person ? L(`${esc(person)} bu gün yarışmıyor.`,`${esc(person)} is not competing this day.`) : L('Bu gün kulübün yarışması yok.','No club events this day.')}</p>`;
   let placed = false;
   items.forEach(i => {
@@ -1181,9 +1390,16 @@ function renderClub(soft){
   $('clubBox').innerHTML = html;
   if(soft) window.scrollTo(0, y);
   $('clubBox').querySelectorAll('[data-cd]').forEach(b => b.onclick = () => { st.cDay = +b.dataset.cd; renderClub(); const n=$('cNow'); if(n) n.scrollIntoView({block:'center'}); });
-  $('clubBox').querySelectorAll('[data-tick]').forEach(b => b.onclick = e => { e.stopPropagation(); e.preventDefault(); toggleDone(b.dataset.tick); });
+  $('clubBox').querySelectorAll('[data-tick]').forEach(b => b.onclick = e => { e.stopPropagation(); e.preventDefault(); toggleDone(b.dataset.tick, b.dataset.tick0); });
   $('cHide').onchange = e => { store.set('wdsfist-hidedone', e.target.checked); renderClub(true); };
-  $('cPer').onchange = e => { st.cPerson = e.target.value; store.set('wdsfist-cperson', st.cPerson); renderClub(); };
+  $('cPer').onchange = e => { st.cPerson = e.target.value; store.set('wdsfist-cperson', st.cPerson); st.chgN = null; renderClub(); };
+  $('cShare').onclick = () => shareText(clubShareText(day, person));
+  if($('cWake')) $('cWake').onclick = toggleWake;
+  $('cNote').onclick = () => openNote(day);
+  if($('chgSeenBtn')) $('chgSeenBtn').onclick = chgMarkSeen;
+  $('clubBox').querySelectorAll('[data-delnote]').forEach(b => b.onclick = e => { e.stopPropagation(); const id = b.dataset.delnote;
+    if(st.delNote !== id){ st.delNote = id; renderClub(true); return; }
+    syncState(); myNotes = myNotes.filter(n => n.id !== id); saved(store.set('wdsfist-mynotes', myNotes)); st.delNote = null; toast(L('Not silindi','Note deleted')); renderClub(true); });
   $('cIcs').onclick = () => downloadICS(DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))));
 }
 
@@ -1285,7 +1501,7 @@ function tick0(force){
   if(force) rerender();
   else if(view==='simdi') renderNow();
   else if(view==='programim') renderMine();
-  else if(view==='kulup') renderClub(true);
+  else if(view==='kulup'){ const ae = document.activeElement; if(!(ae && ae.tagName === 'SELECT' && $('clubBox').contains(ae))) renderClub(true); }
   else if(view==='program'){ const y=window.scrollY; renderProgram(); window.scrollTo(0,y); }
 }
 window.addEventListener('hashchange', route);
@@ -1324,7 +1540,25 @@ $('themeBtn').onclick = () => { theme = isDark() ? 'light' : 'dark'; try{ localS
 if(window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch(e) {}
 $('lngBtn').onclick = () => { lang = lang==='en' ? 'tr' : 'en'; try{ localStorage.setItem('wdsfist-lang', lang); }catch(e){} applyLang(); rerender(); };
 applyLang(); applyTheme();
+/* The page reloads itself when the schedule is rebuilt, and phones unload background tabs. Day, scroll
+   position, opened boxes and "keep awake" come back afterwards (same tab, within 30 minutes). */
+const UIK = store.ns('wdsfist-ui');
+function saveUI(){ try { sessionStorage.setItem(UIK, JSON.stringify({t: Date.now(), view, cDay: st.cDay, y: Math.round(window.scrollY), det: detState, wake: wakeOn})); } catch(e) {} }
+let uiBack = null;
+try { const u = JSON.parse(sessionStorage.getItem(UIK) || 'null'); if(u && typeof u.t === 'number' && Date.now() - u.t >= 0 && Date.now() - u.t < 30 * 60000) uiBack = u; } catch(e) {}
+if(uiBack){
+  if(DAYS.includes(uiBack.cDay)) st.cDay = uiBack.cDay;
+  if(uiBack.det && typeof uiBack.det === 'object') Object.keys(uiBack.det).forEach(k => { detState[k] = !!uiBack.det[k]; });
+}
+addEventListener('pagehide', saveUI);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') saveUI(); });
 route();
+if(uiBack){
+  if(uiBack.view === view && uiBack.y > 0) setTimeout(() => { if(!$('ov').classList.contains('on')) window.scrollTo(0, uiBack.y); }, 60);
+  if(uiBack.wake && 'wakeLock' in navigator) wakeAcquire().then(ok => { if(ok){ wakeOn = true; if(view === 'kulup') renderClub(true); } });
+}
+// Ask the browser not to clear what is kept on this phone when it runs short of space.
+try { if(CLUB && navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch(e) {}
 setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
 
 /* ---------- keep open pages fresh ---------- */
@@ -1332,7 +1566,7 @@ setInterval(() => tick(false), 20000); setTimeout(checkAlerts, 500);
 let lastInput = Date.now(), pendingUpdate = false;
 ['touchstart','keydown','wheel','click'].forEach(ev => addEventListener(ev, () => { lastInput = Date.now(); }, {passive:true}));
 const canReload = () => true;
-const busy = () => { if($('ov').classList.contains('on')) return true; const ae = document.activeElement; return !!(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)); };
+const busy = () => { if($('ov').classList.contains('on') || ($('noteDlg') && $('noteDlg').open)) return true; const ae = document.activeElement; return !!(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)); };
 function tryReload(onReturn){
   if(!pendingUpdate || simAbs != null) return;
   if(!canReload()){ showUpdateNote(); return; }

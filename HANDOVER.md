@@ -25,6 +25,22 @@ Bu depo iki sayfayı yayınlar (Cloudflare Pages, proje `istanbul2026-takip`):
   Bütün çiftler karşılaştırılır; bağımsız bir Python hesabıyla birebir doğrulandı (marX saatleriyle 69 kişi-çift).
 - "Bitti" işaretleri sadece o telefonda saklanır.
 
+## Antrenör araçları (11 Kasım gecesi eklendi)
+- **Saat değişiklikleri**: `loop.mjs` her dakika marX'ın önceki haliyle farkını alır (`marxDiff`), `live.json`'a `chg`
+  (değişiklik günlüğü, en çok 600 kayıt) ve `chg0` (günlüğün başladığı an) yazar. Sayfa bunu "eski → yeni" olarak
+  listeler, satırda "↻ önce 10:11" gösterir. Saatlere dokunmaz. Geri alınan değişiklik gösterilmez. Günlük ile ekrandaki
+  saat uyuşmuyorsa (bir dakikalık fark) hiçbir şey göstermez. `chg` olmayan eski akışta bölüm hiç çıkmaz.
+- **Günü paylaş**: seçili gün/sporcu için düz metin (telefonun paylaş menüsü; yoksa panoya kopyalar).
+- **Ekran açık**: sayfa açıkken ekran kapanmaz (Wake Lock; desteklemeyen tarayıcıda düğme görünmez).
+- **＋ Not**: hocanın kendi notu, sadece o telefonda (`tarz-mynotes`). Herkese görünecek not hâlâ `club/tarz.json`.
+- **Kayıtların korunması**: bitti işaretleri artık saate değil turun/provanın kendisine bağlı (WDSF saati değişince
+  kaybolmaz; eski anahtarlar da tanınır). Her kayıttan önce depodan yeniden okunur (iki sekme birbirini ezmez).
+  Sayfa kendini yenilediğinde ya da telefon sekmeyi boşalttığında seçili gün, kaydırma yeri, açık kutular ve
+  "ekran açık" 30 dk içinde geri gelir (`sessionStorage`). Tarayıcı kayıt tutmuyorsa (gizli sekme) uyarı çıkar.
+- Sınamalar: `tests/` (bkz. `tests/README.md`).
+- **Gerçek iPhone'da elle bakılacaklar** (WebKit burada sınanamadı): ＋ Not penceresi ve saat seçici, Günü paylaş →
+  WhatsApp, Ekran açık, bir turu işaretleyip sayfayı kapat-aç.
+
 ## Bilinen noktalar
 - marX 10 Kasım 22:21'de saatleri 2 saat ileri yayınladı, 23:53'te geri aldı. Site her zaman marX'ı olduğu gibi gösterir.
 - "Ege solo" (13 Kasım 09:55) WDSF'de ve marX'ta yok; hoca notu olarak duruyor.

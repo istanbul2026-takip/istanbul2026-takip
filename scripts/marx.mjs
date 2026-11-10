@@ -39,3 +39,41 @@ export async function fetchMarx() {
 
 // Same content, ignoring when we looked.
 export const marxKey = mx => mx ? JSON.stringify({ at: mx.at, r: mx.r, x: mx.x }) : '';
+
+// --- Change log: what marX moved, and when we saw it. Nothing is corrected or judged here;
+// the page only tells people "this was 19:22, marX now says 19:40".
+// One change: [key, oldDay, oldHall, oldMinutes, newDay, newHall, newMinutes].
+// key is "compId.round" for rounds, "x|<text>" for other items (rehearsals, awards, ceremonies).
+const validRow = m => Array.isArray(m) && Number.isFinite(m[0]) && typeof m[1] === 'string' && Number.isFinite(m[2]);
+const uniqueX = mx => {
+  const seen = new Map();
+  for (const m of (mx && Array.isArray(mx.x) ? mx.x : [])) {
+    if (!validRow(m) || typeof m[4] !== 'string' || !m[4]) continue;
+    seen.set(m[4], seen.has(m[4]) ? null : m);          // the same text twice: cannot tell them apart, leave out
+  }
+  return seen;
+};
+export function marxDiff(prev, cur) {
+  const out = [];
+  if (!prev || !cur || !prev.r || !cur.r) return out;
+  if (Object.keys(prev.r).length < 50 || Object.keys(cur.r).length < 50) return out;   // half-empty snapshot: no conclusions
+  const moved = (a, b) => a[0] !== b[0] || a[1] !== b[1] || a[2] !== b[2];
+  for (const [k, n] of Object.entries(cur.r)) {
+    const o = prev.r[k];
+    if (validRow(o) && validRow(n) && moved(o, n)) out.push([k, o[0], o[1], o[2], n[0], n[1], n[2]]);
+  }
+  const px = uniqueX(prev), cx = uniqueX(cur);
+  for (const [k, n] of cx) {
+    const o = px.get(k);
+    if (o && n && moved(o, n)) out.push(['x|' + k, o[0], o[1], o[2], n[0], n[1], n[2]]);
+  }
+  return out;
+}
+// Log: [[isoTime, [change, ...]], ...], oldest first, capped so the 1-minute file stays small.
+export function addChanges(log, iso, changes, cap = 600) {
+  const out = (Array.isArray(log) ? log : []).filter(g => Array.isArray(g) && typeof g[0] === 'string' && Array.isArray(g[1]) && g[1].length);
+  if (changes && changes.length) out.push([iso, changes]);
+  let n = out.reduce((s, g) => s + g[1].length, 0);
+  while (out.length > 1 && n > cap) n -= out.shift()[1].length;
+  return out;
+}
