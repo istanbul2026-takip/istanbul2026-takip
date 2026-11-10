@@ -4,6 +4,7 @@ import path from 'path';
 import { createHash } from 'crypto';
 import { scrape } from './scrape.mjs';
 import { buildPage } from './build.mjs';
+import { fetchMarx } from './marx.mjs';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const A = p => path.join(root, p);
@@ -14,12 +15,15 @@ const now = new Date();
 const withEntries = !prev || process.env.FULL === '1' || (now.getUTCHours() % 2 === 0 && now.getUTCMinutes() < 5);
 
 const data = await scrape({ prev, withEntries });
+// Organiser's live timetable (marX): baked into the page as a starting point; the 1-minute feed
+// (scripts/loop.mjs → live branch) keeps phones current without new deploys.
+try { data.MX = await fetchMarx(); } catch (e) { console.log('::warning::marX not reachable: ' + e.message); data.MX = prev && prev.MX || null; }
 const nEntries = Object.values(data.P).reduce((n, v) => n + v.length, 0);
 if (nEntries < 200) throw new Error('entries look incomplete: ' + nEntries);
 console.log(`items ${data.E.length} · comps ${Object.keys(data.R).length} · entries ${nEntries} · teams ${Object.keys(data.T).length} · rankings ${Object.keys(data.RK).length} · entries refreshed: ${withEntries}`);
 // Publish only when something changed, plus a heartbeat every 30 min during event hours
 // (Cloudflare's free plan allows ~500 deploys a month).
-const { fetched, ...content } = data;
+const { fetched, MX, ...content } = data;   // marX changes alone do not trigger a deploy
 const hash = createHash('sha256').update(JSON.stringify(content)).digest('hex');
 const nowMs = Date.now();
 const istHour = (now.getUTCHours() + 3) % 24;

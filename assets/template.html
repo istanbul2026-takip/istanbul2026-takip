@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#7C1528">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="İstanbul 2026">
@@ -73,6 +73,7 @@ nav.tabs a.on::before{content:"";position:absolute;top:0;left:28%;right:28%;heig
 h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .livelink{display:block;margin:10px 0;padding:11px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--live);color:var(--ink);text-decoration:none;font-size:14px;line-height:1.4}.livelink b{display:block;font-size:15px}.livelink span{color:var(--muted)}.livelink b span{color:var(--ink)}
+.dly{font-size:12px;font-weight:800;color:var(--live);background:var(--surface);border:1px solid var(--live);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 section{display:none}
 section.on{display:block}
 h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;margin:26px 0 10px;line-height:1.1}
@@ -488,6 +489,53 @@ let pins = new Set(store.get('wdsfist-pins', []));      // "compId|name"
 let simAbs = null;
 try { const v = sessionStorage.getItem('wdsfist-sim'); if(v) simAbs = +v; } catch(e){}
 const nowAbs = () => simAbs != null ? simAbs : (Date.now()-EPOCH)/60000;
+
+/* ---------- organiser's live timetable (marX) ----------
+   The scrutineers' system moves round times when the event runs late and marks rounds as
+   current / done. A 1-minute mirror lives on GitHub; the page also carries the copy from its build. */
+const LIVE_URL = 'https://raw.githubusercontent.com/istanbul2026-takip/istanbul2026-takip/live/live.json';
+let LIVE = DATA.MX || null;
+try { const c = JSON.parse(localStorage.getItem('wdsfist-live') || 'null'); if(c && c.r && (!LIVE || Date.parse(c.fetched) > Date.parse(LIVE.fetched))) LIVE = c; } catch(e) {}
+const liveFresh = () => !!(LIVE && simAbs == null && Date.now() - Date.parse(LIVE.fetched) < 20*60000);
+COMPLIST.forEach(c => c.rounds.forEach(r => { r.ps = r.s; r.pe = r.e; r.shift = 0; r.lst = null; }));
+ITEMS.forEach(i => { i.ps = i.s; i.pe = i.e; });
+function applyLive(){
+  const a = nowAbs(), fresh = liveFresh();
+  COMPLIST.forEach(c => c.rounds.forEach((r, ix) => {
+    r.s = r.ps; r.e = r.pe; r.shift = 0; r.lst = null;
+    const m = LIVE && LIVE.r && LIVE.r[c.id + '.' + (ix + 1)];
+    if(!m || m[0] !== c.day || typeof m[2] !== 'number') return;
+    const dur = m[3] > 0 ? m[3] : r.pe - r.ps;
+    r.s = m[2]; r.e = m[2] + Math.max(1, dur); r.shift = Math.round(m[2] - r.ps);
+    if(!fresh) return;
+    r.lst = m[4];
+    const now = a - ABS(c.day, 0);
+    if(m[4] === 'd' && r.e > now) r.e = Math.max(r.s + 1, Math.floor(now));                 // finished early
+    if(m[4] === 'c'){ if(now < r.s) r.s = Math.floor(now); if(now >= r.e) r.e = Math.ceil(now) + 3; }   // on stage now (early or running long)
+  }));
+  // other programme items (breaks, ceremonies) move with the round before them in the same hall
+  const off = {};
+  ITEMS.slice().sort((x,y) => ABS(x.d,x.ps) - ABS(y.d,y.ps)).forEach(i => {
+    const k = i.d + i.h;
+    if(i.kind === 'round'){ i.s = i.round.s; i.e = i.round.e; off[k] = i.round.shift; }
+    else { const o = off[k] || 0; i.s = i.ps + o; i.e = i.pe + o; }
+  });
+  ITEMS.sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s) || (x.h < y.h ? -1 : 1));
+}
+const dlyTag = r => !r || !r.shift || Math.abs(r.shift) < 2 ? '' : `<span class="dly" title="${L('WDSF planı','WDSF plan')} ${fmt(r.ps)}">${r.shift > 0 ? '+' + r.shift + L(' dk gecikme',' min late') : r.shift + L(' dk erken',' min early')}</span>`;
+const nowLabel = r => r && r.lst === 'c' ? L('SALONDA ŞU AN','ON STAGE NOW') : L('PLANA GÖRE ŞU AN','SCHEDULED NOW');
+async function pullLive(){
+  if(location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  try {
+    const res = await fetch(LIVE_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    if(!res.ok) return;
+    const j = await res.json();
+    if(!j || !j.r || !j.fetched || (LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched))) return;
+    LIVE = j; try { localStorage.setItem('wdsfist-live', JSON.stringify(j)); } catch(e) {}
+    if(typeof rerender === 'function') rerender();
+  } catch(e) {}
+}
+applyLive();
 const st = { pDay:null, pHall:null, pOnly:false, pDisc:new Set(), pAge:new Set(), pCat:new Set(), pFav:false, pTur:false,
              cQ:'', cDisc:new Set(), cAge:new Set(), aQ:'', aCty:'' };
 
@@ -609,7 +657,7 @@ function itemRow(it, opts={}){
     return `<div class="row ${st0} ${my?'fav':''}" style="--c:${c.disc.c}" data-comp="${c.id}">
       <div class="tm" style="padding-left:6px">${fmt(it.s)}<small>${fmt(it.e)}</small></div>
       <div class="bd"><div class="ti">${esc(c.name)}</div>
-        <div class="mt">${st0==='live'?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
+        <div class="mt">${st0==='live'?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:''}${myTags(c.id)}${roundTag(it.round)}${dlyTag(it.round)}${opts.mine ? qualTag(c, it.round) : ''}${opts.hall!==false?`<span class="hb">${L('Salon','Hall')} ${it.h}</span>`:''}${opts.day?`<span>${DAYS3[it.d]} ${it.d} ${L('Kas','Nov')}</span>`:''}${opts.cal && st0!=='past'?calLink(it):''}</div></div></div>`;
   }
   return `<div class="row minor ${st0}" style="--c:transparent">
     <div class="tm" style="padding-left:6px">${fmt(it.s)}</div>
@@ -648,7 +696,7 @@ function renderNow(){
   const myNext = ITEMS.filter(i => i.kind==='round' && mine.has(i.comp.id) && ABS(i.d,i.e) > a).slice(0,3);
   $('mineBox').innerHTML = mine.size ? `<div class="mine"><div class="k" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span>${L(`★ Takip ettiklerinde sırada`,`★ Up next for you`)}</span><a href="#sporcu" style="font-weight:600;font-size:13.5px;color:var(--mc);text-decoration:none;white-space:nowrap">${L('+ Kişi ekle','+ Add')}</a></div><div class="nexts">${
     myNext.length ? myNext.map(i => { const S=ABS(i.d,i.s); const live=a>=S;
-      return `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx"><b>${esc(i.comp.name)}</b> ${roundTag(i.round)} ${qualTag(i.comp, i.round)} ${myTags(i.comp.id)}<div class="in">${i.d!==d?DAYS3[i.d]+' '+i.d+' Kas · ':''}${L('Salon','Hall')} ${i.h}</div></div><div class="cd">${live?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:relTxt(S-a)}</div></div>`; }).join('')
+      return `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx"><b>${esc(i.comp.name)}</b> ${roundTag(i.round)}${dlyTag(i.round)} ${qualTag(i.comp, i.round)} ${myTags(i.comp.id)}<div class="in">${i.d!==d?DAYS3[i.d]+' '+i.d+' Kas · ':''}${L('Salon','Hall')} ${i.h}</div></div><div class="cd">${live?`<span class="livetag">${L('ŞU AN','NOW')}</span>`:relTxt(S-a)}</div></div>`; }).join('')
     : `<div class="nx minor">${L('Takip ettiklerinin tüm turları bitti.','All rounds you follow are finished.')}</div>`}</div></div>` : '';
 
   const myRes = [...mine].map(id=>COMPS[id]).filter(c => c && c.ranking.length && myNames(c.id).length);
@@ -673,8 +721,8 @@ function renderNow(){
     let live;
     if(curMain && curMain.kind==='round'){
       const c=curMain.comp, S=ABS(curMain.d,curMain.s), E=ABS(curMain.d,curMain.e), pct=Math.min(100,(a-S)/(E-S)*100);
-      live = `<div class="livebox" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="lab"><span class="dot"></span>${L(`PLANA GÖRE ŞU AN`,`SCHEDULED NOW`)}</div>
-        <div class="t">${esc(c.name)}</div><div class="r">${roundTag(curMain.round)} · ${fmt(curMain.s)}–${fmt(curMain.e)} · ${Math.max(0,Math.round(E-a))}${L(` dk kaldı`,` min left`)}</div>
+      live = `<div class="livebox" style="--c:${c.disc.c}" data-comp="${c.id}"><div class="lab"><span class="dot"></span>${nowLabel(curMain.round)}</div>
+        <div class="t">${esc(c.name)}</div><div class="r">${roundTag(curMain.round)}${dlyTag(curMain.round)} · ${fmt(curMain.s)}–${fmt(curMain.e)} · ${Math.max(0,Math.round(E-a))}${L(` dk kaldı`,` min left`)}</div>
         <div class="prog"><i style="width:${pct}%"></i></div></div>`;
     } else if(curMain){
       live = `<div class="livebox"><div class="lab idle">${L(`ŞU AN`,`NOW`)}</div><div class="t">${esc(curMain.text)}</div><div class="r">${fmt(curMain.s)}–${fmt(curMain.e)}</div></div>`;
@@ -682,8 +730,8 @@ function renderNow(){
       live = `<div class="livebox"><div class="lab idle">${L(`ŞU AN`,`NOW`)}</div><div class="t" style="color:var(--muted);font-weight:600">${L(`Salonda program yok`,`Nothing in this hall now`)}</div></div>`;
     }
     return `<div class="hall" id="hall-${h}"><div class="hallimg" style="background-image:url(${HALLIMG[h]})"><div class="hl"><b>${h}</b><span>${HALL[h].split(' · ')[1]}<small style="display:block;font-weight:500;opacity:.85;font-size:12.5px">${HALL_HINT(h)}</small></span></div></div><div class="hn"><span>${L('Salon','Hall')}</span><b>${HALL[h]}</b></div>${live}
-      <div class="plannote">${L('Plana göre. Gerçek akış kayabilir; salondaki anonsu ve ekranı takip et.','Based on the plan. The real running order can shift; follow the hall announcements and screen.')}</div><div class="nexts">${nexts.length? nexts.map(i => i.kind==='round'
-        ? `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.comp.name)} ${roundTag(i.round)}${i.d!==d?`<div class="in">${DAYS3[i.d]} ${i.d} ${L('Kas','Nov')}</div>`:''}</div><div class="cd">${relTxt(ABS(i.d,i.s)-a)}</div></div>`
+      <div class="plannote">${liveFresh() ? L(`Saatler organizasyonun canlı akışından (marX), ${fmt(Math.floor(((Date.parse(LIVE.fetched)-EPOCH)/60000)%1440))} itibarıyla. Salondaki anonsu da takip et.`,`Times from the organiser's live timetable (marX), as of ${fmt(Math.floor(((Date.parse(LIVE.fetched)-EPOCH)/60000)%1440))}. Also follow the hall announcements.`) : L('Plana göre. Gerçek akış kayabilir; salondaki anonsu ve ekranı takip et.','Based on the plan. The real running order can shift; follow the hall announcements and screen.')}</div><div class="nexts">${nexts.length? nexts.map(i => i.kind==='round'
+        ? `<div class="nx" data-comp="${i.comp.id}"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.comp.name)} ${roundTag(i.round)}${dlyTag(i.round)}${i.d!==d?`<div class="in">${DAYS3[i.d]} ${i.d} ${L('Kas','Nov')}</div>`:''}</div><div class="cd">${relTxt(ABS(i.d,i.s)-a)}</div></div>`
         : `<div class="nx minor"><div class="tm">${fmt(i.s)}</div><div class="tx">${esc(i.text)}</div></div>`).join('')
         : `<div class="nx minor">${L('Bu salonda başka program yok.','Nothing else in this hall.')}</div>`}</div></div>`;
   }).join('');
@@ -790,7 +838,7 @@ function athStatus(p){
   const pp = c.parts.find(x => x.key === p.key);
   if(pp && pp.place) return `🏅 <b>${esc(pp.place)}${L('. sıra','. place')}</b> (${c.parts.length} ${L('kayıt','entries')})`;
   const live = c.rounds.find(r => ABS(c.day,r.s) <= a && a < ABS(c.day,r.e));
-  if(live) return `<span class="live-now">● ${L('PLANA GÖRE ŞU AN','SCHEDULED NOW')}</span> · ${roundTag(live)} · ${L('Salon','Hall')} ${c.hall}`;
+  if(live) return `<span class="live-now">● ${nowLabel(live)}</span> · ${roundTag(live)} · ${L('Salon','Hall')} ${c.hall}`;
   const nxt = c.rounds.find(r => ABS(c.day,r.s) > a);
   if(nxt) return `${L('Sıradaki','Next')}: ${roundTag(nxt)} ${qualTag(c, nxt)} <b>${fmt(nxt.s)}</b> · ${relTxt(ABS(c.day,nxt.s) - a)}`;
   return L('Bitti · sonuç henüz açıklanmadı, açıklanınca burada görünür','Finished · result not published yet; it will appear here');
@@ -885,7 +933,7 @@ function openComp(id){
     <div class="mt">${c.day} ${L('Kasım','November')} ${DAYN[c.day]} · ${L('Salon','Hall')} ${HALL[c.hall]}</div>${myNames(c.id).length?`<div class="mt" style="margin-top:6px">${L(`Takip ettiğin: `,`Following: `)}${myTags(c.id)}</div>`:''}
     <div class="links"><button class="btn ${favs.has(c.id)?'pri':''}" data-star="${c.id}">${favs.has(c.id)?`${L('★ Klasman takipte','★ Category followed')}`:`${L('☆ Klasmanın tamamını takip et','☆ Follow the whole category')}`}</button></div>
     <h2>${L('Turlar','Rounds')}</h2>
-    <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('ŞU AN','NOW'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
+    <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}${dlyTag(r)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('ŞU AN','NOW'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
     ${res?`<tr>${L(`<td>Ödül töreni</td>`,`<td>Awards</td>`)}<td class="t">${fmt(res.s)}</td><td></td></tr>`:''}</table>
     <div class="links">
       <a class="lk" href="${base}Schedule/${slug}-${id}" target="_blank" rel="noopener">${L(`WDSF programı ↗`,`WDSF schedule ↗`)}</a>
@@ -1015,7 +1063,7 @@ function route(){
 }
 function rerender(){ keepFocus(rerender0); }
 function rerender0(){
-  renderClock(); updateBadge();
+  applyLive(); renderClock(); try { updLine(); } catch(e) {} updateBadge();
   if(view==='simdi') renderNow();
   if(view==='program') renderProgram();
   if(view==='yarismalar') renderComps();
@@ -1025,7 +1073,7 @@ function rerender0(){
 }
 function tick(force){ keepFocus(() => tick0(force)); }
 function tick0(force){
-  renderClock(); checkAlerts();
+  applyLive(); renderClock(); checkAlerts();
   if($('ov').dataset.comp && !force) return;
   if(force) rerender();
   else if(view==='simdi') renderNow();
@@ -1033,15 +1081,20 @@ function tick0(force){
   else if(view==='program'){ const y=window.scrollY; renderProgram(); window.scrollTo(0,y); }
 }
 window.addEventListener('hashchange', route);
+function updLine(){
+  const t = x => new Date(x).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const lv = liveFresh() ? ' · ' + L('Canlı akış ','Live timetable ') + new Date(LIVE.fetched).toLocaleTimeString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}) : '';
+  $('updTxt').textContent = L('Güncellendi ','Updated ') + t(DATA.fetched) + lv;
+}
 
-$('updTxt').textContent = L('Güncellendi ','Updated ') + new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+updLine();
 $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
 function applyLang(){
   document.documentElement.lang = lang;
   $('lngBtn').textContent = lang==='en' ? 'TR' : 'EN'; $('lngBtn').setAttribute('aria-label', lang==='en' ? 'TR · Türkçe' : 'EN · English'); $('lngBtn').title = lang==='en' ? 'Türkçe' : 'English';
   document.querySelectorAll('[data-en]').forEach(el => { if(!el.dataset.tr) el.dataset.tr = el.placeholder; el.placeholder = lang==='en' ? el.dataset.en : el.dataset.tr; });
-  $('updTxt').textContent = L('Güncellendi ','Updated ') + new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  updLine();
   $('fetched').textContent = new Date(DATA.fetched).toLocaleString(L('tr-TR','en-GB'),{timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
   $('statsBox').innerHTML = [[COMPLIST.length,L('yarışma','competitions')],[ITEMS.filter(i=>i.kind==='round').length,L('tur','rounds')],[ALLP.length,L('kayıt','entries')],[new Set(ALLP.map(p=>p.cty)).size,L('ülke','countries')],[ALLP.filter(p=>p.cty==='TUR').length,L('TUR kaydı','TUR entries')]].map(([n,l])=>`<div class="stat"><b>${n}</b>${l}</div>`).join('');
 }
@@ -1095,6 +1148,8 @@ async function checkVersion(onReturn){
 }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkVersion(true); });
 setInterval(() => checkVersion(false), 120000);
+setInterval(pullLive, 60000); setTimeout(pullLive, 2500);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') pullLive(); });
 setTimeout(() => checkVersion(false), 15000);
 function renderStale(){
   const age = Math.round((Date.now() - Date.parse(DATA.fetched)) / 60000);

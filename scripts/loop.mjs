@@ -2,10 +2,44 @@
 // publishing when something changed. The workflow then starts a fresh copy of itself.
 import fs from 'fs';
 import { spawnSync } from 'child_process';
+import { fetchMarx, marxKey } from './marx.mjs';
 
 const RUN_UNTIL = Date.now() + (+process.env.LOOP_MINUTES || 340) * 60e3;
 const EVENT_END = Date.UTC(2026, 10, 15, 22, 0);      // 16 Nov 01:00 Istanbul
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// --- 1-minute live feed: organiser's timetable → live.json on the 'live' branch.
+// Phones read it from raw.githubusercontent.com, so delays show up without a new deploy.
+const REPO = process.env.GITHUB_REPOSITORY, TOKEN = process.env.GH_TOKEN;
+let liveSha = null, liveKey = '', livePushedAt = 0;
+async function gh(path, init = {}) {
+  const r = await fetch('https://api.github.com/repos/' + REPO + path, { ...init, headers: { Authorization: 'Bearer ' + TOKEN, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(init.headers || {}) }, signal: AbortSignal.timeout(20000) });
+  return r;
+}
+async function pushLive() {
+  if (!REPO || !TOKEN) return;
+  let mx;
+  try { mx = await fetchMarx(); } catch (e) { console.log('marX:', e.message); return; }
+  const key = marxKey(mx);
+  if (key === liveKey && Date.now() - livePushedAt < 10 * 60e3) return;      // unchanged: heartbeat every 10 min
+  try {
+    if (!liveSha) { const g = await gh('/contents/live.json?ref=live'); if (g.ok) liveSha = (await g.json()).sha; }
+    const body = { message: (key === liveKey ? 'live: heartbeat ' : 'live: timetable ') + mx.fetched, content: Buffer.from(JSON.stringify(mx)).toString('base64'), branch: 'live', ...(liveSha ? { sha: liveSha } : {}) };
+    let p = await gh('/contents/live.json', { method: 'PUT', body: JSON.stringify(body) });
+    if (p.status === 409 || p.status === 422) { liveSha = null; const g = await gh('/contents/live.json?ref=live'); if (g.ok) { liveSha = (await g.json()).sha; p = await gh('/contents/live.json', { method: 'PUT', body: JSON.stringify({ ...body, sha: liveSha }) }); } }
+    if (!p.ok) { console.log('live push failed', p.status, (await p.text()).slice(0, 200)); return; }
+    liveSha = (await p.json()).content.sha;
+    if (key !== liveKey) console.log('live feed updated ·', Object.values(mx.r).filter(x => x[4] === 'c').length, 'current ·', mx.at);
+    liveKey = key; livePushedAt = Date.now();
+  } catch (e) { console.log('live push error', e.message); }
+}
+async function waitWithLiveFeed(ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    if (istHour() >= 7) await pushLive();
+    await sleep(Math.min(60e3, Math.max(0, end - Date.now())));
+  }
+}
 const istHour = () => (new Date().getUTCHours() + 3) % 24;
 const deployCmd = ['--yes', 'wrangler@3.114.17', 'pages', 'deploy', 'dist', '--project-name=istanbul2026-takip', '--branch=main', '--commit-dirty=true'];
 
@@ -27,6 +61,6 @@ while (Date.now() < RUN_UNTIL && Date.now() < EVENT_END) {
   const gap = (istHour() >= 7 ? 5 : 30) * 60e3;
   const wait = gap - ((Date.now() - started) % gap);
   if (Date.now() + wait >= RUN_UNTIL) break;
-  await sleep(wait);
+  await waitWithLiveFeed(wait);
 }
 console.log('loop finished after', round, 'round(s)');

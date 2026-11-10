@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const A = p => path.join(root, p);
 export async function buildPage(data, outDir = A('dist')) {
   const { S, _hash, _lastDeployAt, ...payload } = data;
-  const { fetched: _f, ...stable } = payload;
+  const { fetched: _f, MX: _mx, ...stable } = payload;
   // The version covers the data AND the page/worker code, so a design change also counts as an update
   // (otherwise phones keep opening their stored copy of the previous page).
   const buildHash = createHash('sha256').update(JSON.stringify(stable))
@@ -44,6 +44,6 @@ export async function buildPage(data, outDir = A('dist')) {
   fs.writeFileSync(path.join(outDir, 'version.txt'), buildHash + '\n' + payload.fetched + '\n');
   fs.writeFileSync(path.join(outDir, 'sw.js'), fs.readFileSync(A('assets/sw.js'), 'utf8').replace('/*ASSETS*/[]', () => JSON.stringify(assets)));
   fs.writeFileSync(path.join(outDir, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
-  fs.writeFileSync(path.join(outDir, '_headers'), `/*\n  X-Robots-Tag: noindex, nofollow\n  Referrer-Policy: no-referrer\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()\n  Cross-Origin-Opener-Policy: same-origin\n  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\n/\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n/version.txt\n  Cache-Control: no-store\n/sw.js\n  Cache-Control: no-cache\n/a/*\n  Cache-Control: public, max-age=31536000, immutable\n`);
+  fs.writeFileSync(path.join(outDir, '_headers'), `/*\n  X-Robots-Tag: noindex, nofollow\n  Referrer-Policy: no-referrer\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()\n  Cross-Origin-Opener-Policy: same-origin\n  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\n/\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n/version.txt\n  Cache-Control: no-store\n/sw.js\n  Cache-Control: no-cache\n/a/*\n  Cache-Control: public, max-age=31536000, immutable\n`);
   return { bytes: Buffer.byteLength(app), app };
 }
