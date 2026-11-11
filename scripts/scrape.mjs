@@ -26,7 +26,7 @@ async function pool(items, n, fn) {
 
 export async function scrape({ prev = null, withEntries = true } = {}) {
   const g = parse(await get('/Events/GroupSchedule/' + EVENT));
-  const E = [];
+  const E = [], unparsed = [];
   for (const c of g.querySelectorAll('.js-day-container')) {
     const day = +String(c.getAttribute('data-day')).slice(8);
     const halls = [...c.querySelectorAll('thead th')].map(text);
@@ -42,8 +42,8 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
         col += cs;
         // WDSF shows a delayed item with two spans (…time--original and …time--delayed) instead of one; the delayed time is the current one.
         const t = td.querySelector('.schedule__item__time') || td.querySelector('.schedule__item__time--delayed') || td.querySelector('.schedule__item__time--original');
-        if (!t) return;
         const a = td.querySelector('a');
+        if (!t) { if (a && /\/Competitions\/Schedule\//.test(a.getAttribute('href') || '')) unparsed.push(day + ' ' + text(td).slice(0, 60)); return; }
         const [s, e] = text(t).split(' - ');
         const href = a ? a.getAttribute('href') : '';
         let label = text(td); for (const x of td.querySelectorAll('[class*="schedule__item__time"]')) label = label.replace(text(x), '');
@@ -54,6 +54,16 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
     }
   }
   if (E.length < 50) throw new Error('schedule looks empty (' + E.length + ' items)');
+  // Safety nets: never publish a schedule that silently lost rows (the previous site stays up instead).
+  if (unparsed.length) throw new Error('schedule cells with a competition link but no time were not parsed (WDSF markup changed?): ' + unparsed.slice(0, 5).join(' | '));
+  if (prev && prev.E) {
+    const todayD = (() => { const t = new Date(Date.now() + 3 * 3600e3).toISOString(); return t.startsWith('2026-11-') ? +t.slice(8, 10) : 0; })();
+    const cnt = (rows, d) => rows.filter(e => e[0] === d && e[5]).length;
+    for (let d = Math.max(todayD, 1); d <= 31; d++) {
+      const was = cnt(prev.E, d), now = cnt(E, d);
+      if (was >= 5 && now < was * 0.85) throw new Error(`day ${d}: schedule rows dropped from ${was} to ${now}`);
+    }
+  }
   const S = {}; E.forEach(e => { if (e[5]) S[e[5]] = e[6]; }); E.forEach(e => e.pop());
   const ids = Object.keys(S);
   const todayIst = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
