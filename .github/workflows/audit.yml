@@ -1,0 +1,21 @@
+name: Audit data
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/audit.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit
+          path: data/audit-*.json
