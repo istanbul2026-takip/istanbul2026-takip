@@ -1,7 +1,7 @@
 import sys, json; sys.path.insert(0,'/tmp/t')
 from h import *
 ORDER=json.load(open('/tmp/t/order-sample.json')); MX=json.load(open('/tmp/t/marx-now.json')); SC=json.load(open('/tmp/t/sc-sample.json'))
-s=Session('/tmp/dist')
+s=Session(sys.argv[1] if len(sys.argv) > 1 else '/tmp/dist')
 def route(r):
     u=r.request.url
     if '/sc/' in u:

@@ -77,7 +77,7 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 #v-kulup .cday{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px}
 .csum{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
 .csum .k{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--live)}
-.csum .t{font-weight:700;font-size:16px;margin-top:2px}.csum .m{color:var(--muted);font-size:14px;margin-top:2px}.csum .w{font-weight:700;font-size:17px;margin-top:4px;line-height:1.3}.csum .w .ordt{margin-left:6px}
+.csum .t{font-weight:700;font-size:16px;margin-top:2px}.csum .m{color:var(--muted);font-size:14px;margin-top:2px}.csum .w{font-weight:700;font-size:17px;margin-top:4px;line-height:1.3}.csum .w .ordt{margin-left:6px}.csum .pb{height:5px;border-radius:3px;background:var(--line);margin-top:10px;overflow:hidden}.csum .pb i{display:block;height:100%;background:var(--live)}.cres{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:8px 0}.cres h3{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--muted);margin:2px 0 4px}.cres .rr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);cursor:pointer;min-height:26px}.cres .rr b{font-size:15px}.cres .rr small{display:block;color:var(--muted);font-size:13px;font-weight:400}
 .cfil{display:flex;gap:8px;align-items:center;margin:8px 0}.cfil select{flex:1;min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:15px;padding:0 10px}
 .cwarn{border:1px solid var(--live);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--surface)}.cwarn summary{font-weight:700;cursor:pointer;min-height:32px;line-height:32px}
 .cwarn li{margin:4px 0;font-size:14px}
@@ -1496,6 +1496,19 @@ if($('noteForm')){
     $('noteDlg').close(); st.cDay = day; if(kept || !storeOK) toast(L('Not eklendi','Note added')); if(view === 'kulup') renderClub(true);
   };
 }
+// Results the organiser has published for the club's entries on one day: final place, or out in an earlier round
+let clubResToday = (day, person) => {
+  const seen = new Set(), rows = [];
+  clubItems(day).filter(i => i.kind === 'round').forEach(i => { const c = i.comp; if(seen.has(c.id)) return; seen.add(c.id);
+    const fin = ordFinalRn(c);
+    clubEntries(c.id).filter(e => !person || e[2].includes(person)).forEach(e => { const r = ordResFor(c, e[0]); if(!r) return;
+      let tag = '';
+      if(r.rank != null) tag = `<span class="ordt res">🏁 ${r.rank}.</span>`;
+      else { const rns = Object.keys(r.rounds || {}).map(Number).sort((x, y) => y - x); if(rns.length && rns[0] !== fin && !r.rounds[rns[0]][1]) tag = `<span class="ordt res out">${L('elendi','out')}</span>`; }
+      if(tag) rows.push(`<div class="rr" data-comp="${c.id}"><b>${esc(e[1])}<small>${klas(c)}</small></b>${tag}</div>`); }); });
+  return rows.length ? `<div class="cres"><h3>${L('AÇIKLANAN SONUÇLAR','PUBLISHED RESULTS')}</h3>${rows.join('')}</div>` : '';
+};
+clubResToday = safe(clubResToday, '');
 function renderClub(soft){
   const a = nowAbs(), d = todayDay();
   if(st.cDay == null) st.cDay = DAYS.includes(d) ? d : (a > ABS(DAYS[DAYS.length-1], 0) ? DAYS[DAYS.length-1] : DAYS[0]);
@@ -1517,9 +1530,10 @@ function renderClub(soft){
   const live = upc.filter(i => ABS(i.d,i.s) <= a), nxt = upc.filter(i => ABS(i.d,i.s) > a).slice(0, 2);
   const sumLine = (i, k) => { const rn = i.comp.rounds.indexOf(i.round) + 1;
     const ents = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => { const o = ordFind(i.comp.id, rn, e[0]); return `<span style="white-space:nowrap">${esc(e[1])}${o ? `<span class="ordt">${esc(ordTxt(o))}</span>` : ''}</span>`; }).join(' · ');
-    return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ''}</div><div class="w">${ents}</div><div class="m">${fmt(i.s)} · ${klas(i.comp)} ${roundTag(i.round)}${dlyTag(i.round)} ${hallChip(i.h)}</div></div>`; };
+    return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ' · ' + L(`${Math.max(1, Math.round(ABS(i.d,i.e) - a))} dk kaldı`,`${Math.max(1, Math.round(ABS(i.d,i.e) - a))} min left`)}</div><div class="w">${ents}</div><div class="m">${fmt(i.s)} · ${klas(i.comp)} ${roundTag(i.round)}${dlyTag(i.round)} ${hallChip(i.h)}</div>${ABS(i.d,i.s) <= a && i.e > i.s ? `<div class="pb" aria-hidden="true"><i style="width:${Math.min(100, Math.max(0, Math.round((a - ABS(i.d,i.s)) / (i.e - i.s) * 100)))}%"></i></div>` : ''}</div>`; };
   live.forEach(i => html += sumLine(i, i.round.lst==='c' ? L('● SAHNEDE','● ON STAGE') : L('● PLANA GÖRE ŞU AN','● SCHEDULED NOW')));
   nxt.forEach((i, k) => html += sumLine(i, k ? L('SONRAKİ','AFTER THAT') : L('SIRADAKİ','NEXT UP')));
+  html += clubResToday(day, person);
   html += clubSources();
   html += `<div class="cfil"><label for="cPer" class="sr">${L('Sporcu','Athlete')}</label><select id="cPer"><option value="">${L('Bütün kulüp','Whole club')}</option>${CLUB.members.filter(m => DAYS.some(x => clubItems(x).some(i => clubWho(i).includes(m)))).map(m => `<option ${m===person?'selected':''}>${esc(m)}</option>`).join('')}</select>
     <button class="btn" id="cIcs" style="white-space:nowrap">📅 ${L('Takvime','Calendar')}</button></div>`;

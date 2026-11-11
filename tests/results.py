@@ -1,7 +1,7 @@
 import sys, json; sys.path.insert(0,'/tmp/t')
 from h import *
 ORDER=json.load(open('/tmp/t/order-sample.json')); MX=json.load(open('/tmp/t/marx-now.json'))
-s=Session('/tmp/dist')
+s=Session(sys.argv[1] if len(sys.argv) > 1 else '/tmp/dist')
 s.ctx.route('https://raw.githubusercontent.com/**', lambda r: r.fulfill(status=200, content_type='application/json', body=json.dumps(ORDER if 'order.json' in r.request.url else MX)))
 p=s.page('/tarz/', ist(11,'22:30'))
 r=p.evaluate("""async (order) => { ORD = order; const out=[];
