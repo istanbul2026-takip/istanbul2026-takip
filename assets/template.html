@@ -109,7 +109,7 @@ dialog.ndlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}dialog.ndlg
 .anom{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px;margin-left:4px}
 .wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 .ordt{font-size:12px;font-weight:700;color:var(--gilt);border:1px solid var(--gilt);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
-.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.ordl li.mine{background:color-mix(in srgb,var(--gilt) 18%,transparent);border-radius:6px}.ordl .dn{color:var(--muted);font-size:12px}
+.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.ordl li.mine{background:color-mix(in srgb,var(--gilt) 28%,transparent);border-radius:6px;border-left:4px solid var(--gilt);padding-left:6px}.ordme{color:var(--gilt)}.ordl .dn{color:var(--muted);font-size:12px}
 .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;white-space:nowrap;display:inline-block;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
@@ -691,16 +691,19 @@ function ordBlock(c){
   const rks = Object.keys(oc.h || {}).map(Number).sort((a,b) => a - b);
   if(rks.length){
     const mine = new Set(c.parts.filter(p => pins.has(p.key)).map(p => ordKeyN(p.raw)));
+    const clubK = new Set(((typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id) : []).map(e => ordKeyN(e[0])));
+    const isMineN = n => mine.has(ordKeyN(n)) || clubK.has(ordKeyN(n));
     const a = nowAbs();
     const open = rks.find(rn => { const r = c.rounds[rn-1]; return r && ABS(c.day, r.e) > a; });
+    const mineIn = rn => { let ix = 0, prev = null, out = []; oc.h[rn].forEach(([dn, sns]) => { if(dn !== prev){ ix = 0; prev = dn; } ix++; if(sns.some(sn => isMineN((oc.n || {})[sn] || ''))) out.push(ix); }); return out; };
     h += `<h2>${L('Çıkış sırası','Running order')}</h2>` + rks.map(rn => {
       const r = c.rounds[rn-1], heats = oc.h[rn], dances = new Set(heats.map(x => x[0]));
       let ix = 0, prev = null;
       const lines = heats.map(([dn, sns]) => { if(dn !== prev){ ix = 0; prev = dn; } ix++;
-        const names = sns.map(sn => { const n = (oc.n || {})[sn] || ''; const m = mine.has(ordKeyN(n)); return `${m ? '★ ' : ''}${esc(n)}`; }).join(' · ');
-        const isMine = sns.some(sn => mine.has(ordKeyN((oc.n || {})[sn] || '')));
+        const names = sns.map(sn => { const n = (oc.n || {})[sn] || ''; const m = isMineN(n); return m ? `<strong class="ordme">★ ${esc(n)}</strong>` : esc(n); }).join(' · ');
+        const isMine = sns.some(sn => isMineN((oc.n || {})[sn] || ''));
         return `<li class="${isMine?'mine':''}"><b>${ix}.</b><span>${sns.length === 1 ? `<span class="dn">№${sns[0]}</span> ` : `<span class="dn">${sns.map(x => '№' + x).join(' ')}</span> `}${names}${dances.size > 1 ? ` <span class="dn">· ${esc(dn)}</span>` : ''}</span></li>`; }).join('');
-      return `<details class="srcs" data-dk="ord${c.id}-${rn}" ${detOpen('ord' + c.id + '-' + rn, rn === open)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} · ${heats.length} ${dances.size > 1 ? L('çıkış','heats') : L('çıkış','heats')}</summary><ol class="ordl" style="list-style:none">${lines}</ol></details>`;
+      return `<details class="srcs" data-dk="ord${c.id}-${rn}" ${detOpen('ord' + c.id + '-' + rn, rn === open)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} · ${heats.length} ${L('çıkış','heats')}${(() => { const m = mineIn(rn); return m.length ? ` <span class="ordt">★ ${m.join(', ')}</span>` : ''; })()}</summary><ol class="ordl" style="list-style:none">${lines}</ol></details>`;
     }).join('');
   } else h += `<div class="plannote" style="padding:2px 0 6px">${L('Çıkış sırası henüz yayınlanmadı (turdan kısa süre önce marX\'a girilir).','Running order not published yet (marX adds it shortly before the round).')}</div>`;
   return h;
