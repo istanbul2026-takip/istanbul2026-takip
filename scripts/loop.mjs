@@ -3,6 +3,7 @@
 import fs from 'fs';
 import { spawnSync } from 'child_process';
 import { fetchMarx, marxKey, marxDiff, addChanges } from './marx.mjs';
+import { refreshOrder } from './order.mjs';
 
 const RUN_UNTIL = Date.now() + (+process.env.LOOP_MINUTES || 340) * 60e3;
 const EVENT_END = Date.UTC(2026, 10, 15, 22, 0);      // 16 Nov 01:00 Istanbul
@@ -43,11 +44,35 @@ function withChanges(mx) {
   if (!chgFrom) chgFrom = mx.fetched;                 // the log starts with this run
   return { ...mx, chg, chg0: chgFrom };
 }
+// --- Running order and judges: organiser's per-category files → order.json on the 'live' branch (same way as live.json).
+const ordStore = {}, ordLast = {};
+let ordSha = null, ordKey = '', ordPushedAt = 0;
+async function pushOrder(mx) {
+  if (!REPO || !TOKEN || !mx || !mx.cat) return;
+  try {
+    const istDay = new Date(Date.now() + 3 * 3600e3).getUTCDate();
+    const changed = await refreshOrder(mx, ordStore, ordLast, istDay, console.log);
+    const body = JSON.stringify({ fetched: new Date().toISOString(), o: ordStore });
+    const key = JSON.stringify(ordStore);
+    if (!changed && key === ordKey && Date.now() - ordPushedAt < 10 * 60e3) return;
+    if (!Object.keys(ordStore).length) return;
+    const put = () => gh('/contents/order.json', { method: 'PUT', body: JSON.stringify({ message: 'live: order ' + new Date().toISOString(), content: Buffer.from(body).toString('base64'), branch: 'live', ...(ordSha ? { sha: ordSha } : {}) }) });
+    const readSha = async () => { const g = await gh('/contents/order.json?ref=live'); ordSha = g.ok ? (await g.json()).sha : null; };
+    if (!ordSha) await readSha();
+    let p = await put();
+    if (p.status === 409 || p.status === 422) { await readSha(); p = await put(); }
+    if (!p.ok) { console.log('order push failed', p.status, (await p.text()).slice(0, 200)); return; }
+    ordSha = (await p.json()).content.sha;
+    if (key !== ordKey) console.log('order feed updated ·', Object.keys(ordStore).length, 'categories ·', body.length, 'bytes');
+    ordKey = key; ordPushedAt = Date.now();
+  } catch (e) { console.log('order push error', e.message); }
+}
 async function pushLive() {
   if (!REPO || !TOKEN) return;
   let mx;
   try { mx = await fetchMarx(); } catch (e) { console.log('marX:', e.message); return; }
   const key = marxKey(mx);
+  await pushOrder(mx);                               // a problem here never stops the timetable below
   if (key === liveKey && Date.now() - livePushedAt < 10 * 60e3) return;      // unchanged: heartbeat every 10 min
   try {
     if (!liveSha) await loadLive();

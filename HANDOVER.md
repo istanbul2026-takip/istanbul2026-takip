@@ -41,6 +41,21 @@ Bu depo iki sayfayı yayınlar (Cloudflare Pages, proje `istanbul2026-takip`):
 - **Gerçek iPhone'da elle bakılacaklar** (WebKit burada sınanamadı): ＋ Not penceresi ve saat seçici, Günü paylaş →
   WhatsApp, Ekran açık, bir turu işaretleyip sayfayı kapat-aç.
 
+## Çıkış sırası ve hakemler (11 Kasım sabahı eklendi)
+- Kaynak: marX'ın her kategori için yayınladığı `<kategoriId>.json` (viewer'da kategoriye basınca açılan veri).
+  `timetable.json`'daki `categoryId` ile `wdsfId` eşleşir (`fetchMarx().cat`, JSON'a yazılmaz).
+  WDSF'de çıkış sırası ve hakem yok (Officials sayfasında sadece Chairperson ve DJ var).
+- `scripts/order.mjs` kategori dosyasını küçültür: hakemler `j` [harf, ad, ülke], diğer görevliler `o`, start numaraları `n`,
+  çıkış sırası `h` {turNo: [[dans, [startNo...]], ...]} (heat sırasıyla). `loop.mjs` bunu `live` dalındaki `order.json`'a yazar
+  (~25 KB; bugün biten olmayan kategoriler ~100 sn'de bir, diğerleri 20 dk'da bir yenilenir; değişmezse 10 dk'da bir kalp atışı).
+- Sayfa `order.json`'ı her dakika çeker (`pullOrder`). Yarışma penceresinde "Hakemler" ve "Çıkış sırası" (tur başına açılır liste,
+  takip edilenler ★), kayıt satırlarında "Tur · №322 · sıra 3/3"; kulüp sayfasında satırda ve "Günü paylaş" metninde sporcunun
+  start no'su ve sırası. İsim eşleşmesi büyük/küçük harf, aksan ve kelime sırasından bağımsız; bulunamazsa ya da birden fazla
+  eşleşirse hiçbir şey gösterilmez (tahmin yok).
+- marX bir turun sırasını turdan kısa süre önce giriyor; yayınlanmayan tur için sayfada "henüz yayınlanmadı" yazar.
+  Hakem paneli de kategori başladıkça doluyor (11 Kasım 09:00'da 21 kategoride vardı).
+- İlk gün sınanmadı: gerçek iPhone'da ve gerçek WDSF isimleriyle (takım adları, düetler) kulüp satırlarındaki etiketlere bak.
+
 ## Bilinen noktalar
 - marX 10 Kasım 22:21'de saatleri 2 saat ileri yayınladı, 23:53'te geri aldı. Site her zaman marX'ı olduğu gibi gösterir.
 - "Ege solo" (13 Kasım 09:55) WDSF'de ve marX'ta yok; hoca notu olarak duruyor.

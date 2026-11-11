@@ -1,6 +1,7 @@
 // Reads the organiser's live timetable (marX). It carries each round's current start time,
 // expected length and state (upcoming / current / done), updated by the scrutineers during the event.
-export const MARX_URL = 'https://marx.dance/reg/LIVE/2026/20261111_Istanbul/timetable.json';
+export const MARX_BASE = 'https://marx.dance/reg/LIVE/2026/20261111_Istanbul/';
+export const MARX_URL = MARX_BASE + 'timetable.json';
 const MONTHS = { November: 11 };
 
 export async function fetchMarx() {
@@ -14,6 +15,7 @@ export async function fetchMarx() {
   const hallNames = (j.competition && j.competition.hallNames) || {};
   const hallOf = n => ((hallNames[n] || '').match(/^\s*([A-Z])\b/) || [])[1] || (n === 1 ? 'A' : n === 2 ? 'B' : String(n));
   const r = {};
+  const cat = {};   // wdsfId -> marX categoryId (for the heats/judges files); not part of live.json
   const x = [];   // other items (rehearsals, results presentations, breaks, ceremonies): [day, hall, minutes, length, key]
   for (const e of j.timetable) {
     if (!e) continue;
@@ -27,6 +29,7 @@ export async function fetchMarx() {
       continue;
     }
     if (!e.roundNumber) continue;
+    if (e.categoryId) cat[e.wdsfId] = e.categoryId;
     const m = String(e.time || '').match(/^(\d{1,2}):(\d{2})$/);
     const dm = String(e.blockName || '').match(/(\d{1,2}) ([A-Z][a-z]+)/);
     if (!m || !dm || MONTHS[dm[2]] !== 11) continue;
@@ -34,7 +37,9 @@ export async function fetchMarx() {
     r[`${e.wdsfId}.${e.roundNumber}`] = [+dm[1], hallOf(e.hall), +m[1] * 60 + +m[2], +e.expectedMinutes || 0, st];
   }
   if (Object.keys(r).length < 50) throw new Error('marX: only ' + Object.keys(r).length + ' rounds');
-  return { at: j.exportedAt || null, fetched: new Date().toISOString(), r, x };
+  const out = { at: j.exportedAt || null, fetched: new Date().toISOString(), r, x };
+  Object.defineProperty(out, 'cat', { value: cat, enumerable: false });   // kept out of JSON and spreads
+  return out;
 }
 
 // Same content, ignoring when we looked.

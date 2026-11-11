@@ -108,6 +108,8 @@ dialog.ndlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}dialog.ndlg
 .plan{font-size:12px;color:var(--muted)}
 .anom{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px;margin-left:4px}
 .wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
+.ordt{font-size:12px;font-weight:700;color:var(--gilt);border:1px solid var(--gilt);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
+.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.ordl li.mine{background:color-mix(in srgb,var(--gilt) 18%,transparent);border-radius:6px}.ordl .dn{color:var(--muted);font-size:12px}
 .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;white-space:nowrap;display:inline-block;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
@@ -645,6 +647,64 @@ async function pullLive(){
     if(typeof rerender === 'function') rerender();
   } catch(e) {}
 }
+/* ---------- running order and judges (organiser's per-category files, order.json) ----------
+   Shown as marX publishes them; heats for later rounds appear once marX has published them. */
+const ORDER_URL = 'https://raw.githubusercontent.com/istanbul2026-takip/istanbul2026-takip/live/order.json';
+let ORD = null;
+try { const c = JSON.parse(localStorage.getItem('wdsfist-order') || 'null'); if(c && c.o && typeof c.o === 'object' && c.fetched) ORD = c; } catch(e) {}
+async function pullOrder(){
+  if(location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  try {
+    const res = await fetch(ORDER_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    if(!res.ok) return;
+    const j = await res.json();
+    if(!j || !j.o || typeof j.o !== 'object' || !j.fetched || isNaN(Date.parse(j.fetched))) return;
+    if(ORD && Date.parse(j.fetched) <= Date.parse(ORD.fetched)) return;
+    const old = ORD ? JSON.stringify(ORD.o) : '';
+    ORD = j; try { localStorage.setItem('wdsfist-order', JSON.stringify(j)); } catch(e) {}
+    if(JSON.stringify(j.o) !== old && typeof rerender === 'function') rerender();
+  } catch(e) {}
+}
+const ordCat = id => (ORD && ORD.o && ORD.o[id]) || null;
+// the same name written differently (case, accents, word order, "(choreography)") still matches
+const ordKeyN = s => String(s || '').replace(/\s*\([^)]*\)\s*$/, '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').split(/[^a-z0-9]+/).filter(Boolean).sort().join(' ');
+function ordFind(id, rn, name){
+  const c = ordCat(id); if(!c || !c.h || !Array.isArray(c.h[rn]) || !c.h[rn].length) return null;
+  const k = ordKeyN(name); if(!k) return null;
+  const hit = Object.entries(c.n || {}).filter(([, n]) => ordKeyN(n) === k);
+  if(hit.length !== 1) return null;                       // not found or ambiguous: say nothing rather than guess
+  const sn = +hit[0][0], d0 = c.h[rn][0][0], same = c.h[rn].filter(h => h[0] === d0);
+  const ix = same.findIndex(h => h[1].includes(sn)); if(ix < 0) return null;
+  return {sn, pos: ix + 1, of: same.length, grp: same[ix][1].length > 1};
+}
+const ordTxt = o => o ? `№${o.sn} · ${o.grp ? L('grup','heat') : L('sıra','order')} ${o.pos}/${o.of}` : '';
+function ordLatest(c, name){
+  const oc = ordCat(c.id); if(!oc || !oc.h) return '';
+  for(const rn of Object.keys(oc.h).map(Number).sort((a,b) => b - a)){ const o = ordFind(c.id, rn, name); if(o){ const r = c.rounds[rn-1]; return `<span class="ordt">${r ? esc(r.label) + ' · ' : ''}${esc(ordTxt(o))}</span>`; } }
+  return '';
+}
+function ordBlock(c){
+  const oc = ordCat(c.id); if(!oc) return '';
+  let h = '';
+  const jl = oc.j || [], ol = oc.o || [];
+  if(jl.length || ol.length) h += `<h2>${L('Hakemler','Judges')}</h2><div class="plist">${jl.map(([l,n,ct]) => `<div class="pr"><b style="width:30px">${esc(l)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}${ol.map(([r,n,ct]) => `<div class="pr"><b style="width:auto;margin-right:8px;font-size:12px;color:var(--muted)">${esc(r)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}</div>`;
+  const rks = Object.keys(oc.h || {}).map(Number).sort((a,b) => a - b);
+  if(rks.length){
+    const mine = new Set(c.parts.filter(p => pins.has(p.key)).map(p => ordKeyN(p.raw)));
+    const a = nowAbs();
+    const open = rks.find(rn => { const r = c.rounds[rn-1]; return r && ABS(c.day, r.e) > a; });
+    h += `<h2>${L('Çıkış sırası','Running order')}</h2>` + rks.map(rn => {
+      const r = c.rounds[rn-1], heats = oc.h[rn], dances = new Set(heats.map(x => x[0]));
+      let ix = 0, prev = null;
+      const lines = heats.map(([dn, sns]) => { if(dn !== prev){ ix = 0; prev = dn; } ix++;
+        const names = sns.map(sn => { const n = (oc.n || {})[sn] || ''; const m = mine.has(ordKeyN(n)); return `${m ? '★ ' : ''}${esc(n)}`; }).join(' · ');
+        const isMine = sns.some(sn => mine.has(ordKeyN((oc.n || {})[sn] || '')));
+        return `<li class="${isMine?'mine':''}"><b>${ix}.</b><span>${sns.length === 1 ? `<span class="dn">№${sns[0]}</span> ` : `<span class="dn">${sns.map(x => '№' + x).join(' ')}</span> `}${names}${dances.size > 1 ? ` <span class="dn">· ${esc(dn)}</span>` : ''}</span></li>`; }).join('');
+      return `<details class="srcs" data-dk="ord${c.id}-${rn}" ${detOpen('ord' + c.id + '-' + rn, rn === open)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} · ${heats.length} ${dances.size > 1 ? L('çıkış','heats') : L('çıkış','heats')}</summary><ol class="ordl" style="list-style:none">${lines}</ol></details>`;
+    }).join('');
+  } else h += `<div class="plannote" style="padding:2px 0 6px">${L('Çıkış sırası henüz yayınlanmadı (turdan kısa süre önce marX\'a girilir).','Running order not published yet (marX adds it shortly before the round).')}</div>`;
+  return h;
+}
 applyLive();
 function chgIndex(){
   if(chgIdx) return chgIdx;
@@ -1113,6 +1173,7 @@ function openComp(id){
     <h2>${L('Turlar','Rounds')}</h2>
     <table class="rtab">${c.rounds.map(r => { const s0=status(c.day,r.s,r.e); return `<tr class="${s0}"><td>${esc(r.label)}${r.final?' 🏆':''}</td><td class="t">${fmt(r.s)}–${fmt(r.e)}${dlyTag(r)}${anomTag(c, r)}${nomxTag(r)}</td><td style="text-align:right;color:var(--muted);font-size:12.5px">${s0==='live'?L('ŞU AN','NOW'):s0==='past'?L('bitti','done'):relTxt(ABS(c.day,r.s)-a)+' '+calLink({d:c.day,h:c.hall,s:r.s,e:r.e,comp:c,round:r})}</td></tr>`; }).join('')}
     ${res?`<tr>${L(`<td>Ödül töreni</td>`,`<td>Awards</td>`)}<td class="t">${fmt(res.s)}</td><td></td></tr>`:''}</table>
+    ${ordBlock(c)}
     <div class="links">
       <a class="lk" href="${base}Schedule/${slug}-${id}" target="_blank" rel="noopener">${L(`WDSF programı ↗`,`WDSF schedule ↗`)}</a>
       <a class="lk" href="${base}Participants/${slug}-${id}" target="_blank" rel="noopener">${L(`Katılımcılar ↗`,`Participants ↗`)}</a>
@@ -1126,7 +1187,7 @@ function openComp(id){
     <input class="search" id="sq" type="search" placeholder="${isTeam?L('Takım veya üye ara…','Search team or member…'):L('Bu yarışmada ara…','Search this competition…')}" style="margin-top:10px">
     <div class="plist" id="spl"></div>`;
   const drawP = () => { const q = norm($('sq').value); $('spl').innerHTML = c.parts.filter(p => (!sheetCty || p.cty===sheetCty)) .filter(p => !q || norm(p.name+' '+p.chor+' '+p.cty+' '+(p.members||[]).join(' ')).includes(q)).map(p =>
-    `<div><div class="pr"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="n">${esc(p.name)}${p.chor?` <i>“${esc(p.chor)}”</i>`:''}${p.members?` <button class="tbtn" data-mem>${p.members.length}${L(` kişi ▾`,` ▾`)}</button>`:''}</div><button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?L('✓ Takipte','✓ Following'):L('Takip et','Follow')}</button></div>`
+    `<div><div class="pr"><button class="cty" ${ctyStyle(p.cty)} data-cty="${esc(p.cty)}">${ctyLabel(p.cty)}</button><div class="n">${esc(p.name)}${ordLatest(c, p.raw)}${p.chor?` <i>“${esc(p.chor)}”</i>`:''}${p.members?` <button class="tbtn" data-mem>${p.members.length}${L(` kişi ▾`,` ▾`)}</button>`:''}</div><button class="pin ${pins.has(p.key)?'on':''}" data-pin="${esc(p.key)}">${pins.has(p.key)?L('✓ Takipte','✓ Following'):L('Takip et','Follow')}</button></div>`
     + (p.members ? `<div class="mem" ${q && p.members.some(m=>norm(m).includes(q)) ? '' : 'hidden'}>${p.members.map(m => q && norm(m).includes(q) ? `<b>${esc(m)}</b>` : esc(m)).join(' · ')}</div>` : '') + `</div>`).join('');
     $('spl').querySelectorAll('[data-mem]').forEach(b => b.onclick = e => { e.stopPropagation(); const mm = b.closest('.pr').nextElementSibling; mm.hidden = !mm.hidden; const k = b.dataset.mem || b.closest('.pr').textContent; mm.hidden ? openMembers.delete(k) : openMembers.add(k); }); $('spl').querySelectorAll('[data-mem]').forEach(b => { const k = b.dataset.mem || b.closest('.pr').textContent; if(openMembers.has(k)){ const mm=b.closest('.pr').nextElementSibling; if(mm) mm.hidden=false; } }); };
   drawP(); $('sq').oninput = drawP;
@@ -1199,7 +1260,7 @@ function clubRow(i, a){
     return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
       <div class="ti">${klas(c)}</div>
       <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
-      <div class="mt">${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':chgTag(i)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
+      <div class="mt">${ents.map(e => { const o = ordFind(c.id, c.rounds.indexOf(i.round) + 1, e[0]); return o ? `<span class="ordt">${ents.length > 1 ? esc(e[1]) + ' · ' : ''}${esc(ordTxt(o))}</span>` : ''; }).join('')}${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':chgTag(i)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
   }
   if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${i.own ? L('Benim notum · bu telefonda','My note · this phone only') : L('Hoca notu','Coach note')}</span>${i.noHall ? '' : hallChip(i.h)}${i.own ? `<button class="linkbtn" data-delnote="${esc(i.own)}" style="min-height:32px;padding:0 6px">${st.delNote === i.own ? L('Emin misin? Tekrar dokun','Sure? Tap again') : L('Sil','Delete')}</button>` : ''}</div></div>${tick}</div>`;
   const ids = CLUB.rel[i.k] || [];
@@ -1291,7 +1352,7 @@ function clubShareText(day, person){
   if(!items.length) lines.push(person ? L('Bu gün yarışma yok.','No events this day.') : L('Bu gün kulübün yarışması yok.','No club events this day.'));
   items.forEach(i => {
     const hall = i.noHall ? '' : ` · ${(HALL[i.h] || i.h).replace(' · ', ' ')}`;
-    if(i.kind === 'round') lines.push(`${fmt(i.s)}–${fmt(i.e)}${hall} · ${klasTxt(i.comp)} · ${i.round.label}${isLater(i.comp, i.round) ? L(' (geçerse)',' (if qualified)') : ''} — ${entryNames(i.comp.id, who).join(', ')}`);
+    if(i.kind === 'round') lines.push(`${fmt(i.s)}–${fmt(i.e)}${hall} · ${klasTxt(i.comp)} · ${i.round.label}${isLater(i.comp, i.round) ? L(' (geçerse)',' (if qualified)') : ''} — ${entryNames(i.comp.id, who).join(', ')}${(() => { const o = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => ordTxt(ordFind(i.comp.id, i.comp.rounds.indexOf(i.round) + 1, e[0]))).filter(Boolean); return o.length ? ' (' + o.join('; ') + ')' : ''; })()}`);
     else if(i.kind === 'note') lines.push(`${fmt(i.s)}${hall} · 📝 ${i.text}`);
     else { const ids = evComps(i), names = ids.flatMap(id => entryNames(id, who)).join(', ');
       const what = isReh(i) ? L('Sahne provası','Stage rehearsal') : /Results/i.test(i.raw || '') ? L('Ödül töreni','Awards') : i.text;
@@ -1600,7 +1661,8 @@ async function checkVersion(onReturn){
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkVersion(true); });
 setInterval(() => checkVersion(false), 60000);
 setInterval(pullLive, 60000); setTimeout(pullLive, 2500);
-document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') pullLive(); });
+setInterval(pullOrder, 60000); setTimeout(pullOrder, 3000);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ pullLive(); pullOrder(); } });
 setTimeout(() => checkVersion(false), 15000);
 function renderStale(){
   const age = Math.round((Date.now() - Date.parse(DATA.fetched)) / 60000);
