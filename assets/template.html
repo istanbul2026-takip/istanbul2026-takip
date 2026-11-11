@@ -692,7 +692,7 @@ function ordBlock(c){
   if(jl.length || ol.length) h += `<h2>${L('Hakemler','Judges')}</h2><div class="plist">${jl.map(([l,n,ct]) => `<div class="pr"><b style="width:30px">${esc(l)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}${ol.map(([r,n,ct]) => `<div class="pr"><b style="width:auto;margin-right:8px;font-size:12px;color:var(--muted)">${esc(r)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}</div>`;
   const rks = Object.keys(oc.h || {}).map(Number).sort((a,b) => a - b);
   if(rks.length){
-    const mineNames = [...c.parts.filter(p => pins.has(p.key)).map(p => p.raw), ...(((typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id) : []).map(e => e[0]))];
+    const mineNames = (typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id).map(e => e[0]) : c.parts.filter(p => pins.has(p.key)).map(p => p.raw);   // club page: only the club's own entries
     const isMineN = n => mineNames.some(m => ordSame(n, m));
     const a = nowAbs();
     const open = rks.find(rn => { const r = c.rounds[rn-1]; return r && ABS(c.day, r.e) > a; });
