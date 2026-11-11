@@ -12,7 +12,10 @@ const A = p => path.join(root, p);
 const cacheFile = A('data/last.json');
 const prev = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : null;
 const now = new Date();
-const withEntries = !prev || process.env.FULL === '1' || (now.getUTCHours() % 2 === 0 && now.getUTCMinutes() < 5);
+// Entry lists (who dances where) are refreshed every 2 h, every 30 min on event days, and at once whenever a competition has no list yet.
+const evDay = now.getUTCMonth() === 10 && now.getUTCDate() >= 10 && now.getUTCDate() <= 15;
+const noList = !prev || !prev.P || (prev.E || []).some(e => e[5] && !(prev.P[e[5]] || []).length);
+const withEntries = !prev || process.env.FULL === '1' || noList || (now.getUTCHours() % 2 === 0 && now.getUTCMinutes() < 5) || (evDay && now.getUTCMinutes() % 30 < 5);
 
 const data = await scrape({ prev, withEntries });
 // Organiser's live timetable (marX): baked into the page as a starting point; the 1-minute feed
