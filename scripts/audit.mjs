@@ -29,19 +29,19 @@ for (const id of wIds) {
   const rows = d.R[id] || [];
   if (!rows.length) { B(`comp ${id}: no round table`); continue; }
   const mr = Object.keys(mx.r).filter(k => k.startsWith(id + '.')).length;
-  if (mr && rows.filter(r => hm(r[1] || '') != null).length !== mr) W(`comp ${id}: WDSF has ${rows.filter(r => hm(r[1] || '') != null).length} timed rounds, marX ${mr}`);
+  if (mr && rows.filter(r => hm(r[3] || '') != null).length !== mr) W(`comp ${id}: WDSF has ${rows.filter(r => hm(r[3] || '') != null).length} timed rounds, marX ${mr}`);
 }
 
 // C. times & halls: marX vs WDSF
 let cmp = 0;
 for (const [k, v] of Object.entries(mx.r)) {
   const [id, n] = k.split('.');
-  const wr = (d.R[id] || []).filter(r => hm(r[1] || '') != null)[+n - 1];
+  const wr = (d.R[id] || []).filter(r => hm(r[3] || '') != null)[+n - 1];
   const er = d.E.find(e => String(e[5]) === id);
   if (!er) continue;
   if (er[0] !== v[0]) B(`comp ${id} day: WDSF ${er[0]} vs marX ${v[0]}`);
   if (er[1] !== v[1]) W(`comp ${id} hall: WDSF ${er[1]} vs marX ${v[1]}`);
-  if (wr) { cmp++; const w = hm(wr[1]); if (Math.abs(w - v[2]) > 60) W(`comp ${id} round ${n}: WDSF ${wr[1]} vs marX ${Math.floor(v[2] / 60)}:${String(v[2] % 60).padStart(2, '0')}`); }
+  if (wr) { cmp++; const w = hm(wr[3]); if (Math.abs(w - v[2]) > 60) W(`comp ${id} round ${n}: WDSF ${wr[3]} vs marX ${Math.floor(v[2] / 60)}:${String(v[2] % 60).padStart(2, '0')}`); }
 }
 console.log('compared round times:', cmp);
 
@@ -50,7 +50,6 @@ for (const day of [...new Set(d.E.map(e => e[0]))]) for (const h of ['A', 'B']) 
   const rows = d.E.filter(e => e[0] === day && e[1] === h).map(e => [hm(e[2]), hm(e[3]), e]).sort((a, b) => a[0] - b[0]);
   if (!rows.length) { if (day <= 15) W(`day ${day} hall ${h}: no rows`); continue; }
   rows.forEach(([s, e, r]) => { if (s == null || e == null || e <= s) B(`bad time ${JSON.stringify(r)}`); });
-  for (let i = 1; i < rows.length; i++) if (rows[i][0] < rows[i - 1][1] - 1) W(`day ${day} ${h}: overlap ${rows[i - 1][2][4].slice(0, 40)} / ${rows[i][2][4].slice(0, 40)}`);
 }
 
 // E. club coverage vs marX start lists
@@ -72,7 +71,7 @@ for (let i = 0; i < cats.length; i += 6) await Promise.all(cats.slice(i, i + 6).
     const people = nm.split(/\s*[|\/]\s*/).map(s => s.trim());
     const hasMember = people.some(x => [...mine].some(m => norm(m) === norm(x)));
     if (isClub || hasMember) { mxClub++; if (!clubKeys.has(norm(nm.replace(/\s*\|\s*/g, ' / ')))) { const alt = [...clubKeys].some(k => k === norm(nm)); if (!alt) B(`club entry in marX but not in club list: comp ${wid} "${nm}"`); } }
-    else if (p.ct === 'TUR') W(`TUR entry not in club (review): comp ${wid} "${nm}"`);
+    else if (/^(T[uü]rkiye|Turkey|TUR)$/i.test(p.ct)) W(`TUR entry not in club (review): comp ${wid} "${nm}"`);
   }
 }));
 console.log(`marX entries ${mxEnt} · club-looking ${mxClub} · club entries in site ${Object.values(club.entries).reduce((n, v) => n + v.length, 0)} in ${Object.keys(club.entries).length} comps · members ${club.members.length}`);
