@@ -45,13 +45,23 @@ function withChanges(mx) {
   return { ...mx, chg, chg0: chgFrom };
 }
 // --- Running order and judges: organiser's per-category files → order.json on the 'live' branch (same way as live.json).
-const ordStore = {}, ordLast = {};
+const ordStore = {}, ordLast = {}, scStore = {}, scSha = {}, scKey = {};
 let ordSha = null, ordKey = '', ordPushedAt = 0;
 async function pushOrder(mx) {
   if (!REPO || !TOKEN || !mx || !mx.cat) return;
   try {
     const istDay = new Date(Date.now() + 3 * 3600e3).getUTCDate();
-    const changed = await refreshOrder(mx, ordStore, ordLast, istDay, console.log);
+    const changed = await refreshOrder(mx, ordStore, ordLast, istDay, console.log, scStore);
+    // marks: one small file per competition (sc/<id>.json), written only when it changed
+    for (const wid of Object.keys(scStore)) {
+      const sbody = JSON.stringify({ fetched: new Date().toISOString(), ...scStore[wid] }), sk = JSON.stringify(scStore[wid]);
+      if (scKey[wid] === sk) continue;
+      const path = '/contents/sc/' + wid + '.json';
+      const putS = () => gh(path, { method: 'PUT', body: JSON.stringify({ message: 'live: marks ' + wid, content: Buffer.from(sbody).toString('base64'), branch: 'live', ...(scSha[wid] ? { sha: scSha[wid] } : {}) }) });
+      let ps = await putS();
+      if (ps.status === 409 || ps.status === 422) { const g = await gh(path + '?ref=live'); scSha[wid] = g.ok ? (await g.json()).sha : undefined; ps = await putS(); }
+      if (ps.ok) { scSha[wid] = (await ps.json()).content.sha; scKey[wid] = sk; console.log('marks updated · comp', wid); } else console.log('marks push failed', wid, ps.status);
+    }
     const body = JSON.stringify({ fetched: new Date().toISOString(), o: ordStore });
     const key = JSON.stringify(ordStore);
     if (!changed && key === ordKey && Date.now() - ordPushedAt < 10 * 60e3) return;

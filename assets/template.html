@@ -109,7 +109,8 @@ dialog.ndlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}dialog.ndlg
 .anom{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px;margin-left:4px}
 .wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 .ordt{font-size:12px;font-weight:700;color:var(--gilt);border:1px solid var(--gilt);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
-.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.ordt.res{color:var(--gilt);font-weight:700}.ordt.res.up{color:#6fcf97}.ordt.res.out{color:var(--muted)}
+.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.sctot{margin-left:8px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}.scd>summary{list-style:none;cursor:pointer}.scd>summary::-webkit-details-marker{display:none}.sct{border-collapse:collapse;font-size:13px;margin:4px 0;font-variant-numeric:tabular-nums}.sct td,.sct th{padding:2px 8px 2px 0;text-align:left;font-weight:500}.sct th{color:var(--muted);font-size:11px}.sct .jl{font-weight:700}.sct .jn{color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sct .inv{color:var(--muted);text-decoration:line-through}
+.ordt.res{color:var(--gilt);font-weight:700}.ordt.res.up{color:#6fcf97}.ordt.res.out{color:var(--muted)}
 .ordl li.mine{background:color-mix(in srgb,var(--gilt) 28%,transparent);border-radius:6px;border-left:4px solid var(--gilt);padding-left:6px}.ordme{color:var(--gilt)}.ordl .dn{color:var(--muted);font-size:12px}
 .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;white-space:nowrap;display:inline-block;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
@@ -688,6 +689,28 @@ function ordLatest(c, name){
   for(const rn of Object.keys(oc.h).map(Number).sort((a,b) => b - a)){ const o = ordFind(c.id, rn, name); if(o){ const r = c.rounds[rn-1]; return `<span class="ordt">${r ? esc(r.label) + ' · ' : ''}${esc(ordTxt(o))}</span>`; } }
   return '';
 }
+
+// Marks per competition (sc/<id>.json on the live branch), loaded only when a results block is shown
+const SCD = {};
+function scGet(id){
+  const e = SCD[id];
+  if(!e || (Date.now() - e.at > 60000 && !e.busy)){
+    const ent = SCD[id] = { at: Date.now(), busy: true, data: e ? e.data : null };
+    if(location.protocol !== 'file:') fetch(ORDER_URL.replace('order.json', 'sc/' + id + '.json') + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null).then(j => { ent.busy = false; if(j && j.r && JSON.stringify(j) !== JSON.stringify(ent.data)){ ent.data = j; if(typeof rerender === 'function') rerender(); } }).catch(() => { ent.busy = false; });
+    else ent.busy = false;
+  }
+  return SCD[id].data;
+}
+function scMarks(c, rn, sn, oc, isMine){
+  const sc = scGet(c.id); const row = sc && sc.r && sc.r[rn] && sc.r[rn][sn]; if(!row) return '';
+  const cr = (sc.cr && sc.cr[rn]) || [], judges = {}; (oc.j || []).forEach(([l, n]) => judges[l] = n);
+  const dances = row[3] || [];
+  return `<div class="scm">` + dances.map(d => {
+    const rows = Object.entries(d[3] || {}).map(([jl, ms]) => `<tr><td class="jl">${esc(jl)}</td><td class="jn">${esc((judges[jl] || '').replace(/^(\S+)\s.*\s(\S+)$/, '$1 $2'))}</td>${ms.map(m => `<td class="${m.endsWith('*') ? 'inv' : ''}">${esc(m)}</td>`).join('')}</tr>`).join('');
+    return `${dances.length > 1 ? `<div class="dn" style="margin-top:6px">${esc(d[0])} · ${d[1] != null ? d[1].toFixed(3) : ''}${d[2] != null ? ' · ' + d[2] + '.' : ''}</div>` : ''}<table class="sct"><tr><th></th><th></th>${cr.map(x => `<th>${esc(x)}</th>`).join('')}</tr>${rows}</table>`;
+  }).join('') + `</div>`;
+}
 const ordMineFn = c => {
   const mineNames = (typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id).map(e => e[0]) : c.parts.filter(p => pins.has(p.key)).map(p => p.raw);   // club page: only the club's own entries
   const clubRe = (typeof CLUB !== 'undefined' && CLUB && CLUB.pat) ? new RegExp(CLUB.pat, 'i') : null;
@@ -698,14 +721,19 @@ const ordMineFn = c => {
 const ordFinalRn = c => { let f = 0; c.rounds.forEach((r, i) => { if(r.final) f = i + 1; }); return f; };
 // marX results for one start number: {rank, rounds:{rn:[place, advanced]}}
 function ordResOf(c, sn){
-  const oc = ordCat(c.id); const e = oc && oc.s && oc.s[sn]; if(!e) return null;
-  const rounds = {}; (e[1] || []).forEach(([rn, fp, adv]) => rounds[rn] = [fp, !!adv]);
+  const oc = ordCat(c.id); const e = oc && oc.s && oc.s[sn]; const sc = (SCD[c.id] || {}).data;
+  const rounds = {}; (e ? e[1] || [] : []).forEach(([rn, fp, adv]) => rounds[rn] = [fp, !!adv]);
+  if(sc && sc.r) Object.entries(sc.r).forEach(([rn, ps]) => { if(!rounds[rn] && ps[sn] && ps[sn][1] != null) rounds[rn] = [ps[sn][1], !!ps[sn][2]]; });   // marks files also carry places
+  if(!e && !Object.keys(rounds).length) return null;
   const fin = ordFinalRn(c);
-  const rank = e[0] != null ? e[0] : (fin && rounds[fin] ? rounds[fin][0] : null);
+  const rank = e && e[0] != null ? e[0] : (fin && rounds[fin] ? rounds[fin][0] : null);
   return {rank, rounds};
 }
+const ordResIds = c => { const oc = ordCat(c.id), sc = (SCD[c.id] || {}).data, ids = new Set(oc && oc.s ? Object.keys(oc.s) : []);
+  if(sc && sc.r) Object.values(sc.r).forEach(ps => Object.keys(ps).forEach(k => ids.add(k)));
+  return [...ids].map(Number).filter(sn => ordResOf(c, sn)); };
 function ordResFor(c, name){
-  const oc = ordCat(c.id); if(!oc || !oc.s) return null;
+  const oc = ordCat(c.id); if(!oc) return null;
   const hit = Object.entries(oc.n || {}).filter(([, n]) => ordSame(n, name));
   return hit.length === 1 ? ordResOf(c, +hit[0][0]) : null;
 }
@@ -718,19 +746,24 @@ function ordResTag(c, rn, name){
   return x[1] ? `<span class="ordt res up">✓ ${L('sonraki tura geçti','advanced')}</span>` : `<span class="ordt res out">${L('elendi','out')}</span>`;
 }
 function ordResBlock(c){
-  const oc = ordCat(c.id); if(!oc || !oc.s) return '';
+  const oc = ordCat(c.id); if(!oc) return '';
+  if(oc.s || (ordFinalRn(c) && true)) scGet(c.id);
+  if(!oc.s && !((SCD[c.id] || {}).data)) return '';
   const isMine = ordMineFn(c), fin = ordFinalRn(c), nm = sn => (oc.n || {})[sn] || '№' + sn;
-  const line = (pl, sn, extra) => { const n = nm(sn), m = isMine(n); return `<li class="${m?'mine':''}"><b>${pl}.</b><span><span class="dn">№${sn}</span> ${m ? `<strong class="ordme">★ ${esc(n)}</strong>` : esc(n)}${extra || ''}</span></li>`; };
-  const all = Object.keys(oc.s).map(Number);
+  const line = (pl, sn, extra, rn) => { const n = nm(sn), m = isMine(n), sc = scGet(c.id), row = rn && sc && sc.r && sc.r[rn] && sc.r[rn][sn];
+    const head = `<span class="dn">№${sn}</span> ${m ? `<strong class="ordme">★ ${esc(n)}</strong>` : esc(n)}${extra || ''}${row ? ` <span class="sctot">${row[0].toFixed(3)}</span>` : ''}`;
+    if(!row) return `<li class="${m?'mine':''}"><b>${pl}.</b><span>${head}</span></li>`;
+    return `<li class="${m?'mine':''}"><b>${pl}.</b><span><details class="scd" data-dk="sc${c.id}-${rn}-${sn}" ${detOpen('sc' + c.id + '-' + rn + '-' + sn, false)}><summary>${head}</summary>${scMarks(c, rn, sn, oc, isMine)}</details></span></li>`; };
+  const all = ordResIds(c);
   let h = '';
   const ranked = all.map(sn => [ordResOf(c, sn).rank, sn]).filter(x => x[0] != null).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  if(ranked.length) h += `<details class="srcs" open><summary>${L('Final sonucu','Final result')} · ${ranked.length}</summary><ol class="ordl" style="list-style:none">${ranked.map(([r, sn]) => line(r, sn)).join('')}</ol></details>`;
+  if(ranked.length) h += `<details class="srcs" open><summary>${L('Final sonucu','Final result')} · ${ranked.length}</summary><ol class="ordl" style="list-style:none">${ranked.map(([r, sn]) => line(r, sn, '', fin)).join('')}</ol></details>`;
   const rks = [...new Set(all.flatMap(sn => Object.keys(ordResOf(c, sn).rounds).map(Number)))].filter(rn => rn !== fin).sort((a, b) => b - a);
   rks.forEach(rn => {
     const rows = all.map(sn => [ordResOf(c, sn).rounds[rn], sn]).filter(x => x[0]).sort((a, b) => a[0][0] - b[0][0] || a[1] - b[1]);
     if(!rows.length) return;
     const r = c.rounds[rn-1], mine = rows.some(([, sn]) => isMine(nm(sn)));
-    h += `<details class="srcs" data-dk="res${c.id}-${rn}" ${detOpen('res' + c.id + '-' + rn, mine && !ranked.length)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} ${L('sonucu','result')} · ${rows.filter(([x]) => x[1]).length} ${L('geçti','advanced')}</summary><ol class="ordl" style="list-style:none">${rows.map(([x, sn]) => line(x[0], sn, x[1] ? ` <span class="dn">✓</span>` : ` <span class="dn">${L('elendi','out')}</span>`)).join('')}</ol></details>`;
+    h += `<details class="srcs" data-dk="res${c.id}-${rn}" ${detOpen('res' + c.id + '-' + rn, mine && !ranked.length)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} ${L('sonucu','result')} · ${rows.filter(([x]) => x[1]).length} ${L('geçti','advanced')}</summary><ol class="ordl" style="list-style:none">${rows.map(([x, sn]) => line(x[0], sn, x[1] ? ` <span class="dn">✓</span>` : ` <span class="dn">${L('elendi','out')}</span>`, rn)).join('')}</ol></details>`;
   });
   return h ? `<h2>${L('Sonuçlar','Results')}</h2>` + h : '';
 }

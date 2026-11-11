@@ -36,13 +36,47 @@ export function compactCategory(c) {
   return Object.keys(s).length ? { j, o, n, h, s } : { j, o, n, h };
 }
 
+// Marks (AJS scoring) of every judged round, for the detail view. Phones load it per competition, only when someone opens the results.
+//   { cr: { roundNo: ['TQ','CH','IP'] }, r: { roundNo: { startNo: [total, place, advanced, [[dance, danceTotal, dancePlace, { judgeLetter: ['5.8','5.0*'] }], ...]] } } }
+// A mark ending in * was flagged invalid by the scoring system. marX can reuse one round id for two rounds, so the round is picked
+// by its size (marked entries == round size); anything ambiguous is left out rather than guessed.
+export function compactScores(c) {
+  if (!c || !Array.isArray(c.r) || !c.dr || typeof c.dr !== 'object') return null;
+  const byId = {}; c.r.forEach(r => { if (r && r.i != null && Number.isFinite(r.rn)) (byId[r.i] = byId[r.i] || []).push(r); });
+  const out = { cr: {}, r: {} };
+  for (const [rid, v] of Object.entries(c.dr)) {
+    const s = v && v.sajs; if (!s || !Array.isArray(s.p) || !s.p.length) continue;
+    const cands = byId[rid] || [];
+    const exact = cands.filter(r => r.mp === s.p.length);
+    const rd = exact.length ? exact.sort((a, b) => b.rn - a.rn)[0] : (cands.length === 1 ? cands[0] : null);
+    if (!rd) continue;
+    const crit = (s.sajsCriteria || []).filter(x => x && x.enabled);
+    const dn = {}; (s.da || []).forEach(d => { if (d) { const a = d.abbreviation || d.n || ''; if (d.uuid) dn[d.uuid] = a; if (d.i) dn[d.i] = a; } });
+    const ps = {};
+    for (const p of s.p) {
+      if (!p || !Number.isFinite(p.sn) || !Number.isFinite(p.ts)) continue;
+      const drs = (p.drs || []).map(d => {
+        const js = {};
+        for (const j of d.jsc || []) { if (!j || !j.sc) continue; js[j.jl || j.ji] = crit.map(k => (j.sc[k.key] == null ? '' : String(j.sc[k.key])) + (j.invalid && j.invalid[k.key] ? '*' : '')); }
+        return [dn[d.di] || '', Number.isFinite(d.ts) ? d.ts : null, Number.isFinite(d.pl) ? d.pl : null, js];
+      });
+      if (!(p.ts > 0) && !drs.some(d => Object.values(d[3]).some(ms => ms.some(m => m !== '')))) continue;   // not judged yet
+      ps[p.sn] = [Math.round(p.ts * 1000) / 1000, Number.isFinite(p.fpl) ? p.fpl : null, p.adv ? 1 : 0, drs];
+    }
+    if (!Object.keys(ps).length) continue;
+    out.cr[rd.rn] = crit.map(k => k.label || ''); out.r[rd.rn] = ps;
+  }
+  return Object.keys(out.r).length ? out : null;
+}
+
 async function getCategory(id) {
   const res = await fetch(MARX_BASE + id + '.json?_cb=' + Date.now(), {
     headers: { 'Cache-Control': 'no-cache', 'User-Agent': 'istanbul2026-takip (schedule mirror)' },
     signal: AbortSignal.timeout(20000),
   });
   if (!res.ok) throw new Error('marX ' + id + ' ' + res.status);
-  return compactCategory(await res.json());
+  const raw = await res.json();
+  return { ord: compactCategory(raw), sc: compactScores(raw) };
 }
 
 // Which categories to look at now. A category with a round today that is not finished (or tomorrow's first thing)
@@ -63,15 +97,17 @@ export function dueCategories(mx, last, now = Date.now(), todayDay) {
 
 // Refresh the categories that are due; `store` is { [wdsfId]: compact category } and is updated in place.
 // Returns true when something changed.
-export async function refreshOrder(mx, store, last, todayDay, log = console.log) {
+export async function refreshOrder(mx, store, last, todayDay, log = console.log, scStore = {}) {
   const due = dueCategories(mx, last, Date.now(), todayDay);
   let changed = false, i = 0;
+  const scChanged = refreshOrder.scChanged = new Set();
   await Promise.all(Array.from({ length: 4 }, async () => {
     while (i < due.length) {
       const [wid, cid] = due[i++];
       try {
-        const c = await getCategory(cid);
+        const { ord: c, sc } = await getCategory(cid);
         last[wid] = Date.now();
+        if (sc && JSON.stringify(scStore[wid]) !== JSON.stringify(sc)) { scStore[wid] = sc; scChanged.add(wid); }
         if (!c) continue;
         if (JSON.stringify(store[wid]) !== JSON.stringify(c)) { store[wid] = c; changed = true; }
       } catch (e) { log('order:', e.message); }
