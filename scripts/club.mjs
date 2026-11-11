@@ -38,5 +38,5 @@ export function clubFor(data, cfg) {
     const who = people(n).filter(p => members.has(p));
     if (who.length) add(cid, n, people(n).map(given).join(' – '), who);
   });
-  return { slug: cfg.slug, name: cfg.name, short: cfg.short, members: [...members].sort((a, b) => a.localeCompare(b, 'tr')), entries };
+  return { slug: cfg.slug, name: cfg.name, short: cfg.short, pat: cfg.teamPattern, xt: cfg.extraTeams || [], members: [...members].sort((a, b) => a.localeCompare(b, 'tr')), entries };
 }

@@ -693,7 +693,10 @@ function ordBlock(c){
   const rks = Object.keys(oc.h || {}).map(Number).sort((a,b) => a - b);
   if(rks.length){
     const mineNames = (typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id).map(e => e[0]) : c.parts.filter(p => pins.has(p.key)).map(p => p.raw);   // club page: only the club's own entries
-    const isMineN = n => mineNames.some(m => ordSame(n, m));
+    const clubRe = (typeof CLUB !== 'undefined' && CLUB && CLUB.pat) ? new RegExp(CLUB.pat, 'i') : null;
+    const clubX = (typeof CLUB !== 'undefined' && CLUB && CLUB.xt) ? CLUB.xt.map(x => x.toLowerCase()) : [];
+    // marX names are matched on their own too, so a club entry still lights up when WDSF's entry list is missing or spelled differently
+    const isMineN = n => mineNames.some(m => ordSame(n, m)) || (clubRe && (clubRe.test(n) || clubX.includes(n.replace(/\s*\([^)]*\)\s*$/, '').trim().toLowerCase())));
     const a = nowAbs();
     const open = rks.find(rn => { const r = c.rounds[rn-1]; return r && ABS(c.day, r.e) > a; });
     const mineIn = rn => { let ix = 0, prev = null, out = []; oc.h[rn].forEach(([dn, sns]) => { if(dn !== prev){ ix = 0; prev = dn; } ix++; if(sns.some(sn => isMineN((oc.n || {})[sn] || ''))) out.push(ix); }); return out; };
