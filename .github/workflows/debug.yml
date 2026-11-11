@@ -13,4 +13,4 @@ jobs:
         with:
           node-version: 20
       - run: npm ci --no-audit --no-fund
-      - run: node scripts/debug-day.mjs
+      - run: node scripts/debug-day.mjs; node scripts/debug-club.mjs
