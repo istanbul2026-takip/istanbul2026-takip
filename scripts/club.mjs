@@ -29,6 +29,8 @@ export function clubFor(data, cfg) {
   const add = (cid, n, label, who) => (entries[cid] = entries[cid] || []).push([n, label, who]);
   for (const [cid, list] of Object.entries(P)) list.forEach(([n, cty], i) => {
     const team = T[cid] && T[cid][i] && T[cid][i].length > 2 ? T[cid][i] : null;
+    // a club team is the club's even when WDSF has not (yet) published its members
+    if (!team && isClubTeam(n)) { add(cid, n, teamLabel(n), []); return; }
     if (team) {
       const share = team.filter(m => members.has(m)).length / team.length;
       if (isClubTeam(n) || share >= 0.5) add(cid, n, teamLabel(n), team.filter(m => members.has(m)));
