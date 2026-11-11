@@ -115,6 +115,12 @@ while (Date.now() < RUN_UNTIL && Date.now() < EVENT_END) {
   round++;
   const started = Date.now();
   fs.rmSync('dist', { recursive: true, force: true });
+  // This job checked the repo out once, hours ago. Take what was pushed to main since then,
+  // or the next deploy would put an old page (and old club lists) back over a newer one.
+  if (process.env.GITHUB_ACTIONS) {
+    const g = spawnSync('git', ['pull', '--ff-only', '-q', 'origin', 'main'], { encoding: 'utf8', timeout: 60e3 });
+    if (g.status !== 0) console.log('git pull skipped:', ((g.stderr || '') + (g.error ? g.error.message : '')).trim().slice(-200));
+  }
   const r = spawnSync('node', ['scripts/update.mjs'], { encoding: 'utf8', env: { ...process.env, GITHUB_OUTPUT: '', EVENT_NAME: 'loop' } });
   const out = (r.stdout || '') + (r.stderr || '');
   console.log(`— round ${round} · ${new Date().toISOString()}\n${out.trim()}`);
