@@ -30,8 +30,16 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
   for (const c of g.querySelectorAll('.js-day-container')) {
     const day = +String(c.getAttribute('data-day')).slice(8);
     const halls = [...c.querySelectorAll('thead th')].map(text);
+    // A cell that spans several rows (a long competition block) pushes the cells of the following rows one column to the left,
+    // so the hall is the cell's real column (rowspan/colspan counted), not its position among the row's children.
+    const occ = [];
     for (const tr of c.querySelectorAll('tbody tr')) {
-      [...tr.children].forEach((td, i) => {
+      let col = 0;
+      [...tr.children].forEach(td => {
+        while ((occ[col] || 0) > 0) col++;
+        const i = col, rs = Math.max(1, +td.getAttribute('rowspan') || 1), cs = Math.max(1, +td.getAttribute('colspan') || 1);
+        for (let k = 0; k < cs; k++) occ[col + k] = rs;
+        col += cs;
         const t = td.querySelector('.schedule__item__time'); if (!t) return;
         const a = td.querySelector('a');
         const [s, e] = text(t).split(' - ');
@@ -39,6 +47,7 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
         E.push([day, (halls[i] || '').startsWith('B') ? 'B' : 'A', s, e, text(td).replace(text(t), '').trim(),
           href ? +href.split('-').pop() : 0, href ? href.replace('/Competitions/Schedule/', '').replace(/-\d+$/, '') : '']);
       });
+      for (let k = 0; k < occ.length; k++) if (occ[k] > 0) occ[k]--;
     }
   }
   if (E.length < 50) throw new Error('schedule looks empty (' + E.length + ' items)');
