@@ -19,3 +19,7 @@ let shown = 0;
 [...c.querySelectorAll('tbody tr')].forEach((tr, n) => [...tr.children].forEach((td, i) => { if (!td.querySelector('.schedule__item__time') && td.textContent.trim() && shown++ < 8) console.log('NOTIME tr', n, 'col', i, td.outerHTML.replace(/\s+/g, ' ').slice(0, 700)); }));
 // the B cell that did parse (Youth solo 08:44 - 22:06) for comparison
 const ok = [...c.querySelectorAll('td')].find(td => (td.textContent || '').includes('08:44 - 22:06')); console.log('OKCELL', ok ? ok.outerHTML.replace(/\s+/g, ' ').slice(0, 700) : 'none');
+// after the fix: day totals and the rounds of two delayed competitions
+console.log('FIXED E', day, rows.length, 'A', rows.filter(e => e[1] === 'A').length);
+for (const e of rows.filter(e => e[1] === 'A')) console.log('FIXED A', JSON.stringify(e));
+for (const id of [67344, 67350, 67353, 67346]) console.log('FIXED R', id, JSON.stringify(d.R[id]));

@@ -40,11 +40,14 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
         const i = col, rs = Math.max(1, +td.getAttribute('rowspan') || 1), cs = Math.max(1, +td.getAttribute('colspan') || 1);
         for (let k = 0; k < cs; k++) occ[col + k] = rs;
         col += cs;
-        const t = td.querySelector('.schedule__item__time'); if (!t) return;
+        // WDSF shows a delayed item with two spans (…time--original and …time--delayed) instead of one; the delayed time is the current one.
+        const t = td.querySelector('.schedule__item__time') || td.querySelector('.schedule__item__time--delayed') || td.querySelector('.schedule__item__time--original');
+        if (!t) return;
         const a = td.querySelector('a');
         const [s, e] = text(t).split(' - ');
         const href = a ? a.getAttribute('href') : '';
-        E.push([day, (halls[i] || '').startsWith('B') ? 'B' : 'A', s, e, text(td).replace(text(t), '').trim(),
+        let label = text(td); for (const x of td.querySelectorAll('[class*="schedule__item__time"]')) label = label.replace(text(x), '');
+        E.push([day, (halls[i] || '').startsWith('B') ? 'B' : 'A', s, e, label.trim(),
           href ? +href.split('-').pop() : 0, href ? href.replace('/Competitions/Schedule/', '').replace(/-\d+$/, '') : '']);
       });
       for (let k = 0; k < occ.length; k++) if (occ[k] > 0) occ[k]--;
