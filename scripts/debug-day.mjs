@@ -14,3 +14,8 @@ const g = new DOMParser().parseFromString(html, 'text/html');
 const c = [...g.querySelectorAll('.js-day-container')].find(x => String(x.getAttribute('data-day')).slice(8) == String(day));
 console.log('thead:', [...c.querySelectorAll('thead th')].map(t => t.textContent.replace(/\s+/g, ' ').trim()).join(' || '));
 [...c.querySelectorAll('tbody tr')].slice(0, 70).forEach((tr, n) => console.log('tr', n, [...tr.children].map(td => (td.tagName + (td.getAttribute('rowspan') ? ' rs' + td.getAttribute('rowspan') : '') + (td.getAttribute('colspan') ? ' cs' + td.getAttribute('colspan') : '') + ' ' + ((td.querySelector('.schedule__item__time') || {}).textContent || '-').replace(/\s+/g, ' ').trim())).join(' | ')));
+// cells that have content but no time element
+let shown = 0;
+[...c.querySelectorAll('tbody tr')].forEach((tr, n) => [...tr.children].forEach((td, i) => { if (!td.querySelector('.schedule__item__time') && td.textContent.trim() && shown++ < 8) console.log('NOTIME tr', n, 'col', i, td.outerHTML.replace(/\s+/g, ' ').slice(0, 700)); }));
+// the B cell that did parse (Youth solo 08:44 - 22:06) for comparison
+const ok = [...c.querySelectorAll('td')].find(td => (td.textContent || '').includes('08:44 - 22:06')); console.log('OKCELL', ok ? ok.outerHTML.replace(/\s+/g, ' ').slice(0, 700) : 'none');
