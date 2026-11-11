@@ -2,7 +2,7 @@ name: Audit data
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -15,7 +15,5 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: node scripts/audit.mjs
       - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: audit
-          path: data/audit-*.json
+        run: |
+          mkdir /tmp/o && cp data/audit-*.json /tmp/o/ && cd /tmp/o && git init -q && git checkout -q -b audit && git add . && git -c user.name=audit -c user.email=a@a commit -qm audit && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" audit

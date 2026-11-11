@@ -17,6 +17,7 @@ const club = clubFor(d, cfg);
 fs.mkdirSync('data', { recursive: true });
 fs.writeFileSync('data/audit-last.json', JSON.stringify({ ...d, MX: mx }));
 
+console.log('R sample', JSON.stringify(d.R[Object.keys(d.R)[0]]));
 // A. coverage between the two sources
 const wIds = new Set(d.E.map(e => String(e[5])).filter(x => x !== '0'));
 const mIds = new Set(Object.keys(mx.r).map(k => k.split('.')[0]));
