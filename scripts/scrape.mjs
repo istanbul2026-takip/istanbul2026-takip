@@ -67,7 +67,7 @@ export async function scrape({ prev = null, withEntries = true } = {}) {
     if (prev && prev.R && prev.R[id] && prev.R[id].length && day < todayDay) R[id] = prev.R[id];
     else {
       const sd = parse(await get('/Competitions/Schedule/' + slug));
-      R[id] = [...sd.querySelectorAll('table tbody tr')].map(tr => [...tr.children].map(text))
+      R[id] = [...sd.querySelectorAll('table tbody tr')].map(tr => [...tr.children].map(td => text(td.querySelector('[class*="time--delayed"]') || td)))   // a delayed round shows original and delayed time: take the delayed one
         .filter(x => x.length >= 4).map(x => [x[0].replace(/ \(\d+\)/, ''), +x[1] || 0, x[2], x[3].replace(' - ', '-')]);
     }
     if (prev && prev.RK && prev.RK[id] && day < todayDay) { RK[id] = prev.RK[id]; return; }
