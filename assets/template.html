@@ -711,7 +711,7 @@ function scMarks(c, rn, sn, oc, isMine){
     return `${dances.length > 1 ? `<div class="dn" style="margin-top:6px">${esc(d[0])} · ${d[1] != null ? d[1].toFixed(3) : ''}${d[2] != null ? ' · ' + d[2] + '.' : ''}</div>` : ''}<table class="sct"><tr><th></th><th></th>${cr.map(x => `<th>${esc(x)}</th>`).join('')}</tr>${rows}</table>`;
   }).join('') + `</div>`;
 }
-const ordMineFn = c => {
+let ordMineFn = c => {
   const mineNames = (typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id).map(e => e[0]) : c.parts.filter(p => pins.has(p.key)).map(p => p.raw);   // club page: only the club's own entries
   const clubRe = (typeof CLUB !== 'undefined' && CLUB && CLUB.pat) ? new RegExp(CLUB.pat, 'i') : null;
   const clubX = (typeof CLUB !== 'undefined' && CLUB && CLUB.xt) ? CLUB.xt.map(x => x.toLowerCase()) : [];
@@ -791,6 +791,11 @@ function ordBlock(c){
   } else h += `<div class="plannote" style="padding:2px 0 6px">${L('Çıkış sırası henüz yayınlanmadı (turdan kısa süre önce marX\'a girilir).','Running order not published yet (marX adds it shortly before the round).')}</div>`;
   return h;
 }
+
+// Feed data (order, results, marks) comes from outside the build: if it is ever odd, that part is left out instead of breaking the page.
+const safe = (f, d = '') => function(){ try { return f.apply(this, arguments); } catch(e) { try { console.error('feed:', e); } catch(_) {} return d; } };
+ordFind = safe(ordFind, null); ordLatest = safe(ordLatest); ordBlock = safe(ordBlock); ordResBlock = safe(ordResBlock); ordResTag = safe(ordResTag);
+ordResFor = safe(ordResFor, null); ordResOf = safe(ordResOf, null); scMarks = safe(scMarks); ordMineFn = safe(ordMineFn, () => false);
 applyLive();
 function chgIndex(){
   if(chgIdx) return chgIdx;
@@ -1631,15 +1636,17 @@ function route(){
   if(view==='program') setTimeout(scrollToNow, 30);
 }
 function rerender(){ keepFocus(rerender0); }
+// Each part of the screen is drawn on its own: a problem in one never blanks the rest, and the page keeps what it showed before.
+function guard(f){ try { f(); } catch(e) { try { console.error('render:', e); } catch(_) {} } }
 function rerender0(){
-  applyLive(); renderClock(); try { updLine(); } catch(e) {} updateBadge();
-  if(view==='simdi') renderNow();
-  if(view==='program') renderProgram();
-  if(view==='yarismalar') renderComps();
-  if(view==='sporcu') renderAth();
-  if(view==='programim') renderMine();
-  if(view==='kulup') renderClub();
-  if($('ov').dataset.comp){ const y=$('sheet').scrollTop; const q=$('sq')?$('sq').value:''; openComp(+$('ov').dataset.comp); $('sq').value=q; $('sq').oninput(); $('sheet').scrollTop=y; }
+  guard(applyLive); guard(renderClock); guard(updLine); guard(updateBadge);
+  if(view==='simdi') guard(renderNow);
+  if(view==='program') guard(renderProgram);
+  if(view==='yarismalar') guard(renderComps);
+  if(view==='sporcu') guard(renderAth);
+  if(view==='programim') guard(renderMine);
+  if(view==='kulup') guard(renderClub);
+  if($('ov').dataset.comp) guard(() => { const y=$('sheet').scrollTop; const q=$('sq')?$('sq').value:''; openComp(+$('ov').dataset.comp); $('sq').value=q; $('sq').oninput(); $('sheet').scrollTop=y; });
 }
 function tick(force){ keepFocus(() => tick0(force)); }
 function tick0(force){
