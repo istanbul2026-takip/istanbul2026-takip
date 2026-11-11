@@ -667,11 +667,13 @@ async function pullOrder(){
 }
 const ordCat = id => (ORD && ORD.o && ORD.o[id]) || null;
 // the same name written differently (case, accents, word order, "(choreography)") still matches
+const ordKeyRaw = s => String(s || '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').split(/[^a-z0-9]+/).filter(Boolean).sort().join(' ');
+const ordSame = (a, b) => { const x = ordKeyN(a), y = ordKeyN(b); return !!x && (x === y || x === ordKeyRaw(b) || y === ordKeyRaw(a) || ordKeyRaw(a) === ordKeyRaw(b)); };
 const ordKeyN = s => String(s || '').replace(/\s*\([^)]*\)\s*$/, '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').split(/[^a-z0-9]+/).filter(Boolean).sort().join(' ');
 function ordFind(id, rn, name){
   const c = ordCat(id); if(!c || !c.h || !Array.isArray(c.h[rn]) || !c.h[rn].length) return null;
-  const k = ordKeyN(name); if(!k) return null;
-  const hit = Object.entries(c.n || {}).filter(([, n]) => ordKeyN(n) === k);
+  if(!ordKeyN(name)) return null;
+  const hit = Object.entries(c.n || {}).filter(([, n]) => ordSame(n, name));
   if(hit.length !== 1) return null;                       // not found or ambiguous: say nothing rather than guess
   const sn = +hit[0][0], d0 = c.h[rn][0][0], same = c.h[rn].filter(h => h[0] === d0);
   const ix = same.findIndex(h => h[1].includes(sn)); if(ix < 0) return null;
@@ -690,9 +692,8 @@ function ordBlock(c){
   if(jl.length || ol.length) h += `<h2>${L('Hakemler','Judges')}</h2><div class="plist">${jl.map(([l,n,ct]) => `<div class="pr"><b style="width:30px">${esc(l)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}${ol.map(([r,n,ct]) => `<div class="pr"><b style="width:auto;margin-right:8px;font-size:12px;color:var(--muted)">${esc(r)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}</div>`;
   const rks = Object.keys(oc.h || {}).map(Number).sort((a,b) => a - b);
   if(rks.length){
-    const mine = new Set(c.parts.filter(p => pins.has(p.key)).map(p => ordKeyN(p.raw)));
-    const clubK = new Set(((typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id) : []).map(e => ordKeyN(e[0])));
-    const isMineN = n => mine.has(ordKeyN(n)) || clubK.has(ordKeyN(n));
+    const mineNames = [...c.parts.filter(p => pins.has(p.key)).map(p => p.raw), ...(((typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id) : []).map(e => e[0]))];
+    const isMineN = n => mineNames.some(m => ordSame(n, m));
     const a = nowAbs();
     const open = rks.find(rn => { const r = c.rounds[rn-1]; return r && ABS(c.day, r.e) > a; });
     const mineIn = rn => { let ix = 0, prev = null, out = []; oc.h[rn].forEach(([dn, sns]) => { if(dn !== prev){ ix = 0; prev = dn; } ix++; if(sns.some(sn => isMineN((oc.n || {})[sn] || ''))) out.push(ix); }); return out; };
@@ -703,7 +704,7 @@ function ordBlock(c){
         const names = sns.map(sn => { const n = (oc.n || {})[sn] || ''; const m = isMineN(n); return m ? `<strong class="ordme">★ ${esc(n)}</strong>` : esc(n); }).join(' · ');
         const isMine = sns.some(sn => isMineN((oc.n || {})[sn] || ''));
         return `<li class="${isMine?'mine':''}"><b>${ix}.</b><span>${sns.length === 1 ? `<span class="dn">№${sns[0]}</span> ` : `<span class="dn">${sns.map(x => '№' + x).join(' ')}</span> `}${names}${dances.size > 1 ? ` <span class="dn">· ${esc(dn)}</span>` : ''}</span></li>`; }).join('');
-      return `<details class="srcs" data-dk="ord${c.id}-${rn}" ${detOpen('ord' + c.id + '-' + rn, rn === open)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} · ${heats.length} ${L('çıkış','heats')}${(() => { const m = mineIn(rn); return m.length ? ` <span class="ordt">★ ${m.join(', ')}</span>` : ''; })()}</summary><ol class="ordl" style="list-style:none">${lines}</ol></details>`;
+      return `<details class="srcs" data-dk="ord${c.id}-${rn}" ${detOpen('ord' + c.id + '-' + rn, rn === open || (mineIn(rn).length > 0 && !!r && ABS(c.day, r.e) > a))}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} · ${heats.length} ${L('çıkış','heats')}${(() => { const m = mineIn(rn); return m.length ? ` <span class="ordt">★ ${m.join(', ')}</span>` : ''; })()}</summary><ol class="ordl" style="list-style:none">${lines}</ol></details>`;
     }).join('');
   } else h += `<div class="plannote" style="padding:2px 0 6px">${L('Çıkış sırası henüz yayınlanmadı (turdan kısa süre önce marX\'a girilir).','Running order not published yet (marX adds it shortly before the round).')}</div>`;
   return h;
