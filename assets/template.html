@@ -77,7 +77,7 @@ h1.brand{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit}
 #v-kulup .cday{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px}
 .csum{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
 .csum .k{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--live)}
-.csum .t{font-weight:700;font-size:16px;margin-top:2px}.csum .m{color:var(--muted);font-size:14px;margin-top:2px}
+.csum .t{font-weight:700;font-size:16px;margin-top:2px}.csum .m{color:var(--muted);font-size:14px;margin-top:2px}.csum .w{font-weight:700;font-size:17px;margin-top:4px;line-height:1.3}.csum .w .ordt{margin-left:6px}
 .cfil{display:flex;gap:8px;align-items:center;margin:8px 0}.cfil select{flex:1;min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:15px;padding:0 10px}
 .cwarn{border:1px solid var(--live);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--surface)}.cwarn summary{font-weight:700;cursor:pointer;min-height:32px;line-height:32px}
 .cwarn li{margin:4px 0;font-size:14px}
@@ -1010,7 +1010,7 @@ function renderNow(){
     }
   }
   let findHidden = false; try { findHidden = localStorage.getItem('wdsfist-findhide') === '1'; } catch(e) {}
-  $('heroBox').innerHTML = hero + (myCompIds().size || findHidden ? '' : `<div class="find"><button class="x" id="findX" aria-label="${L('Kapat','Close')}">✕</button><h3>${L('Kimi takip ediyorsun?','Who are you following?')}</h3>
+  $('heroBox').innerHTML = hero + (myCompIds().size || findHidden || CLUB ? '' : `<div class="find"><button class="x" id="findX" aria-label="${L('Kapat','Close')}">✕</button><h3>${L('Kimi takip ediyorsun?','Who are you following?')}</h3>
     <p>${L('Kendini, çocuğunu, sporcularını ya da takımını bul; hangi gün, hangi salonda ve saat kaçta olduklarını gör. İstediğin kadar kişi ekleyebilirsin.','Find yourself, your child, your athletes or your team; see the day, hall and time of each round. Add as many as you like.')}</p>
     <input class="search" id="homeQ" type="search" placeholder="${L('Sporcu veya takım adı','Athlete or team name')}" autocomplete="off">
     <div class="steps"><span>1 · ${L('Bul','Find')}</span><span>2 · ${L('Takip et','Follow')}</span><span>3 · ${L('Turları Takibim\'de, 30 dk önce uyarı','Rounds in Following, 30-min alert')}</span></div></div>`);
@@ -1504,8 +1504,7 @@ function renderClub(soft){
   let items = clubItems(day);
   if(person) items = items.filter(i => clubWho(i).includes(person) || (i.kind !== 'round' && !clubWho(i).length && i.kind !== 'note'));
   const roundsAll = DAYS.map(x => clubItems(x).filter(i => i.kind === 'round' && (!person || clubWho(i).includes(person))).length);
-  let html = `<h2 style="margin-bottom:2px">${esc(CLUB.name)}</h2><div class="plannote" style="padding:0 0 4px">${L('Kulübün tüm turları, provaları ve ödül törenleri. Saatler WDSF ve organizasyonun canlı akışından otomatik gelir.','All club rounds, rehearsals and awards. Times come automatically from WDSF and the organiser\'s live timetable.')}</div>`;
-  html += clubSources();
+  let html = `<h2 style="margin-bottom:2px">${esc(CLUB.name)}</h2>`;
   if(!storeOK) html += `<div class="cwarn" style="padding:10px 12px;font-size:14px"><b>⚠ ${L('Bu tarayıcı kayıt tutmuyor','This browser does not keep data')}</b><br>${L('Gizli sekmede ya da bir uygulamanın içinde açılmış olabilir. Bitti işaretleri ve notların sayfa kapanınca silinir; sayfayı Safari ya da Chrome\'da normal sekmede aç.','It may be a private tab or an in-app browser. Done marks and notes are lost when the page closes; open the page in a normal Safari or Chrome tab.')}</div>`;
   // what marX moved lately, for the club's upcoming rounds, rehearsals and awards
   const chgRows = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind !== 'note' && ABS(i.d,i.e) > a && !isDone(i) && (!person || clubWho(i).includes(person))).map(i => [i, chgDesc(i, person)]);
@@ -1516,10 +1515,12 @@ function renderClub(soft){
   // what's on now / next (any day)
   const upc = DAYS.flatMap(x => clubItems(x)).filter(i => i.kind === 'round' && !isDone(i) && (!person || clubWho(i).includes(person)) && ABS(i.d,i.e) > a).sort((x,y) => ABS(x.d,x.s) - ABS(y.d,y.s));
   const live = upc.filter(i => ABS(i.d,i.s) <= a), nxt = upc.filter(i => ABS(i.d,i.s) > a).slice(0, 2);
-  const sumLine = (i, k) => { const ents = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => e[1]).join(' · ');
-    return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}</div><div class="t">${fmt(i.s)} · ${klas(i.comp)} ${roundTag(i.round)}${dlyTag(i.round)}</div><div class="m">${esc(ents)} · ${hallChip(i.h)}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ''}</div></div>`; };
+  const sumLine = (i, k) => { const rn = i.comp.rounds.indexOf(i.round) + 1;
+    const ents = clubEntries(i.comp.id).filter(e => !person || e[2].includes(person)).map(e => { const o = ordFind(i.comp.id, rn, e[0]); return `<span style="white-space:nowrap">${esc(e[1])}${o ? `<span class="ordt">${esc(ordTxt(o))}</span>` : ''}</span>`; }).join(' · ');
+    return `<div class="csum" data-comp="${i.comp.id}" style="cursor:pointer"><div class="k">${k}${ABS(i.d,i.s) > a ? ' · ' + relTxt(ABS(i.d,i.s) - a) : ''}</div><div class="w">${ents}</div><div class="m">${fmt(i.s)} · ${klas(i.comp)} ${roundTag(i.round)}${dlyTag(i.round)} ${hallChip(i.h)}</div></div>`; };
   live.forEach(i => html += sumLine(i, i.round.lst==='c' ? L('● SAHNEDE','● ON STAGE') : L('● PLANA GÖRE ŞU AN','● SCHEDULED NOW')));
   nxt.forEach((i, k) => html += sumLine(i, k ? L('SONRAKİ','AFTER THAT') : L('SIRADAKİ','NEXT UP')));
+  html += clubSources();
   html += `<div class="cfil"><label for="cPer" class="sr">${L('Sporcu','Athlete')}</label><select id="cPer"><option value="">${L('Bütün kulüp','Whole club')}</option>${CLUB.members.filter(m => DAYS.some(x => clubItems(x).some(i => clubWho(i).includes(m)))).map(m => `<option ${m===person?'selected':''}>${esc(m)}</option>`).join('')}</select>
     <button class="btn" id="cIcs" style="white-space:nowrap">📅 ${L('Takvime','Calendar')}</button></div>`;
   html += `<div class="cact"><button class="btn" id="cShare">📤 ${L('Günü paylaş','Share day')}</button>${'wakeLock' in navigator ? `<button class="btn ${wakeOn ? 'on' : ''}" id="cWake" aria-pressed="${wakeOn}">🔆 ${L('Ekran açık','Keep awake')}</button>` : ''}<button class="btn" id="cNote">＋ ${L('Not','Note')}</button></div>`;
