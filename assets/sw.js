@@ -24,7 +24,7 @@ self.addEventListener('activate', e => e.waitUntil((async () => {
 })()));
 
 async function remoteVersion(dir) {
-  const r = await Promise.race([fetch(dir + 'version.txt', { cache: 'no-store' }), timeout(3000)]);
+  const r = await Promise.race([fetch(dir + 'version.txt', { cache: 'no-store' }), timeout(2000)]);
   if (!r.ok) throw new Error('version ' + r.status);
   return (await r.text()).split('\n')[0].trim();
 }
@@ -39,18 +39,22 @@ async function page(req, dir) {
     const have = await c.match(VKEY);
     if (have && (await have.text()) === v) return cached;   // nothing new: open instantly
   }
-  const network = fetch(req, { cache: 'no-store' }).then(res => {
-    if (res.ok) {
-      const copy = res.clone();
-      c.put(dir, copy).then(() => v && c.put(VKEY, new Response(v)));
-    }
+  // Only a complete copy of our own page is shown or stored: an error page, a Wi-Fi login page
+  // or a download cut half-way must never replace the good copy on the phone.
+  const raw = fetch(req, { cache: 'no-store' });
+  const good = raw.then(async res => {
+    if (!res.ok) throw new Error('status ' + res.status);
+    const txt = await res.clone().text();     // rejects if the connection is cut mid-body
+    if (!txt.includes('id="v-simdi"') || !/<\/html>\s*$/.test(txt)) throw new Error('not our complete page');
+    await c.put(dir, res.clone());
+    if (v) await c.put(VKEY, new Response(v));
     return res;
   });
   try {
-    return await Promise.race([network, timeout(cached ? 6000 : 30000)]);
+    return await Promise.race([good, timeout(cached ? 5000 : 30000)]);
   } catch (e) {
-    if (cached) { network.catch(() => {}); return cached; }
-    return network;
+    if (cached) { good.catch(() => {}); return cached; }
+    return raw;                                // nothing stored yet: show whatever the server sent
   }
 }
 
