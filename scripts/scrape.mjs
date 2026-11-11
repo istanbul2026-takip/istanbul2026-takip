@@ -9,7 +9,7 @@ const text = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
 async function get(path, tries = 3) {
   for (let i = 0; i < tries; i++) {
     try {
-      const r = await fetch(BASE + path, { headers: { 'User-Agent': 'Mozilla/5.0 (WDSF Istanbul schedule helper)', 'Accept-Language': 'en' } });
+      const r = await fetch(BASE + path, { headers: { 'User-Agent': 'Mozilla/5.0 (WDSF Istanbul schedule helper)', 'Accept-Language': 'en' }, signal: AbortSignal.timeout(30000) });
       if (r.ok) return await r.text();
       if (r.status === 404) return '';
     } catch (e) {}

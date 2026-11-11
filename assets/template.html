@@ -425,10 +425,12 @@ const BUILD = /*BUILD*/null;
 
 /* ---------- language ---------- */
 let lang = 'tr';
-try { lang = localStorage.getItem('wdsfist-lang') || ((navigator.language||'').toLowerCase().startsWith('tr') ? 'tr' : 'en'); } catch(e) {}
+try { lang = localStorage.getItem('wdsfist-lang'); } catch(e) {}
+if(lang !== 'en' && lang !== 'tr') lang = (navigator.language||'').toLowerCase().startsWith('tr') ? 'tr' : 'en';
 const L = (tr, en) => lang==='en' ? en : tr;
 /* ---------- theme ---------- */
 let theme = null; try { theme = localStorage.getItem('wdsfist-theme'); } catch(e) {}
+if(theme !== 'dark' && theme !== 'light') theme = null;
 const sysDark = () => !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
 const isDark = () => theme ? theme === 'dark' : sysDark();
 function applyTheme(){
@@ -542,10 +544,14 @@ const firstAbs = ITEMS.length ? Math.min(...ITEMS.map(i=>ABS(i.d,i.s))) : 0;
 const lastAbs = ITEMS.length ? Math.max(...ITEMS.map(i=>ABS(i.d,i.e))) : 0;
 
 /* ---------- state ---------- */
-let favs = new Set(store.get('wdsfist-favs', []));
-let pins = new Set(store.get('wdsfist-pins', []));      // "compId|name"
+// what the phone stored may be damaged or from an older version: keep only values of the expected kind
+const setOf = (k, ok) => new Set([].concat(store.get(k, [])).filter(ok));
+const isFavId = v => v !== null && v !== '' && typeof v !== 'object' && typeof v !== 'boolean' && Number.isFinite(+v);
+const isPinKey = v => typeof v === 'string' && v.includes('|');
+let favs = setOf('wdsfist-favs', isFavId);
+let pins = setOf('wdsfist-pins', isPinKey);      // "compId|name"
 let simAbs = null;
-try { const v = sessionStorage.getItem('wdsfist-sim'); if(v) simAbs = +v; } catch(e){}
+try { const v = sessionStorage.getItem('wdsfist-sim'); if(v && isFinite(+v)) simAbs = +v; } catch(e){}
 const nowAbs = () => simAbs != null ? simAbs : (Date.now()-EPOCH)/60000;
 
 /* ---------- organiser's live timetable (marX) ----------
@@ -632,14 +638,17 @@ const dlyTag = r => !r || !r.shift || Math.abs(r.shift) < 1 ? '' : `<span class=
 const nomxTag = r => r && r.nomx ? `<span class="wdsft">${L('marX\'ta yok · WDSF saati','not on marX · WDSF time')}</span>` : '';
 const anomTag = (c, r) => r && r.anom ? `<span class="anom" title="${L('marX\'taki saat, bir önceki turdan daha erken','marX time is earlier than the previous round')}">⚠ ${L('Sıra hatası olabilir: ' + esc(r.label) + ' önceki turdan önce','Possible order error: ' + esc(r.label) + ' before the previous round')}</span>` : '';
 const nowLabel = r => r && r.lst === 'c' ? L('SALONDA ŞU AN','ON STAGE NOW') : L('PLANA GÖRE ŞU AN','SCHEDULED NOW');
+let liveBusy = false;
+const pollSignal = () => { try { return window.AbortSignal && AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined; } catch(e) { return undefined; } };
 async function pullLive(){
-  if(location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  if(liveBusy || location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  liveBusy = true;
   try {
-    const res = await fetch(LIVE_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    const res = await fetch(LIVE_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store', signal: pollSignal() });
     if(!res.ok) return;
     const j = await res.json();
     if(!j || !j.r || typeof j.r !== 'object' || !j.fetched || isNaN(Date.parse(j.fetched))) return;
-    if(LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched)){
+    if(LIVE && Date.parse(j.fetched) <= Date.parse(LIVE.fetched) && !(Date.parse(LIVE.fetched) - Date.parse(j.fetched) > 864e5)){
       // the timetable on the page is already as new (it came with the page itself); the change log is still worth taking
       if(Array.isArray(j.chg) && (!CHGOK || chgSigOf(j) !== chgSig)){ setChg(j); if(typeof rerender === 'function') rerender(); }
       return;
@@ -647,25 +656,26 @@ async function pullLive(){
     if(Object.values(j.r).filter(m => Array.isArray(m) && m.length >= 5 && typeof m[2] === 'number').length < 50) return;   // half-empty file: keep the last good one
     LIVE = j; setChg(j); try { localStorage.setItem('wdsfist-live', JSON.stringify(j)); } catch(e) {}
     if(typeof rerender === 'function') rerender();
-  } catch(e) {}
+  } catch(e) {} finally { liveBusy = false; }
 }
 /* ---------- running order and judges (organiser's per-category files, order.json) ----------
    Shown as marX publishes them; heats for later rounds appear once marX has published them. */
 const ORDER_URL = 'https://raw.githubusercontent.com/istanbul2026-takip/istanbul2026-takip/live/order.json';
-let ORD = null;
+let ORD = null, ordBusy = false;
 try { const c = JSON.parse(localStorage.getItem('wdsfist-order') || 'null'); if(c && c.o && typeof c.o === 'object' && c.fetched) ORD = c; } catch(e) {}
 async function pullOrder(){
-  if(location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  if(ordBusy || location.protocol === 'file:' || document.visibilityState === 'hidden') return;
+  ordBusy = true;
   try {
-    const res = await fetch(ORDER_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    const res = await fetch(ORDER_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store', signal: pollSignal() });
     if(!res.ok) return;
     const j = await res.json();
     if(!j || !j.o || typeof j.o !== 'object' || !j.fetched || isNaN(Date.parse(j.fetched))) return;
-    if(ORD && Date.parse(j.fetched) <= Date.parse(ORD.fetched)) return;
+    if(ORD && Date.parse(j.fetched) <= Date.parse(ORD.fetched) && !(Date.parse(ORD.fetched) - Date.parse(j.fetched) > 864e5)) return;
     const old = ORD ? JSON.stringify(ORD.o) : '';
     ORD = j; try { localStorage.setItem('wdsfist-order', JSON.stringify(j)); } catch(e) {}
     if(JSON.stringify(j.o) !== old && typeof rerender === 'function') rerender();
-  } catch(e) {}
+  } catch(e) {} finally { ordBusy = false; }
 }
 const ordCat = id => (ORD && ORD.o && ORD.o[id]) || null;
 // the same name written differently (case, accents, word order, "(choreography)") still matches
@@ -870,7 +880,7 @@ function myNames(cid){ const out=[]; pins.forEach(k => { const i=k.indexOf('|');
 function placeOf(cid, name){ const c = COMPS[cid]; const p = c && c.parts.find(x => x.name===name); return p && p.place; }
 function myTags(cid){ return myNames(cid).map(n => { const pl = placeOf(cid,n); return `<span class="mytag">★ ${esc(n)}${pl?` · 🏅 ${esc(pl)}.`:''}</span>`; }).join(''); }
 function saveFavs(){ store.set('wdsfist-favs',[...favs]); store.set('wdsfist-pins',[...pins]); updateBadge(); }
-function myCompIds(){ const s = new Set(favs); pins.forEach(p => s.add(+p.split('|')[0])); return s; }
+function myCompIds(){ const s = new Set(favs); pins.forEach(p => { const n = +String(p).split('|')[0]; if(n) s.add(n); }); return s; }
 function updateBadge(){ const n = pins.size + favs.size; const b=$('favBadge'); b.hidden=!n; b.textContent=n; }
 function toggleFav(id){ id=+id; if(typeof syncState === 'function') syncState(); favs.has(id)?favs.delete(id):favs.add(id); saveFavs(); toast(favs.has(id)?L('Takibine eklendi ★','Added to Following ★'):L('Takipten çıkarıldı','Removed from Following')); rerender(); }
 function togglePin(key){ if(typeof syncState === 'function') syncState(); pins.has(key)?pins.delete(key):pins.add(key); saveFavs(); toast(pins.has(key)?L('Takibe alındı','Now following'):L('Takipten çıkarıldı','Unfollowed')); rerender(); }
@@ -922,7 +932,7 @@ function beep(){
   }catch(e){}
 }
 document.addEventListener('click', () => { if(prefs.sound && audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, {passive:true});
-let alerted = new Set(store.get('wdsfist-alerted', []));
+let alerted = setOf('wdsfist-alerted', v => typeof v === 'string');
 function checkAlerts(){
   if(!prefs.alert) return;
   const a = nowAbs(), ids = myCompIds(); const due = [];
@@ -1324,7 +1334,7 @@ let myNotes = readNotes();
 // back to the front, so two open tabs (or a page restored from the background) never overwrite each other.
 function syncState(){
   if(!storeOK) return;                           // nothing is kept in this browser: what is on screen is all there is
-  favs = new Set([].concat(store.get('wdsfist-favs', []))); pins = new Set([].concat(store.get('wdsfist-pins', [])));
+  favs = setOf('wdsfist-favs', isFavId); pins = setOf('wdsfist-pins', isPinKey);
   if(CLUB){ clubDone = new Set([].concat(store.get('wdsfist-done', []))); myNotes = readNotes(); st.cPerson = store.get('wdsfist-cperson', '') || ''; }
   chgSeen = Math.max(chgSeen, +store.get('wdsfist-chgseen', 0) || 0);
 }
@@ -1513,6 +1523,7 @@ function renderClub(soft){
   const a = nowAbs(), d = todayDay();
   if(st.cDay == null) st.cDay = DAYS.includes(d) ? d : (a > ABS(DAYS[DAYS.length-1], 0) ? DAYS[DAYS.length-1] : DAYS[0]);
   if(st.cPerson == null) st.cPerson = store.get('wdsfist-cperson', '');
+  if(typeof st.cPerson !== 'string' || (st.cPerson && !CLUB.members.includes(st.cPerson))) st.cPerson = '';
   const day = st.cDay, person = st.cPerson;
   let items = clubItems(day);
   if(person) items = items.filter(i => clubWho(i).includes(person) || (i.kind !== 'round' && !clubWho(i).length && i.kind !== 'note'));
@@ -1665,7 +1676,7 @@ function rerender0(){
 }
 function tick(force){ keepFocus(() => tick0(force)); }
 function tick0(force){
-  applyLive(); renderClock(); checkAlerts();
+  guard(applyLive); guard(renderClock); guard(checkAlerts);
   if($('ov').dataset.comp && !force) return;
   if(force) rerender();
   else if(view==='simdi') renderNow();

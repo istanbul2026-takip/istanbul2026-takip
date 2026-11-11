@@ -3,7 +3,7 @@ const token = process.env.CLOUDFLARE_API_TOKEN, account = process.env.CLOUDFLARE
 const project = 'istanbul2026-takip', KEEP = 3;
 if (!token || !account) process.exit(0);
 const api = (path, opts = {}) => fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}${path}`,
-  { ...opts, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }).then(r => r.json());
+  { ...opts, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(20000) }).then(r => r.json());
 const res = await api('/deployments?per_page=25&sort_by=created_on&sort_order=desc');
 if (!res.success) { console.log('could not list deployments', JSON.stringify(res.errors)); process.exit(0); }
 const old = res.result.slice(KEEP);

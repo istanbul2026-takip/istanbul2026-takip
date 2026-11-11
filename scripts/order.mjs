@@ -76,7 +76,11 @@ async function getCategory(id) {
   });
   if (!res.ok) throw new Error('marX ' + id + ' ' + res.status);
   const raw = await res.json();
-  return { ord: compactCategory(raw), sc: compactScores(raw) };
+  // one odd value in the marks must not cost the heats and judges of the category (and the other way round)
+  let ord = null, sc = null;
+  try { ord = compactCategory(raw); } catch (e) { console.log('order: heats', id, e.message); }
+  try { sc = compactScores(raw); } catch (e) { console.log('order: marks', id, e.message); }
+  return { ord, sc };
 }
 
 // Which categories to look at now. A category with a round today that is not finished (or tomorrow's first thing)
@@ -110,7 +114,7 @@ export async function refreshOrder(mx, store, last, todayDay, log = console.log,
         if (sc && JSON.stringify(scStore[wid]) !== JSON.stringify(sc)) { scStore[wid] = sc; scChanged.add(wid); }
         if (!c) continue;
         if (JSON.stringify(store[wid]) !== JSON.stringify(c)) { store[wid] = c; changed = true; }
-      } catch (e) { log('order:', e.message); }
+      } catch (e) { last[wid] = Date.now(); log('order:', e.message); }   // try again when it is next due, not on every pass
     }
   }));
   return changed;

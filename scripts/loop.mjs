@@ -121,15 +121,17 @@ while (Date.now() < RUN_UNTIL && Date.now() < EVENT_END) {
     const g = spawnSync('git', ['pull', '--ff-only', '-q', 'origin', 'main'], { encoding: 'utf8', timeout: 60e3 });
     if (g.status !== 0) console.log('git pull skipped:', ((g.stderr || '') + (g.error ? g.error.message : '')).trim().slice(-200));
   }
-  const r = spawnSync('node', ['scripts/update.mjs'], { encoding: 'utf8', env: { ...process.env, GITHUB_OUTPUT: '', EVENT_NAME: 'loop' } });
+  const r = spawnSync('node', ['scripts/update.mjs'], { encoding: 'utf8', timeout: 4 * 60e3, killSignal: 'SIGKILL', env: { ...process.env, GITHUB_OUTPUT: '', EVENT_NAME: 'loop' } });
   const out = (r.stdout || '') + (r.stderr || '');
   console.log(`— round ${round} · ${new Date().toISOString()}\n${out.trim()}`);
   failures = r.status === 0 ? 0 : failures + 1;
-  if (failures >= 3) { console.error('::error::3 checks in a row failed — stopping so the failure shows up; a new run takes over.'); process.exit(1); }
+  if (failures === 3) console.error('::error::3 checks in a row failed — the page data is stale; the live feed keeps running.');   // stopping here would also stop the 1-minute feed
   if (r.status === 0 && /deploy: true/.test(out) && fs.existsSync('dist/index.html') && process.env.CLOUDFLARE_API_TOKEN) {
-    const d = spawnSync('npx', deployCmd, { encoding: 'utf8', env: process.env });
+    const d = spawnSync('npx', deployCmd, { encoding: 'utf8', timeout: 3 * 60e3, killSignal: 'SIGKILL', env: process.env });
     console.log(d.status === 0 ? 'published' : 'publish failed: ' + (d.stderr || '').slice(-400));
-    if (d.status === 0) spawnSync('node', ['scripts/cleanup.mjs'], { stdio: 'inherit', env: process.env });
+    if (d.status === 0) spawnSync('node', ['scripts/cleanup.mjs'], { stdio: 'inherit', timeout: 60e3, killSignal: 'SIGKILL', env: process.env });
+    // a failed publish must be tried again next round, not remembered as done
+    else try { const c = JSON.parse(fs.readFileSync('data/last.json', 'utf8')); c._hash = 'retry'; c._lastDeployAt = 0; fs.writeFileSync('data/last.json.tmp', JSON.stringify(c)); fs.renameSync('data/last.json.tmp', 'data/last.json'); } catch (e) {}
   }
   const gap = (istHour() >= 7 ? 3 : 10) * 60e3;    // WDSF every 3 min by day, 10 at night; marX every minute in between
   const wait = gap - ((Date.now() - started) % gap);

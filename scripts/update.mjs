@@ -10,7 +10,9 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const A = p => path.join(root, p);
 
 const cacheFile = A('data/last.json');
-const prev = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : null;
+let prev = null;
+try { if (fs.existsSync(cacheFile)) prev = JSON.parse(fs.readFileSync(cacheFile, 'utf8')); }
+catch (e) { console.log('::warning::last.json unreadable, starting fresh: ' + e.message); }   // a cut-off file must not stop every later run
 const now = new Date();
 // Entry lists (who dances where) are refreshed every 2 h, every 30 min on event days, and at once whenever a competition has no list yet.
 const evDay = now.getUTCMonth() === 10 && now.getUTCDate() >= 10 && now.getUTCDate() <= 15;
@@ -34,13 +36,17 @@ const eventDay = now.getUTCMonth() === 10 && (now.getUTCDate() + (now.getUTCHour
 const lastDeployAt = prev && prev._lastDeployAt || 0;
 const heartbeatDue = eventDay && istHour >= 7 && nowMs - lastDeployAt >= 29 * 60e3;
 const forced = ['push', 'workflow_dispatch'].includes(process.env.EVENT_NAME || '');
-const changed = !prev || prev._hash !== hash;
+// The page's own code counts too: a newer template or club list must go out without waiting for a data change.
+const codeHash = (() => { const h = createHash('sha256');
+  try { for (const f of ['assets/template.html', 'assets/sw.js', 'scripts/build.mjs', 'scripts/club.mjs', ...fs.readdirSync(A('club')).sort().map(f => 'club/' + f)]) h.update(fs.readFileSync(A(f))); } catch (e) { return prev && prev._code || ''; }
+  return h.digest('hex'); })();
+const changed = !prev || prev._hash !== hash || (prev._code || codeHash) !== codeHash;
 const deploy = changed || heartbeatDue || forced || nowMs - lastDeployAt > 20 * 3600e3;
 console.log(`changed: ${changed} · heartbeat due: ${heartbeatDue} · forced: ${forced} → deploy: ${deploy}`);
 if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy=${deploy}\n`);
 fs.mkdirSync(A('data'), { recursive: true });
-fs.writeFileSync(cacheFile, JSON.stringify({ ...data, _hash: hash, _lastDeployAt: deploy ? nowMs : lastDeployAt }));
+// Build first: if the build fails, the old marker stays and the next run tries again.
+if (deploy) { const { bytes } = await buildPage(data); console.log('dist/index.html', bytes, 'bytes'); }
+fs.writeFileSync(cacheFile + '.tmp', JSON.stringify({ ...data, _hash: hash, _code: codeHash, _lastDeployAt: deploy ? nowMs : lastDeployAt }));
+fs.renameSync(cacheFile + '.tmp', cacheFile);
 if (!deploy) process.exit(0);
-
-const { bytes } = await buildPage(data);
-console.log('dist/index.html', bytes, 'bytes');
