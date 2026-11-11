@@ -109,7 +109,8 @@ dialog.ndlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}dialog.ndlg
 .anom{font-size:12px;font-weight:800;color:#fff;background:var(--live);border-radius:5px;padding:1px 6px;margin-left:4px}
 .wdsft{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
 .ordt{font-size:12px;font-weight:700;color:var(--gilt);border:1px solid var(--gilt);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
-.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.ordl li.mine{background:color-mix(in srgb,var(--gilt) 28%,transparent);border-radius:6px;border-left:4px solid var(--gilt);padding-left:6px}.ordme{color:var(--gilt)}.ordl .dn{color:var(--muted);font-size:12px}
+.ordl{margin:4px 0 8px;padding:0;list-style:none;font-size:14px}.ordl li{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--line)}.ordl li b{min-width:30px;font-variant-numeric:tabular-nums}.ordt.res{color:var(--gilt);font-weight:700}.ordt.res.up{color:#6fcf97}.ordt.res.out{color:var(--muted)}
+.ordl li.mine{background:color-mix(in srgb,var(--gilt) 28%,transparent);border-radius:6px;border-left:4px solid var(--gilt);padding-left:6px}.ordme{color:var(--gilt)}.ordl .dn{color:var(--muted);font-size:12px}
 .hchip{font-size:11px}
 .hchip{font-size:12px;font-weight:800;white-space:nowrap;display:inline-block;border-radius:5px;padding:1px 6px;color:#fff}.hchip.A{background:#7C1528}.hchip.B{background:#24506B}
 section{display:none}
@@ -681,22 +682,67 @@ function ordFind(id, rn, name){
 }
 const ordTxt = o => o ? `№${o.sn} · ${o.grp ? L('grup','heat') : L('sıra','order')} ${o.pos}/${o.of}` : '';
 function ordLatest(c, name){
-  const oc = ordCat(c.id); if(!oc || !oc.h) return '';
+  const oc = ordCat(c.id); if(!oc) return '';
+  { const rs = ordResFor(c, name); if(rs && rs.rank != null) return `<span class="ordt res">🏁 ${rs.rank}.</span>`; }
+  if(!oc.h) return '';
   for(const rn of Object.keys(oc.h).map(Number).sort((a,b) => b - a)){ const o = ordFind(c.id, rn, name); if(o){ const r = c.rounds[rn-1]; return `<span class="ordt">${r ? esc(r.label) + ' · ' : ''}${esc(ordTxt(o))}</span>`; } }
   return '';
+}
+const ordMineFn = c => {
+  const mineNames = (typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id).map(e => e[0]) : c.parts.filter(p => pins.has(p.key)).map(p => p.raw);   // club page: only the club's own entries
+  const clubRe = (typeof CLUB !== 'undefined' && CLUB && CLUB.pat) ? new RegExp(CLUB.pat, 'i') : null;
+  const clubX = (typeof CLUB !== 'undefined' && CLUB && CLUB.xt) ? CLUB.xt.map(x => x.toLowerCase()) : [];
+  // marX names are matched on their own too, so a club entry still lights up when WDSF's entry list is missing or spelled differently
+  return n => mineNames.some(m => ordSame(n, m)) || (clubRe && (clubRe.test(n) || clubX.includes(n.replace(/\s*\([^)]*\)\s*$/, '').trim().toLowerCase())));
+};
+const ordFinalRn = c => { let f = 0; c.rounds.forEach((r, i) => { if(r.final) f = i + 1; }); return f; };
+// marX results for one start number: {rank, rounds:{rn:[place, advanced]}}
+function ordResOf(c, sn){
+  const oc = ordCat(c.id); const e = oc && oc.s && oc.s[sn]; if(!e) return null;
+  const rounds = {}; (e[1] || []).forEach(([rn, fp, adv]) => rounds[rn] = [fp, !!adv]);
+  const fin = ordFinalRn(c);
+  const rank = e[0] != null ? e[0] : (fin && rounds[fin] ? rounds[fin][0] : null);
+  return {rank, rounds};
+}
+function ordResFor(c, name){
+  const oc = ordCat(c.id); if(!oc || !oc.s) return null;
+  const hit = Object.entries(oc.n || {}).filter(([, n]) => ordSame(n, name));
+  return hit.length === 1 ? ordResOf(c, +hit[0][0]) : null;
+}
+// A short tag for a club entry on the card of one round: final place, or advanced / out for an earlier round
+function ordResTag(c, rn, name){
+  const r = ordResFor(c, name); if(!r) return '';
+  const fin = ordFinalRn(c);
+  if(rn === fin) return r.rank != null ? `<span class="ordt res">🏁 ${r.rank}.</span>` : '';
+  const x = r.rounds[rn]; if(!x) return '';
+  return x[1] ? `<span class="ordt res up">✓ ${L('sonraki tura geçti','advanced')}</span>` : `<span class="ordt res out">${L('elendi','out')}</span>`;
+}
+function ordResBlock(c){
+  const oc = ordCat(c.id); if(!oc || !oc.s) return '';
+  const isMine = ordMineFn(c), fin = ordFinalRn(c), nm = sn => (oc.n || {})[sn] || '№' + sn;
+  const line = (pl, sn, extra) => { const n = nm(sn), m = isMine(n); return `<li class="${m?'mine':''}"><b>${pl}.</b><span><span class="dn">№${sn}</span> ${m ? `<strong class="ordme">★ ${esc(n)}</strong>` : esc(n)}${extra || ''}</span></li>`; };
+  const all = Object.keys(oc.s).map(Number);
+  let h = '';
+  const ranked = all.map(sn => [ordResOf(c, sn).rank, sn]).filter(x => x[0] != null).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if(ranked.length) h += `<details class="srcs" open><summary>${L('Final sonucu','Final result')} · ${ranked.length}</summary><ol class="ordl" style="list-style:none">${ranked.map(([r, sn]) => line(r, sn)).join('')}</ol></details>`;
+  const rks = [...new Set(all.flatMap(sn => Object.keys(ordResOf(c, sn).rounds).map(Number)))].filter(rn => rn !== fin).sort((a, b) => b - a);
+  rks.forEach(rn => {
+    const rows = all.map(sn => [ordResOf(c, sn).rounds[rn], sn]).filter(x => x[0]).sort((a, b) => a[0][0] - b[0][0] || a[1] - b[1]);
+    if(!rows.length) return;
+    const r = c.rounds[rn-1], mine = rows.some(([, sn]) => isMine(nm(sn)));
+    h += `<details class="srcs" data-dk="res${c.id}-${rn}" ${detOpen('res' + c.id + '-' + rn, mine && !ranked.length)}><summary>${r ? esc(r.label) : L('Tur','Round') + ' ' + rn} ${L('sonucu','result')} · ${rows.filter(([x]) => x[1]).length} ${L('geçti','advanced')}</summary><ol class="ordl" style="list-style:none">${rows.map(([x, sn]) => line(x[0], sn, x[1] ? ` <span class="dn">✓</span>` : ` <span class="dn">${L('elendi','out')}</span>`)).join('')}</ol></details>`;
+  });
+  return h ? `<h2>${L('Sonuçlar','Results')}</h2>` + h : '';
 }
 function ordBlock(c){
   const oc = ordCat(c.id); if(!oc) return '';
   let h = '';
   const jl = oc.j || [], ol = oc.o || [];
   if(jl.length || ol.length) h += `<h2>${L('Hakemler','Judges')}</h2><div class="plist">${jl.map(([l,n,ct]) => `<div class="pr"><b style="width:30px">${esc(l)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}${ol.map(([r,n,ct]) => `<div class="pr"><b style="width:auto;margin-right:8px;font-size:12px;color:var(--muted)">${esc(r)}</b><div class="n">${esc(n)}${ct?` <i>${esc(ct)}</i>`:''}</div></div>`).join('')}</div>`;
+  h += ordResBlock(c);
   const rks = Object.keys(oc.h || {}).map(Number).sort((a,b) => a - b);
   if(rks.length){
-    const mineNames = (typeof CLUB !== 'undefined' && CLUB) ? clubEntries(c.id).map(e => e[0]) : c.parts.filter(p => pins.has(p.key)).map(p => p.raw);   // club page: only the club's own entries
-    const clubRe = (typeof CLUB !== 'undefined' && CLUB && CLUB.pat) ? new RegExp(CLUB.pat, 'i') : null;
-    const clubX = (typeof CLUB !== 'undefined' && CLUB && CLUB.xt) ? CLUB.xt.map(x => x.toLowerCase()) : [];
-    // marX names are matched on their own too, so a club entry still lights up when WDSF's entry list is missing or spelled differently
-    const isMineN = n => mineNames.some(m => ordSame(n, m)) || (clubRe && (clubRe.test(n) || clubX.includes(n.replace(/\s*\([^)]*\)\s*$/, '').trim().toLowerCase())));
+    const isMineN = ordMineFn(c);
     const a = nowAbs();
     const open = rks.find(rn => { const r = c.rounds[rn-1]; return r && ABS(c.day, r.e) > a; });
     const mineIn = rn => { let ix = 0, prev = null, out = []; oc.h[rn].forEach(([dn, sns]) => { if(dn !== prev){ ix = 0; prev = dn; } ix++; if(sns.some(sn => isMineN((oc.n || {})[sn] || ''))) out.push(ix); }); return out; };
@@ -1267,7 +1313,7 @@ function clubRow(i, a){
     return `<div class="crow ${st0}" data-comp="${c.id}"><div class="tm">${fmt(i.s)}<small>${fmt(i.e)}</small></div><div>
       <div class="ti">${klas(c)}</div>
       <div class="nm">${ents.map(e => `<b>${esc(e[1])}</b>`).join(' · ')}</div>
-      <div class="mt">${ents.map(e => { const o = ordFind(c.id, c.rounds.indexOf(i.round) + 1, e[0]); return o ? `<span class="ordt">${ents.length > 1 ? esc(e[1]) + ' · ' : ''}${esc(ordTxt(o))}</span>` : ''; }).join('')}${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':chgTag(i)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
+      <div class="mt">${ents.map(e => { const o = ordFind(c.id, c.rounds.indexOf(i.round) + 1, e[0]); const rt = ordResTag(c, c.rounds.indexOf(i.round) + 1, e[0]); return (o ? `<span class="ordt">${ents.length > 1 ? esc(e[1]) + ' · ' : ''}${esc(ordTxt(o))}</span>` : '') + rt; }).join('')}${done?`<span class="donetag">✓ ${L('Bitti','Done')}</span>`:''}${st0==='live'?`<span class="livetag">${i.round.lst==='c'?L('SAHNEDE','ON STAGE'):L('ŞU AN','NOW')}</span>`:''}${roundTag(i.round)}${done?'':chgTag(i)}${done?'':dlyTag(i.round)}${anomTag(c, i.round)}${nomxTag(i.round)}${qualTag(c, i.round)}${hallChip(i.h)}</div></div>${tick}</div>`;
   }
   if(i.kind === 'note') return `<div class="crow note ${st0}"><div class="tm">${fmt(i.s)}</div><div><div class="ti">📝 ${esc(i.text)}</div><div class="mt"><span class="rb">${i.own ? L('Benim notum · bu telefonda','My note · this phone only') : L('Hoca notu','Coach note')}</span>${i.noHall ? '' : hallChip(i.h)}${i.own ? `<button class="linkbtn" data-delnote="${esc(i.own)}" style="min-height:32px;padding:0 6px">${st.delNote === i.own ? L('Emin misin? Tekrar dokun','Sure? Tap again') : L('Sil','Delete')}</button>` : ''}</div></div>${tick}</div>`;
   const ids = CLUB.rel[i.k] || [];

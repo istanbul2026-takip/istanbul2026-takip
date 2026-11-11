@@ -22,7 +22,18 @@ export function compactCategory(c) {
   const ad = Array.isArray(c.ad) && c.ad.length ? c.ad : (Array.isArray(c.j) ? c.j : []);
   const j = ad.filter(a => a && a.n && (a.role || 'judge') === 'judge').map(a => [String(a.l || a.i || ''), String(a.n), String(a.ct || '')]);
   const o = ad.filter(a => a && a.n && (a.role || 'judge') !== 'judge').map(a => [String(a.role), String(a.n), String(a.ct || '')]);
-  return { j, o, n, h };
+  // results: s = { startNo: [finalRank|null, [[roundNumber, placeInRound, advanced 0|1], ...]] }.
+  // marX can reuse one round id for two rounds (e.g. "F" for semi-final and final); per-round data under such an id is ambiguous, so it is left out.
+  const idCount = {}; c.r.forEach(r => { if (r) idCount[r.i] = (idCount[r.i] || 0) + 1; });
+  const s = {};
+  for (const p of c.p) {
+    if (!p || !Number.isFinite(p.sn)) continue;
+    const rr = [];
+    for (const [rid, v] of Object.entries(p.r || {})) if (v && rn[rid] && idCount[rid] === 1 && Number.isFinite(v.fp)) rr.push([rn[rid], v.fp, v.adv ? 1 : 0]);
+    const fr = Number.isFinite(p.finalRank) ? p.finalRank : null;
+    if (fr != null || rr.length) s[p.sn] = [fr, rr];
+  }
+  return Object.keys(s).length ? { j, o, n, h, s } : { j, o, n, h };
 }
 
 async function getCategory(id) {
@@ -43,7 +54,8 @@ export function dueCategories(mx, last, now = Date.now(), todayDay) {
   for (const [wid, cid] of Object.entries(mx.cat || {})) {
     const rs = rounds[wid] || [];
     const active = rs.some(([d, s]) => s !== 'd' && d <= todayDay + 1);
-    const every = (active ? 100 : 20 * 60) * 1000;
+    const today = rs.some(([d]) => d === todayDay);   // results arrive after the final: keep today's finished categories fresh too
+    const every = (active ? 100 : today ? 300 : 20 * 60) * 1000;
     if (!last[wid] || now - last[wid] >= every) due.push([wid, cid]);
   }
   return due;
